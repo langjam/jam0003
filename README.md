@@ -6,8 +6,9 @@ This jam begins at [9pm UK time](https://everytimezone.com/?t=62d9e880,4b0) on t
 
 ## Theme
 
-The theme of jam is: 
+The theme of jam is: Beautiful Assembly
 
+Assembly can mean a number of different things. For example, it could mean the most fundamental language a human can write to interact with a computer, the act of building something, or what has been built. Let your imagination run wild.
 
 ## Getting started
 
@@ -45,7 +46,7 @@ In the PR, submit:
 * a README.md that describes how to build and use the project
 * sample files written in your language
 * links to any presentation you might have (websites, videos, etc)
-* NOTE: if you are using the additional documentation/website time, be sure to link to this documentation from your README.md file
+* NOTE: if you are using the additional documentation/website time, be sure to link to this documentation from your README.md file in the PR
 
 **Please note:** only submit source files and documentation. Please don't submit compiled binaries for your project.
 
