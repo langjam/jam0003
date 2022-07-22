@@ -45,6 +45,7 @@ In the PR, submit:
 * a README.md that describes how to build and use the project
 * sample files written in your language
 * links to any presentation you might have (websites, videos, etc)
+* NOTE: if you are using the additional documentation/website time, be sure to link to this documentation from your README.md file
 
 **Please note:** only submit source files and documentation. Please don't submit compiled binaries for your project.
 
