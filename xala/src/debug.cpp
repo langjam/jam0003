@@ -3,7 +3,11 @@
 #include "wasm.h"
 
 void putval(char c) {
-  wasm_putchar(WASM_STDOUT, c);
+  if (c == '\n') {
+    putval("<br/>");
+  } else {
+    wasm_putchar(WASM_STDOUT, c);
+  }
 }
 
 void putval(const char *s) {
@@ -67,19 +71,43 @@ void tprintf(const char* format) {
 }
 
 void putval(Program prog) {
+  // classes
+  // 0 = no args
+  // 1 = int arg
+  // 2 = float arg
+  // 3 = reg arg
+  int classes[] = {
+    0, 0, 0, 0,
+    0, 1, 2, 3, 3
+  };
   static const char *names[] = {
     "ADD", "SUB", "MUL", "DIV",
     "MOD", "POP", "IMM", "LOAD", "STORE"
   };
+  static const char *regs[] = {
+    "X", "Y", "RET", "OUT"
+  };
 
   tprintf("<pre>");
   const char *fmt = "<span style=\"color: blue;\">{}</span> <span style=\"color: red;\">{}</span> {}\n";
+  const char *fmt2 = "<span style=\"color: blue;\">{}</span> <span style=\"color: red;\">{}</span> %{}\n";
 
   for (sint i=0; i < prog.instrs_len; i++) {
-    if (prog.instrs[i].type == InstrType_Imm) {
-      tprintf(fmt, i, names[prog.instrs[i].type], *(float*)&prog.instrs[i].argument);
-    } else {
-      tprintf(fmt, i, names[prog.instrs[i].type], (sint)prog.instrs[i].argument);
+    switch (classes[prog.instrs[i].type]) {
+      case 0:
+        tprintf(fmt, i, names[prog.instrs[i].type], "");
+        break;
+      case 1:
+        tprintf(fmt, i, names[prog.instrs[i].type], (sint)prog.instrs[i].argument);
+        break;
+      case 2:
+        tprintf(fmt, i, names[prog.instrs[i].type], *(float*)&prog.instrs[i].argument);
+        break;
+      case 3:
+        tprintf(fmt2, i, names[prog.instrs[i].type], regs[prog.instrs[i].argument]);
+        break;
+      default:
+        tprintf("[INVALID]\n");
     }
   }
   tprintf("</pre>");

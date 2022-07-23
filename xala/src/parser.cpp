@@ -121,6 +121,7 @@ static bool fetch_token(Parser *p, Token *output) {
       parser_next(p);
     }
   } else if (p->going == false) {
+
   } else {
     // TODO: Log error
     return true;
@@ -151,6 +152,30 @@ float token_to_number(Token t) {
   return res;
 }
 
+bool token_to_register(Token t, Reg *reg_out) {
+  if (t.type != TokenType_Register) {
+    // TODO: Log error;
+    CHECKOUT(1);
+  }
+
+  Span registers[REG_COUNT];
+  registers[Reg_X] = Span{"X", 1};
+  registers[Reg_Y] = Span{"Y", 1};
+  registers[Reg_Ret] = Span{"RET", 3};
+  registers[Reg_Out] = Span{"OUT", 3};
+  t.str += 1; // skip %
+  t.len -= 1; //
+  for (uint i = 0; i < REG_COUNT; ++i) {
+    if (span_equal(registers[i], Span{t.str, t.len})) {
+      *reg_out = (Reg)i;
+      return 0;
+    }
+  }
+  tprintf("Unknown register: {}\n", Span{t.str, t.len});
+  // TODO: Log error
+  CHECKOUT(1);
+}
+
 bool emit_value(Parser *p, Token t) {
   switch (t.type) {
     case TokenType_Immediate: {
@@ -158,22 +183,9 @@ bool emit_value(Parser *p, Token t) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Imm, *(uint*)&fv}));
     } break;
     case TokenType_Register: {
-      Span registers[REG_COUNT];
-      registers[Reg_X] = Span{"X", 1};
-      registers[Reg_Y] = Span{"Y", 1};
-      registers[Reg_Ret] = Span{"RET", 3};
-      registers[Reg_Out] = Span{"OUT", 3};
-      t.str += 1; // skip %
-      t.len -= 1; //
-      for (uint i = 0; i < REG_COUNT; ++i) {
-        if (span_equal(registers[i], Span{t.str, t.len})) {
-          CHECKOUT(parser_put_instr(p, Instr{InstrType_Load, i}));
-          return 0;
-        }
-      }
-      tprintf("Unknown register: {}\n", Span{t.str, t.len});
-      // TODO: Log error
-      CHECKOUT(1);
+      Reg reg;
+      CHECKOUT(token_to_register(t, &reg));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Load, reg}));
     } break;
     default: {
       // TODO: Log error
@@ -192,28 +204,35 @@ bool parse_call(Parser *p, Token name) {
   }
 
 
-  // TODO: Handle too many/few params
-again:
-  Token t;
-  CHECKOUT(fetch_token(p, &t));
-
-  if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
-    CHECKOUT(emit_value(p, t));
-    goto again;
-  }
-
-  if (span_equal({name.str, name.len}, {"ADD", 3})) {
-    CHECKOUT(parser_put_instr(p, Instr{InstrType_Add}));
-  } else if (span_equal({name.str, name.len}, {"MOD", 3})) {
-    CHECKOUT(parser_put_instr(p, Instr{InstrType_Mod}));
-  } else if (span_equal({name.str, name.len}, {"INTO", 4})) {
-    CHECKOUT(parser_put_instr(p, Instr{InstrType_Store}));
+  if (span_equal({name.str, name.len}, {"INTO", 4})) {
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
+    Reg reg;
+    CHECKOUT(token_to_register(t, &reg));
+    CHECKOUT(parser_put_instr(p, Instr{InstrType_Store, reg}));
+    CHECKOUT(fetch_token(p, &name));
   } else {
-    // TODO: Log error
-    CHECKOUT(1);
-  }
+    // TODO: Handle too many/few params
+again:
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
 
-  name = t;
+    if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
+      CHECKOUT(emit_value(p, t));
+      goto again;
+    }
+
+    if (span_equal({name.str, name.len}, {"ADD", 3})) {
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Add}));
+    } else if (span_equal({name.str, name.len}, {"MOD", 3})) {
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Mod}));
+    } else {
+      // TODO: Log error
+      CHECKOUT(1);
+    }
+
+    name = t;
+  }
 
   if (p->going) {
     CHECKOUT(parse_call(p, name));
@@ -224,7 +243,7 @@ again:
 bool parse_tape(Parser *p) {
   Token t;
   CHECKOUT(fetch_token(p, &t));
-  if (t.type != TokenType_Instr) {
+  if (t.type == TokenType_Instr || t.type == TokenType_Register) {
     CHECKOUT(emit_value(p, t));
     CHECKOUT(fetch_token(p, &t));
   }
