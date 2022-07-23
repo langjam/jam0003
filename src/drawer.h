@@ -7,5 +7,5 @@ class Drawer {
    public:
     Drawer();
 
-    void draw(Grid grid);
+    virtual void draw(Grid* grid) = 0;
 };

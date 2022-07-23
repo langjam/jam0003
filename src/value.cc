@@ -7,20 +7,18 @@ Value::Value() {
 }
 
 void Command::display() {
-    char c;
-    switch (tag) {    
-        case Right:
-            c = 'r';
-            break;
-        case Left:
-            c = 'l';
-            break;
-        case Up:
-            c = '^';
-            break;
-        case Down:
-            c = ',';
-            break;
-    }
-    std::cout << c;
+    std::cout << c_;
+}
+
+
+void Command::set_char(char c) {
+    c_ = c;
+}
+
+char Command::character() {
+    return c_;
+}
+
+CommandKind Command::tag() {
+    return tag_;
 }

@@ -5,6 +5,7 @@ project(jam3 VERSION 1.0.0 LANGUAGES CXX)
 set(SOURCES
     src/main.cc
     src/drawer.cc
+    src/terminal_drawer.cc
     src/grid.cc
     src/value.cc
 )

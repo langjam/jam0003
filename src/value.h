@@ -15,8 +15,15 @@ enum CommandKind {
 };
 
 class Command : public Value {
+   private:
+    CommandKind tag_;
+    char c_;
    public:
-    CommandKind tag;
+    void set_char(char c);
+
+    char character();
+
+    CommandKind tag();
 
     void display();
 };

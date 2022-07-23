@@ -17,3 +17,11 @@ void Grid::set(size_t x, size_t y, Command command) {
 }
 
 Command Grid::get(size_t x, size_t y) { return grid_[y * width_ + x]; }
+
+size_t Grid::width() {
+    return width_;
+}
+
+size_t Grid::height() {
+    return height_;
+}
