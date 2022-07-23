@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>xala</title>
   <style>
-    pre {
+    pre, #stdout {
       background: #eeeecc;
+      font-family: monospace;
       border: 1px solid #dcca;
       border-radius: 5px;
       padding: 10px;
@@ -36,9 +37,10 @@
     <div>
       <canvas id="canvas" width="512" height="512"></canvas>
     </div>
-    <pre id="stdout"></pre>
+    <div id="stdout"></div>
   </div>
   <script>
+    let stdout = ""
     let renderData = new Uint8Array(256*256), ctx;
 
     function render() {
@@ -69,16 +71,18 @@
           wasm_putchar: (stream, ch) => {
             if (ch == 1) {
               stdoutEl.innerText = "";
+              stdoutEl.innerHtml = stdout;
               return;
             }
 
             if (stream == 0) { // stdout
-              stdoutEl.innerText += String.fromCharCode(ch)
+              stdout += String.fromCharCode(ch);
             } else if (stream == 1) { // stderr
-              stdoutEl.innerText += "[TODO: STDERR]"
+              stdoutEl.innerHtml += "[TODO: STDERR]"
             } else {
               console.error("wasm_putchar: Unknown stream")
             }
+            stdoutEl.innerHTML = stdout
           }
         }});
         const instance = result.instance;

@@ -3,6 +3,11 @@
 
 #include "wasm.h"
 #include "common.h"
+#include "vmintrin.h"
+
+struct Colored {
+  const char *color;
+};
 
 void putval(char c);
 void putval(const char *s);
@@ -11,6 +16,7 @@ void putval(uint v);
 void putval(double v);
 void putval(float v);
 void putval(Span v);
+void putval(Program prog);
 void tprintf(const char* format);
 
 template<typename T, typename... Targs>
@@ -28,5 +34,6 @@ void tprintf(const char* format, T value, Targs... Fargs) {
     putval(*format);
   }
 }
+
 
 #endif // H_DEBUG_SRC

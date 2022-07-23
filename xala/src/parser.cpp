@@ -242,6 +242,6 @@ bool parser_parse(Program *output, const char *source) {
   while (p.going) {
     CHECKOUT(parse_tape(&p));
   }
-  return false;
   *output = current_prog;
+  return false;
 }

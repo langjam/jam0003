@@ -77,6 +77,8 @@ WASM_EXPORT void wasm_main() {
   Program prog;
   if (parser_parse(&prog, source_code)) {
     tprintf("Error!");
+  } else {
+    tprintf("{}", prog);
   }
 
   for (int i = 0; i < 256; ++i) {

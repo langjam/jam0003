@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "vmintrin.h"
 #include "wasm.h"
 
 void putval(char c) {
@@ -63,4 +64,23 @@ void putval(Span v) {
 
 void tprintf(const char* format) {
   putval(format);
+}
+
+void putval(Program prog) {
+  static const char *names[] = {
+    "ADD", "SUB", "MUL", "DIV",
+    "MOD", "POP", "IMM", "LOAD", "STORE"
+  };
+
+  tprintf("<pre>");
+  const char *fmt = "<span style=\"color: blue;\">{}</span> <span style=\"color: red;\">{}</span> {}\n";
+
+  for (sint i=0; i < prog.instrs_len; i++) {
+    if (prog.instrs[i].type == InstrType_Imm) {
+      tprintf(fmt, i, names[prog.instrs[i].type], *(float*)&prog.instrs[i].argument);
+    } else {
+      tprintf(fmt, i, names[prog.instrs[i].type], (sint)prog.instrs[i].argument);
+    }
+  }
+  tprintf("</pre>");
 }
