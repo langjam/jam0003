@@ -3,8 +3,8 @@ import gleam/option.{None, Option, Some}
 import gleam/list
 
 pub type Token {
-  LParen
-  RParen
+
+  EOF
 
   Ident(String)
   Num(Int)
@@ -14,12 +14,50 @@ pub type Token {
   Fn
   Let
 
+  // +
   Add
+  // -
   Sub
+  // ->
+  Arrow
+  // *
   Mul
+  // /
   Div
-
-  EOF
+  // ;
+  Semi
+  // :
+  Colon
+  // =
+  Assign
+  // ==
+  Eq
+  // !=
+  Neq
+  // !
+  Not
+  // <
+  Lt
+  // <=
+  Le
+  // > 
+  Gt
+  // >=
+  Ge
+  // (
+  LParen
+  // )
+  RParen
+  // {
+  LBrace
+  // }
+  RBrace
+  // .
+  Field
+  // ..
+  Range
+  // ,
+  Comma
 }
 
 pub type Span {
@@ -45,12 +83,22 @@ fn lex_one(source: String) -> Option(#(Token, String)) {
     Error(_) -> None
     Ok(fst) ->
       Some(case fst {
-        "+" -> make_token(Add, fst, source)
-        "-" -> make_token(Sub, fst, source)
-        "*" -> make_token(Mul, fst, source)
-        "/" -> make_token(Div, fst, source)
-        "(" -> make_token(LParen, fst, source)
-        ")" -> make_token(RParen, fst, source)
+        "+" -> make_token1(Add, source)
+        "-" -> make_token_if(">", Sub, Arrow, source)
+        "*" -> make_token1(Mul, source)
+        "/" -> make_token1(Div, source)
+        ";" -> make_token1(Semi, source)
+        ":" -> make_token1(Colon, source)
+        "=" -> make_token_if("=", Assign, Eq, source)
+        "!" -> make_token_if("=", Not, Neq, source)
+        "<" -> make_token_if("=", Lt, Le, source)
+        ">" -> make_token_if("=", Gt, Ge, source)
+        "(" -> make_token1(LParen, source)
+        ")" -> make_token1(RParen, source)
+        "{" -> make_token1(LBrace, source)
+        "}" -> make_token1(RBrace, source)
+        "." -> make_token_if(".", Field, Range, source)
+        "," -> make_token1(Comma, source)
         "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ->
           make_number(source)
         "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" ->
@@ -59,14 +107,26 @@ fn lex_one(source: String) -> Option(#(Token, String)) {
   }
 }
 
-fn make_token(token: Token, value: String, from: String) -> #(Token, String) {
-  assert True =
-    from
-    |> string.starts_with(value)
-
-  let len = string.length(value)
-  let rest = string.drop_left(from, len)
+fn make_token1(token: Token, from: String) -> #(Token, String) {
+  let rest = string.drop_left(from, 1)
   #(token, rest)
+}
+
+fn make_token_if(
+  snd_char: String,
+  t1: Token,
+  t2: Token,
+  src: String,
+) -> #(Token, String) {
+  let s1 =
+    src
+    |> string.drop_left(1)
+  let c2 = string.first(s1)
+  let s2 = string.drop_left(s1, 1)
+  case Ok(snd_char) == c2 {
+    True -> #(t1, s1)
+    False -> #(t2, s2)
+  }
 }
 
 fn make_number(source: String) -> #(Token, String) {

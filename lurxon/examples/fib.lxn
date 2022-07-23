@@ -9,6 +9,6 @@ fn fib(n: int) -> int {
 fn main() {
     for i: int in 0..10 {
         let f: int = fib(i);
-        println("fib(" + int2str(i) + ") = " + int2str(f));
+        println(i, f);
     }
 }
