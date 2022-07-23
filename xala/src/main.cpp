@@ -6,6 +6,6 @@ void putstr(Wasm_StreamId stream, const char *s) {
   }
 }
 
-void wasm_main() {
-  putstr(WASM_STDOUT, "Hello world from wasm!\nNew line.");
+WASM_EXPORT void wasm_main() {
+  putstr(WASM_STDOUT, "Hello world from wasm!\nNew line.!");
 }

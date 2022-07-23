@@ -35,6 +35,7 @@
 
       (async () => {
         const wasm = fetch("main.wasm");
+
         const { instance } = await WebAssembly.instantiateStreaming(wasm, { env: {
           wasm_putchar: (stream, ch) => {
             if (stream == 0) { // stdout

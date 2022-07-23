@@ -1,7 +1,7 @@
 #ifndef H_WASM_SRC
 #define H_WASM_SRC
 
-#define WASM_EXPORT extern "C" __attribute__((visibility("default")))
+#define WASM_EXPORT __attribute__((visibility("default"))) extern "C" 
 #define WASM_IMPORT extern "C"
 
 static_assert(sizeof(char) == 1, "sizeof(char) != 1");
