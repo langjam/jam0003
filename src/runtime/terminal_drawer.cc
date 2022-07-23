@@ -1,7 +1,8 @@
-#include "grid.h"
-#include "value.h"
-#include "drawer.h"
 #include "terminal_drawer.h"
+
+#include <runtime/drawer.h>
+#include <runtime/grid.h>
+#include <runtime/value.h>
 
 void TerminalDrawer::draw(Grid* grid) {
     for (size_t y = grid->height(); y > 0; y--) {

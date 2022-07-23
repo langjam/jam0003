@@ -1,14 +1,14 @@
 #pragma once
 
-#include "expr.h"
+#include <ast/exprs/expr.h>
+
 #include <string>
 
 class AstVariableExpr : public AstExpr {
-public:
-    AstVariableExpr(std::string name)
-        : AstExpr(), m_name(name) { }
+   public:
+    AstVariableExpr(std::string name) : AstExpr(), m_name(name) {}
 
-private:
+   private:
     std::string m_name;
 
     std::string name() { return m_name; }

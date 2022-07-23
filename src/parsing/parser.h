@@ -1,24 +1,24 @@
 #pragma once
 
-#include "lexer.h"
-#include "ast/exprs/expr.h"
-#include "ast/instructions/instruction.h"
-#include "utils/erroror.h"
+#include <ast/exprs/expr.h>
+#include <ast/instructions/instruction.h>
+#include <parsing/lexer.h>
+#include <utils/erroror.h>
+
 #include <vector>
 
 class Parser final {
-public:
-    Parser(Lexer& lexer)
-        : m_lexer(lexer) { }
-    ~Parser() { }
+   public:
+    Parser(Lexer& lexer) : m_lexer(lexer) {}
+    ~Parser() {}
 
     ErrorOr<void> parse_all();
     void show_error();
 
-private:
+   private:
     Lexer& m_lexer;
-    bool m_has_error { false };
-    std::string m_error_message { };
+    bool m_has_error{false};
+    std::string m_error_message{};
     std::vector<AstInstruction*> m_instructions;
 
     ErrorOr<bool> lex() { return m_lexer.lex(); }

@@ -18,6 +18,7 @@ class Command : public Value {
    private:
     CommandKind tag_;
     char c_;
+
    public:
     void set_char(char c);
 

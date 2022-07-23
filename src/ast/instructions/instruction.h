@@ -1,7 +1,7 @@
 #pragma once
 
 class AstInstruction {
-public:
-    AstInstruction() { }
-    virtual ~AstInstruction() { }
+   public:
+    AstInstruction() {}
+    virtual ~AstInstruction() {}
 };

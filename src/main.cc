@@ -1,14 +1,13 @@
-#include <fstream>
-#include <sstream>
-#include <iostream>
+#include <parsing/lexer.h>
+#include <parsing/parser.h>
 
-#include "lexer.h"
-#include "parser.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 static auto read_file(std::string file_path, std::string& out) -> bool {
     std::ifstream stream(file_path);
-    if (!stream.is_open())
-        return false;
+    if (!stream.is_open()) return false;
     std::stringstream buffer;
     buffer << stream.rdbuf();
     out = buffer.str();
@@ -17,7 +16,8 @@ static auto read_file(std::string file_path, std::string& out) -> bool {
 
 auto main(int argc, char* argv[]) -> int {
     if (argc < 2) {
-        std::cerr << "Expected filename as the first command line argument" << std::endl;
+        std::cerr << "Expected filename as the first command line argument"
+                  << std::endl;
         return 1;
     }
     std::string char_stream;

@@ -37,8 +37,8 @@ class Token final {
     size_t size() { return m_size; }
 
    private:
-    Type m_type { Undefined };
+    Type m_type{Undefined};
     std::string& m_stream;
-    size_t m_index { 0 };
-    size_t m_size { 0 };
+    size_t m_index{0};
+    size_t m_size{0};
 };

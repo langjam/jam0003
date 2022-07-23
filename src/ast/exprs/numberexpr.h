@@ -1,13 +1,12 @@
 #pragma once
 
-#include "expr.h"
+#include <ast/exprs/expr.h>
 
 class AstNumberExpr : public AstExpr {
-public:
-    AstNumberExpr(int value)
-        : AstExpr(), m_value(value) { }
+   public:
+    AstNumberExpr(int value) : AstExpr(), m_value(value) {}
 
-private:
+   private:
     int m_value;
 
     int value() { return m_value; }

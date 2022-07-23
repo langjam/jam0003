@@ -1,7 +1,7 @@
 #pragma once
 
 class AstExpr {
-public:
-    AstExpr() { }
-    virtual ~AstExpr() { }
+   public:
+    AstExpr() {}
+    virtual ~AstExpr() {}
 };

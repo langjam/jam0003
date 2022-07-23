@@ -1,18 +1,16 @@
 #pragma once
 
-#include <optional>
-#include <cstddef>
 #include <cassert>
+#include <cstddef>
+#include <optional>
 
-template<typename T>
+template <typename T>
 class ErrorOr {
-public:
-    ErrorOr()
-        : m_is_error(true) { }
-    ErrorOr(T value) 
-        : m_is_error(false), m_value(value) { }
+   public:
+    ErrorOr() : m_is_error(true) {}
+    ErrorOr(T value) : m_is_error(false), m_value(value) {}
 
-    ~ErrorOr() { }
+    ~ErrorOr() {}
 
     bool is_error() { return m_is_error; }
 
@@ -21,21 +19,20 @@ public:
         return m_value.value();
     }
 
-private:
+   private:
     bool m_is_error;
     std::optional<T> m_value;
 };
 
-template<>
+template <>
 class ErrorOr<void> {
-public:
-    ErrorOr(bool is_value)
-        : m_is_error(!is_value) { }
+   public:
+    ErrorOr(bool is_value) : m_is_error(!is_value) {}
 
-    ~ErrorOr() { }
+    ~ErrorOr() {}
 
     bool is_error() { return m_is_error; }
 
-private:
+   private:
     bool m_is_error;
 };

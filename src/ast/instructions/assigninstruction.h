@@ -1,15 +1,16 @@
 #pragma once
 
-#include "instruction.h"
-#include "../exprs/expr.h"
+#include <ast/exprs/expr.h>
+#include <ast/instructions/instruction.h>
+
 #include <string>
 
 class AstAssignInstruction : public AstInstruction {
-public:
+   public:
     AstAssignInstruction(std::string varname, AstExpr* expr)
-        : m_varname(varname), m_value_expr(expr) { }
+        : m_varname(varname), m_value_expr(expr) {}
 
-private:
+   private:
     std::string m_varname;
     AstExpr* m_value_expr;
 };

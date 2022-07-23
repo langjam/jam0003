@@ -1,4 +1,5 @@
 #include "token.h"
+
 #include <cassert>
 #include <iostream>
 
