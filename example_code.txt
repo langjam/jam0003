@@ -1,0 +1,7 @@
+$right is >
+$left is <
+$up is ^
+$down is ,
+$cube is $right * 4 + $down * 4 + $left * 4 + $up * 5
+$grid is $cube + $right * 4 + $cube
+generate $grid
