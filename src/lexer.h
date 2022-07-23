@@ -1,5 +1,5 @@
-#include "Token.h"
-#include "ErrorOr.h"
+#include "token.h"
+#include "utils/erroror.h"
 #include <string>
 
 class Lexer {
