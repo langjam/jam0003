@@ -11,8 +11,10 @@ class Lexer {
     friend Parser;
 
    public:
-    Lexer(std::string& stream) : m_token(stream), m_stream(stream) {}
+    Lexer(std::string filename, std::string& stream) : m_token(stream), m_stream(stream), m_filename(filename) {}
     ~Lexer() {}
+
+    std::string filename() { return m_filename; }
 
     ErrorOr<bool> lex();
 
@@ -21,6 +23,7 @@ class Lexer {
     std::string m_error_message{""};
     Token m_token;
     std::string& m_stream;
+    std::string m_filename;
     size_t m_index{0};
 
     bool has_error() { return m_has_error; }

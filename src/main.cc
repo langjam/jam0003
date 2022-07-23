@@ -25,7 +25,7 @@ auto main(int argc, char* argv[]) -> int {
         std::cerr << "Unable to open file" << std::endl;
         return 1;
     }
-    Lexer lexer(char_stream);
+    Lexer lexer(argv[1], char_stream);
     Parser parser(lexer);
     if (parser.parse_all().is_error()) {
         parser.show_error();

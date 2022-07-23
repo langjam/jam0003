@@ -56,7 +56,7 @@ void Parser::show_error() {
     if (m_lexer.has_error()) {
         m_lexer.show_error();
     } else if (has_error()) {
-        std::cerr << "ParserError(" << new_lines << ", " << index() - prev_lexer_idx << "): " << m_error_message << std::endl;
+        std::cerr << "ParserError: " << m_lexer.filename() << "(" << new_lines << ", " << index() - prev_lexer_idx << "): " << m_error_message << std::endl;
     } else {
         assert(0);
     }
