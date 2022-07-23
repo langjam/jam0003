@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use lazy_static::lazy_static;
 use std::sync::{Arc, Mutex};
 
@@ -19,6 +17,7 @@ impl<T> Pipe<T> {
     }
 }
 
+#[macro_export]
 macro_rules! component {
     ($id:ident { $($field_id:ident: $field_ty:ty),* }) => {
         struct $id {
@@ -38,6 +37,7 @@ macro_rules! component {
     };
 }
 
+#[macro_export]
 macro_rules! global_pipe {
     ($id:ident, $ty:ty) => {
         lazy_static! {
@@ -46,12 +46,14 @@ macro_rules! global_pipe {
     };
 }
 
+#[macro_export]
 macro_rules! local_pipe {
     ($id:ident, $ty:ty) => {
         let mut $id: Pipe<$ty> = Pipe::new();
     };
 }
 
+#[macro_export]
 macro_rules! machine {
     ($id:ident = |$($param:ident: $ty:ty),*| -> $output:ty $proc:block) => {
         fn $id($($param: $ty),*) -> $output {
@@ -64,6 +66,7 @@ macro_rules! machine {
     };
 }
 
+#[macro_export]
 macro_rules! void_machine {
     ($id:ident = |$($param:ident: $ty:ty),*|$proc:block) => {
         fn $id($($param: $ty),*) {
@@ -75,8 +78,6 @@ macro_rules! void_machine {
         $(void_machine!($id  = |$($param: $ty),*| $proc );)*
     };
 }
-
-fn main() {}
 
 #[cfg(test)]
 mod test {
