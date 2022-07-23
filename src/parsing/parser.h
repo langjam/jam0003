@@ -21,7 +21,7 @@ class Parser final {
     std::string m_error_message{};
     std::vector<AstInstruction*> m_instructions;
     size_t new_lines = 1;
-    size_t prev_lexer_idx = 0;
+    size_t newline_index = 0;
 
     ErrorOr<bool> lex() { return m_lexer.lex(); }
     bool has_error() { return m_has_error; }

@@ -21,12 +21,10 @@ ErrorOr<void> Parser::parse_all() {
         expect_newline();
         m_instructions.push_back(instruction);
     }
-    auto backtrack = index();
     auto maybe_lex = lex();
     if (maybe_lex.is_error()) return false;
     // If managed to lex, error
     if (maybe_lex.value()) {
-        set_index(backtrack);
         set_error("unexpected token");
         return false;
     }
@@ -34,7 +32,6 @@ ErrorOr<void> Parser::parse_all() {
 }
 
 ErrorOr<bool> Parser::match_token(Token::Type type) {
-    prev_lexer_idx = index();
     auto maybe_lex = lex();
     if (maybe_lex.is_error()) return {};
     // If got eof
@@ -56,7 +53,7 @@ void Parser::show_error() {
     if (m_lexer.has_error()) {
         m_lexer.show_error();
     } else if (has_error()) {
-        std::cerr << "ParserError: " << m_lexer.filename() << "(" << new_lines << ", " << index() - prev_lexer_idx << "): " << m_error_message << std::endl;
+        std::cerr << "ParserError: " << m_lexer.filename() << "(" << new_lines << ", " << index() - newline_index << "): " << m_error_message << std::endl;
     } else {
         assert(0);
     }
@@ -69,6 +66,7 @@ ErrorOr<void> Parser::expect_newline(bool do_error) {
     // If matches
     if (maybe_match.value()) {
         new_lines++;
+        newline_index = index();
         return true;
     }
 
@@ -196,13 +194,11 @@ ErrorOr<AstExpr*> Parser::parse_product() {
     auto expr = maybe_parsed.value();
 
     for (;;) {
-        auto backtrack = index();
         auto maybe_lex = lex();
         if (maybe_lex.is_error()) return nullptr;
         // If not lexed, break
         if (!maybe_lex.value()) break;
         if (token().type() != Token::Type::Asterisk) {
-            set_index(backtrack);
             set_error("unexpected token");
             return {};
         }
@@ -210,7 +206,6 @@ ErrorOr<AstExpr*> Parser::parse_product() {
         if (maybe_rhs.is_error()) return {};
         auto rhs = maybe_rhs.value();
         if (!rhs) {
-            set_index(backtrack);
             set_error("unexpected expr after operator");
             return nullptr;
         }
@@ -226,13 +221,11 @@ ErrorOr<AstExpr*> Parser::parse_sum() {
     auto expr = maybe_parsed.value();
 
     for (;;) {
-        auto backtrack = index();
         auto maybe_lex = lex();
         if (maybe_lex.is_error()) return nullptr;
         // If not lexed, break
         if (!maybe_lex.value()) break;
         if (token().type() != Token::Type::Plus) {
-            set_index(backtrack);
             set_error("unexpected token");
             return {};
         }
@@ -240,7 +233,6 @@ ErrorOr<AstExpr*> Parser::parse_sum() {
         if (maybe_rhs.is_error()) return {};
         auto rhs = maybe_rhs.value();
         if (!rhs) {
-            set_index(backtrack);
             set_error("unexpected expr after operator");
             return nullptr;
         }
