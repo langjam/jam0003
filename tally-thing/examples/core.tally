@@ -1,0 +1,50 @@
+SPECIAL undefined
+;;    SYNTAX: ?
+;;    SYNTAX: ???
+;;    In a record, effectively deletes the entry (errors if you later read from it). Use `?`.
+;;    As a value/function, throws an error, use `???`.
+
+let identity = PRIMITIVE[identity]
+;;    SYNTAX: _
+;;    'a -> 'a
+
+let get(prpty) = PRIMITIVE[get]
+;;    SYNTAX: .prpty
+;;    {prpty = 'val} -> 'val
+
+let into(prpty) = PRIMITIVE?
+;;    {prpty = ['val1, 'val2, ...], ...}
+;; -> [{prpty = 'val1, ...}, {prpty = 'val2, ...}, ...]
+
+let common = ???
+;;    [{x = 'same, y = 'val1}, {x = 'same, y = 'val2}, ...]
+;; -> {x = 'same}
+
+let unique = ???
+;;    ['x1, 'x2, 'x3, 'x2, ...] -> ['x1, 'x2, 'x3, ...]
+
+let record->bag(key, val) = ???
+;;    {key1 = 'val1, key2 = 'val2}
+;; -> [{key = "key1", val = 'val1}, {key = "key2", val = 'val2}, ...]
+
+let bag->record(key, val) = ???
+;;    [{key = "key1", val = 'val1}, {key = "key2", val = 'val2}, ...]
+;;    where ([.key] unique = [.key])
+;; -> {key1 = 'val1, key2 = 'val2}
+
+let context = {part = _, whole = _} into(part)
+;;    [val1, val2, ...]
+;; -> [{part = val1, whole = [val1, val2, ...]}, {part = val2, whole = [val1, val2, ...]}, ...]
+
+let by(prpty) = {k = _, v = _} into(k) [
+    {k = .k .prpty, ...}
+	  into(v)
+		{k = common .k, v = [.v {prpty = ?, ...} if (.k = .v .prpty)]}
+  ] unique bag->record(k, v)
+;;    [{prpty = val1, ...}, {prpty = val2, ...}, {prpty = val1, ...}, ...]
+;;    where val1, val2, ... are members of vals
+;; -> {val @ vals = [{...}]}  ;;;; syntax?
+
+let invert = record->bag(k,v) by(v)
+;;    {key1 = val1, key2 = val2, key3 = val1, ...}
+;; -> {val1 = ["key1", "key3", ...], val2 = ["key2", ...], ...}

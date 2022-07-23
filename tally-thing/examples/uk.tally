@@ -1,0 +1,18 @@
+;; Shape of input data?
+data constituencies : [#650]              ;; eqvtly [#650 string]
+data ballots : [{
+  'from constituency : constituencies
+	'for candidate : {name, 'of party}      ;; eqvtly {name : string, 'of party : string}
+}]
+
+;; Helper functions?
+let count = [1] sum                      ;; not idiomatic?
+let highest# = ???
+let fptp = by(candidate) [count] highest# take-random
+let results-by-party = record->bag(constituency, winner) [{...winner, ...}] by(party)
+
+;; Westminister system:
+ballots by(constituency) [fptp] {
+  largest-party# = results-by-party [count] highest#
+	constituencies = _
+}
