@@ -1,0 +1,2 @@
+#!/bin/fish
+cargo run $argv

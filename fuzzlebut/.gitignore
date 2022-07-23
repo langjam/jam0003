@@ -1,0 +1,6 @@
+target
+*/*.bak
+*/*.old
+build
+run
+mascot.jpg
