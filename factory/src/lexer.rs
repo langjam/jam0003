@@ -53,7 +53,7 @@ impl Display for Token {
 pub struct LexerBuilder;
 
 impl LexerBuilder {
-    fn build() -> impl Parser<char, Vec<(Token, Span)>, Error = chumsky::error::Simple<char>> {
+    pub fn build() -> impl Parser<char, Vec<(Token, Span)>, Error = chumsky::error::Simple<char>> {
         let token = Self::number()
             .or(Self::string())
             .or(Self::operator())
@@ -93,7 +93,7 @@ impl LexerBuilder {
     }
 
     fn operator() -> impl Parser<char, Token, Error = chumsky::error::Simple<char>> {
-        primitive::one_of("+-*/%!=><")
+        primitive::one_of("+-*/%!=><:")
             .repeated()
             .at_least(1)
             .collect::<String>()
@@ -116,5 +116,25 @@ impl LexerBuilder {
             "false" => Token::Boolean(false),
             _ => Token::Identifier(ident),
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn basic() {
+        let source = r#"
+component test {
+    name: String,
+    value: Number,
+}
+        "#;
+
+        let lexer = LexerBuilder::build();
+        let tokens = lexer.parse(source).unwrap();
+
+        println!("{tokens:?}");
     }
 }
