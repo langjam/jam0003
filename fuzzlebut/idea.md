@@ -113,16 +113,6 @@ Only works with Int, Float, Bool.
 ## 'E'
 Equality with `left=popped[0]`, `right=popped[1]`
 
-### Behaviour for some types
-#### Objects
-Checks if both objects have all fields, then checks the contents recursively.
-
-#### Strings
-Checks length, then iterates through chars short-circuiting if it is not equal.
-
-#### Bool
-`left&&right`
-
 ## 'T'
 Pushes `true`
 
@@ -152,3 +142,64 @@ Pushes an Int with the specified value.
 
 ## regex"[0-9]+\.[0-9]+" (Floats)
 Pushes a Float with the specified value.
+
+## ' ' (space)
+Does nothing. Acts like a wire cross.
+
+## 'd'
+Duplicates the top item and pushes it.
+
+## 'c'
+Takes the next character in the program and pushes it to the stack.
+
+## '.'
+Splits the top string into a list of chars and pushes it.
+
+## 'p'
+Pops the last item in a collection and pushes it to the stack.
+
+### Strings
+Pops the last char.
+
+### Lists
+Pops the last item.
+
+### Other
+Does nothing.
+
+## 'B'
+Branch if the top item is true.
+True turns CCW, and false turns CW.
+If the top value is not `Value::Bool(true)`, then it is automatically false.
+
+## 'b'
+Same as 'B', but true turns CW and false turns CCW.
+
+## 'l'
+Length of the top item.
+
+### String
+The amount of characters in the string.
+
+### List
+The amount of items.
+
+### Object
+The amount of fields.
+
+### Others
+Pushes `Value::Int(0)`
+
+## '?'
+Debug print the stack.
+
+## '@'
+Random Integer between `popped[0]` and `popped[1]`.
+If both popped ints are zero, then `min=i64::MIN` and `max=i64::MAX`.
+
+## '&'
+Random Floats between `popped[0]` and `popped[1]`.
+If both popped floats are zero, then `min=f64::MIN` and `max=f64::MAX`.
+
+## Other, unmentioned characters
+Does nothing. Acts like a wire cross.
