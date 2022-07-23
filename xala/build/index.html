@@ -34,9 +34,9 @@
       var stdoutEl = document.getElementById("stdout");
 
       (async () => {
-        const wasm = fetch("main.wasm");
-
-        const { instance } = await WebAssembly.instantiateStreaming(wasm, { env: {
+        const wasm = await fetch("main.wasm");
+        const buffer = await wasm.arrayBuffer();
+        const result = await WebAssembly.instantiate(buffer, { env: {
           wasm_putchar: (stream, ch) => {
             if (stream == 0) { // stdout
               stdoutEl.innerText += String.fromCharCode(ch)
@@ -46,8 +46,8 @@
               console.error("wasm_putchar: Unknown stream")
             }
           }
-        }})
-
+        }});
+        const instance = result.instance;
         instance.exports.wasm_main();
       })()
     })
