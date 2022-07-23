@@ -20,7 +20,7 @@ impl<T> Pipe<T> {
 }
 
 macro_rules! component {
-    ($id:ident, $($field_id:ident: $field_ty:ty),*) => {
+    ($id:ident {$($field_id:ident: $field_ty:ty),*}) => {
         struct $id {
             $($field_id: $field_ty),*
         }
@@ -49,7 +49,7 @@ macro_rules! local_pipe {
 }
 
 macro_rules! machine {
-    ($id:ident, $($param:ident: $ty:ty),* => $proc:block) => {
+    ($id:ident => [$($param:ident: $ty:ty),*] $proc:block) => {
         fn $id($($param: $ty),*) {
             $proc
         }
@@ -63,8 +63,11 @@ mod test {
     use super::*;
 
     global_pipe!(PIPE_1, u8);
-    component!(Temp, field_1: u8, field_2: u8);
-    machine!(add, x: u8, y: u8, output: &mut Pipe<u8> => {
+    component!(Temp {
+        field_1: u8,
+        field_2: u8
+    });
+    machine!(add => [x: u8, y: u8, output: &mut Pipe<u8>] {
         output.write(x + y);
     });
 
