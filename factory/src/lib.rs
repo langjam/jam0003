@@ -6,9 +6,9 @@ mod lexer;
 mod parser;
 mod util;
 
+pub use ast::{Ast, Expression, Operator, Value};
 pub use lexer::{LexerBuilder, StandardToken, Token};
 
-use ast::{Expression, Value};
 use chumsky::{
     prelude::{end, filter, Simple},
     Parser,

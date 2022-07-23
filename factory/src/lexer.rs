@@ -57,8 +57,8 @@ impl LexerBuilder {
         let token = Self::number()
             .or(Self::string())
             .or(Self::operator())
-            .or(Self::control())
             .or(Self::identifier())
+            .or(Self::control())
             .recover_with(recovery::skip_then_retry_until([]));
 
         let comment = primitive::just("//")
@@ -92,18 +92,6 @@ impl LexerBuilder {
             .map(Token::String)
     }
 
-    fn operator() -> impl Parser<char, Token, Error = chumsky::error::Simple<char>> {
-        primitive::one_of("+-*/%!=><:")
-            .repeated()
-            .at_least(1)
-            .collect::<String>()
-            .map(Token::Operator)
-    }
-
-    fn control() -> impl Parser<char, Token, Error = chumsky::error::Simple<char>> {
-        primitive::one_of("()[]{},").map(|c: char| Token::Control(c))
-    }
-
     fn identifier() -> impl Parser<char, Token, Error = chumsky::error::Simple<char>> {
         text::ident().map(|ident: String| match ident.as_str() {
             "component" => Token::Standard(StandardToken::Component),
@@ -117,6 +105,18 @@ impl LexerBuilder {
             _ => Token::Identifier(ident),
         })
     }
+
+    fn operator() -> impl Parser<char, Token, Error = chumsky::error::Simple<char>> {
+        primitive::one_of("+-*/%!=><:")
+            .repeated()
+            .at_least(1)
+            .collect::<String>()
+            .map(Token::Operator)
+    }
+
+    fn control() -> impl Parser<char, Token, Error = chumsky::error::Simple<char>> {
+        primitive::one_of("()[]{},").map(|c: char| Token::Control(c))
+    }
 }
 
 #[cfg(test)]
@@ -129,6 +129,12 @@ mod test {
 component test {
     name: String,
     value: Number,
+}
+        
+machine pipe_add(x: Number, y: Number, pipe: Pipe::Number) -> Number {
+    let result = x + y
+        
+    pipe <- result             
 }
         "#;
 
