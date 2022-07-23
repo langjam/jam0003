@@ -6,6 +6,7 @@ set(SOURCES
     src/main.cc
     src/drawer.cc
     src/grid.cc
+    src/value.cc
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

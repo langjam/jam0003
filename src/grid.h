@@ -4,15 +4,17 @@
 
 #include "value.h"
 
-template <std::size_t width, std::size_t height>
 class Grid {
    private:
-    Command grid[height][width];
+    Command* grid_;
+    size_t height_;
+    size_t width_;
 
    public:
-    Grid();
+    Grid(size_t width, size_t height);
+    ~Grid();
 
-    void set(std::size_t x, std::size_t y, Command command);
+    void set(size_t x, size_t y, Command command);
 
-    Command get(std::size_t x, std::size_t y);
+    Command get(size_t x, size_t y);
 };
