@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "ast/exprs/expr.h"
 #include "ast/instructions/instruction.h"
+#include "utils/erroror.h"
 
 class Parser final {
 public:
