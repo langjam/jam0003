@@ -34,16 +34,14 @@ ErrorOr<void> Parser::parse_all() {
 }
 
 ErrorOr<bool> Parser::match_token(Token::Type type) {
-    auto backtrack = index();
+    prev_lexer_idx = index();
     auto maybe_lex = lex();
     if (maybe_lex.is_error()) return {};
     // If got eof
     if (!maybe_lex.value()) {
-        set_index(backtrack);
         return false;
     }
     if (type != token().type()) {
-        set_index(backtrack);
         return false;
     }
     return true;
@@ -58,7 +56,7 @@ void Parser::show_error() {
     if (m_lexer.has_error()) {
         m_lexer.show_error();
     } else if (has_error()) {
-        std::cerr << "ParserError: " << m_error_message << std::endl;
+        std::cerr << "ParserError(" << new_lines << ", " << index() - prev_lexer_idx << "): " << m_error_message << std::endl;
     } else {
         assert(0);
     }
@@ -69,7 +67,10 @@ ErrorOr<void> Parser::expect_newline(bool do_error) {
     auto maybe_match = match_token(Token::Type::Newline);
     if (maybe_match.is_error()) return false;
     // If matches
-    if (maybe_match.value()) return true;
+    if (maybe_match.value()) {
+        new_lines++;
+        return true;
+    }
 
     if (!do_error) return true;
 
