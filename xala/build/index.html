@@ -42,9 +42,9 @@
     let renderData = new Uint8Array(256*256), ctx;
 
     function render() {
-      ctx.fillStyle = "#382b26";
-      ctx.fillRect(0, 0, 512, 512)
-      ctx.fillStyle = `#b8c2b9`
+      ctx.fillStyle = "rgb(51,122,166)";
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillStyle = "rgb(255,255,255)";
 
       for (i in renderData) {
         if (renderData[i]) {
