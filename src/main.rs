@@ -20,7 +20,7 @@ impl<T> Pipe<T> {
 }
 
 macro_rules! component {
-    ($id:ident {$($field_id:ident: $field_ty:ty),*}) => {
+    ($id:ident { $($field_id:ident: $field_ty:ty),* }) => {
         struct $id {
             $($field_id: $field_ty),*
         }
@@ -31,7 +31,11 @@ macro_rules! component {
                 Self { $($field_id),* }
             }
         }
-    }
+    };
+
+    ($($id:ident { $($field_id:ident: $field_ty:ty),* }),*) => {
+        $(component!($id { $($field_id: $field_ty),* });)*
+    };
 }
 
 macro_rules! global_pipe {
@@ -49,11 +53,27 @@ macro_rules! local_pipe {
 }
 
 macro_rules! machine {
-    ($id:ident => [$($param:ident: $ty:ty),*] $proc:block) => {
+    ($id:ident = |$($param:ident: $ty:ty),*| -> $output:ty $proc:block) => {
+        fn $id($($param: $ty),*) -> $output {
+            $proc
+        }
+    };
+
+    ($($id:ident = |$($param:ident: $ty:ty),*| -> $output:ty $proc:block),*) => {
+        $(machine!($id  = |$($param: $ty),*| -> $output $proc );)*
+    };
+}
+
+macro_rules! void_machine {
+    ($id:ident = |$($param:ident: $ty:ty),*|$proc:block) => {
         fn $id($($param: $ty),*) {
             $proc
         }
-    }
+    };
+
+    ($($id:ident = |$($param:ident: $ty:ty),*| $proc:block),*) => {
+        $(void_machine!($id  = |$($param: $ty),*| $proc );)*
+    };
 }
 
 fn main() {}
@@ -63,22 +83,43 @@ mod test {
     use super::*;
 
     global_pipe!(PIPE_1, u8);
-    component!(Temp {
-        field_1: u8,
-        field_2: u8
-    });
-    machine!(add => [x: u8, y: u8, output: &mut Pipe<u8>] {
-        output.write(x + y);
-    });
+    component![
+        Vec2U8 {
+            field_1: u8,
+            field_2: u8
+        },
+        Vec2U16 {
+            field_1: u16,
+            field_2: u16
+        }
+    ];
+    machine![
+        add = |x: u8, y: u8| -> u8 { x + y },
+        sub = |x: u8, y: u8| -> u8 { x - y },
+        recieve = |pipe: &mut Pipe<u8>| -> Option<u8> { pipe.read() }
+    ];
+    void_machine![
+        send = |x: u8, pipe: &mut Pipe<u8>| {
+            pipe.write(x);
+        }
+    ];
 
     #[test]
     fn components_and_pipes_work() {
         local_pipe!(pipe_2, u8);
 
-        let temp = Temp::new(1, 2);
+        let numbers = Vec2U8::new(1, 1);
 
-        add(temp.field_1, temp.field_2, &mut pipe_2);
+        let result = add(numbers.field_1, numbers.field_2);
+        send(result, &mut pipe_2);
 
-        println!("{:?}", pipe_2.read());
+        let result = sub(numbers.field_1, numbers.field_2);
+        send(result, &mut pipe_2);
+
+        let result = recieve(&mut pipe_2);
+        println!("{result:?}");
+
+        let result = recieve(&mut pipe_2);
+        println!("{result:?}");
     }
 }
