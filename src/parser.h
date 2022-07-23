@@ -16,8 +16,8 @@ public:
 private:
     Lexer& m_lexer;
 
-    ErrorOr<bool> lex(Token::Type type) { return m_lexer.lex(); }
-    void index(size_t index) { return m_lexer.index(); }
+    ErrorOr<bool> lex() { return m_lexer.lex(); }
+    size_t index() { return m_lexer.index(); }
     void set_index(size_t index) { m_lexer.set_index(index); }
     void set_error(std::string error_message);
     ErrorOr<bool> match_token(Token::Type type);

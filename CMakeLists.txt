@@ -8,6 +8,8 @@ set(SOURCES
     src/terminal_drawer.cc
     src/grid.cc
     src/value.cc
+    src/lexer.cc
+    src/parser.cc
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -5,6 +5,31 @@
 #include "ast/instructions/assigninstruction.h"
 #include "ast/instructions/generateinstruction.h"
 
+ErrorOr<void> Parser::parse_all() {
+    expect_newline(false);
+    m_instructions = { };
+    for (;;) {
+        auto maybe_instruction = parse_instruction();
+        if (maybe_instruction.is_error())
+            return false;
+        auto instruction = maybe_instruction.value();
+        if (!instruction)
+            break;
+        m_instructions.push_back(instruction);
+    }
+    auto backtrack = index();
+    auto maybe_lex = lex();
+    if (lex.is_error())
+        return false;
+    // If managed to lex, error
+    if (maybe_lex.value()) {
+        set_index(backtrack);
+        set_error("unexpected token");
+        return false;
+    }
+    return true;
+}
+
 ErrorOr<bool> Parser::match_token(Token::Type type) {
     auto backtrack = index();
     auto maybe_lex = lex();

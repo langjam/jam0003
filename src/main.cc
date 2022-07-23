@@ -4,16 +4,31 @@
 #include "lexer.h"
 #include "parser.h"
 
-auto read_file(std::string file_path) -> std::string {
-    std::ifstream t(file_path);
+static auto read_file(std::string file_path, std::string& out) -> bool {
+    std::ifstream stream(file_path);
+    if (!stream.is_open())
+        return false;
     std::stringstream buffer;
-    buffer << t.rdbuf();
-    return buffer.str();
+    buffer << stream.rdbuf();
+    out = buffer.str();
+    return true;
 }
 
-auto main() -> int { 
-    auto chars = read_file("poop.gml");
-    Lexer lex;
-    lex.lex(chars);
+auto main(int argc, char* argv[]) -> int {
+    if (argc < 2) {
+        std::cerr << "Expected filename as the first command line argument" << std::endl;
+        return 1;
+    }
+    std::string char_stream;
+    if (read_file(argv[1], char_stream)) {
+        std::cerr << "Unable to open file" << std::endl;
+        return 1;
+    }
+    Lexer lexer(char_stream);
+    Parser parser(lexer);
+    if (parser.parse_all().is_error()) {
+        parser.show_error();
+        return 1;
+    }
     return 0;
 }

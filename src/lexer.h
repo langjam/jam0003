@@ -1,8 +1,13 @@
+#pragma once
+
 #include "token.h"
 #include "utils/erroror.h"
 #include <string>
 
+class Parser;
+
 class Lexer {
+    friend Parser;
 public:
     Lexer(std::string stream)
         : m_token(stream), m_stream(stream) { }
