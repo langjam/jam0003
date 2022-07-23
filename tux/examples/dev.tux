@@ -1,0 +1,5 @@
+entry:
+    stbg    0, 128, 0
+    stps    10, 10
+    stcl    255, 0, 0
+    rect    100, 100
