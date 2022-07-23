@@ -5,43 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>xala</title>
   <style>
-    pre, #stdout {
+    pre, #stdout, textarea {
       background: #eeeecc;
       font-family: monospace;
       border: 1px solid #dcca;
-      border-radius: 5px;
       padding: 10px;
-      margin: 10px;
       box-sizing: border-box;
+      margin-top: 10px;
       flex: 1;
-      min-width: 40%;
+      width: 100%;
+      overflow: auto;
     }
-    .cont {
+    .row {
       display: flex;
       width: 100vw;
       height: 100vh;
+      padding: 2%;
+      box-sizing: border-box;
+    }
+    .cont {
+      flex: 1;
+      display: flex;
       flex-direction: column;
-     align-items: center;
+      align-items: center;
     }
     body {
       margin: 0;
     }
     canvas {
       border: 1px solid black;
-      margin: 10px;
+    }
+    .runbtn {
+      position: absolute;
     }
   </style>
 </head>
 <body>
-  <div class="cont">
-    <div>
-      <canvas id="canvas" width="512" height="512"></canvas>
+  <div class="row">
+    <div class="cont">
+      <textarea id="input">%X ADD %Y MOD 0.5 INTO %OUT ; adds x and y outputs into the screen</textarea>
+      <button class="runbtn" onclick="run()">Run</button>
     </div>
-    <div id="stdout"></div>
+    <div class="cont">
+      <div>
+        <canvas id="canvas" width="512" height="512"></canvas>
+      </div>
+      <div id="stdout"></div>
+    </div>
   </div>
   <script>
     let stdout = ""
-    let renderData = new Uint8Array(256*256), ctx;
+    let renderData = new Uint8Array(256*256), ctx, instance;
+/*
+    function render() {
+
+      for (i in renderData) {
+        ctx.fillStyle = `rgb(${renderData[i]},${renderData[i]},${renderData[i]})`;
+        ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
+      }
+    }
+    */
 
     function render() {
       ctx.fillStyle = "rgb(51,122,166)";
@@ -53,7 +76,20 @@
           ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
         }
       }
-      window.requestAnimationFrame(render)
+    }
+
+    function run(e) {
+      stdout = "";
+      console.log("run")
+      const input = document.getElementById("input");
+      var enc = new TextEncoder();
+      var buf = enc.encode(input.value);
+      console.log(input.value);
+      for (let v of buf) {
+        instance.exports.wasm_accept(v);
+      }
+      instance.exports.wasm_accept(0);
+      render();
     }
 
     window.addEventListener("load", () => {
@@ -69,6 +105,9 @@
             renderData = new Uint8Array(instance.exports.memory.buffer, buffer, 256*256);
           },
           wasm_putchar: (stream, ch) => {
+            if (stdout.length > 10000) {
+              return;
+            }
             if (ch == 1) {
               stdoutEl.innerText = "";
               stdoutEl.innerHtml = stdout;
@@ -85,8 +124,7 @@
             stdoutEl.innerHTML = stdout
           }
         }});
-        const instance = result.instance;
-        instance.exports.wasm_main();
+        instance = result.instance;
         window.requestAnimationFrame(render)
       })()
     })

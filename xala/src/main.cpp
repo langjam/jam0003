@@ -1,3 +1,4 @@
+#include "vm.h"
 #include "vmintrin.h"
 #include "wasm.h"
 #include "debug.h"
@@ -71,21 +72,32 @@ void dither() {
   }
 }
 
-WASM_EXPORT void wasm_main() {
-  const char *source_code = 
-    "%X ADD %Y MOD 2 MUL 255 INTO %OUT; add numbers bruh\n";
+void entry() {
   Program prog;
-  if (parser_parse(&prog, source_code)) {
+  if (parser_parse(&prog, (const char *)source)) {
     tprintf("Error!");
+    return;
   } else {
     tprintf("{}", prog);
   }
 
+  VM vm = vm_init(prog);
+
   for (int i = 0; i < 256; ++i) {
     for (int j = 0; j < 256; ++j) {
-      bytes[j][i] = i;
+      if (vm_run_for_pixel(&vm, bytes, i, j)) {
+        return;
+      }
     }
   }
   dither();
   wasm_render((u8*)bytes);
+}
+
+WASM_EXPORT void wasm_accept(u8 c) {
+  source[source_len++] = c;
+  if (c == 0) {
+    source_len = 0; 
+    entry();
+  }
 }

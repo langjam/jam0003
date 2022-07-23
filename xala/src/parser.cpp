@@ -4,7 +4,6 @@
 #include "debug.h"
 
 #define UNHANG {static int c = 0; if (c++ > 1000) {CHECKOUT(1);}}
-#define CHECKOUT(x) if (x) { tprintf("LAST SEEN: {}\n", __LINE__); return 1; }
 #define CPINSTR_MAX (1 << 12)
 static Instr current_prog_instrs[CPINSTR_MAX];
 static Program current_prog;
@@ -19,6 +18,7 @@ enum TokenType {
   TokenType_Null,
   TokenType_Immediate, // number
   TokenType_Register, 
+  TokenType_Newline,
   TokenType_Instr, 
 };
 
@@ -62,7 +62,7 @@ u8 parser_next(Parser *p) {
 }
 
 static bool skip_empty(Parser *p) {
-  if (parser_is(p, ' ') || parser_is(p, '\r') || parser_is(p, '\n') || parser_is(p, '\t')) {
+  if (parser_is(p, ' ') || parser_is(p, '\r') || parser_is(p, '\t')) {
     parser_next(p);
     return true;
   } else if (parser_is(p, ';')) {
@@ -110,10 +110,19 @@ static bool fetch_token(Parser *p, Token *output) {
       // TODO: Log error
       return true;
     }
+  } else if (parser_is(p, '\n')) {
+    res.type = TokenType_Newline;
+    parser_next(p);
   } else if (isnum(parser_get(p))) {
     res.type = TokenType_Immediate;
     while (isnum(parser_get(p))) {
       parser_next(p);
+    }
+    if (parser_is(p, '.')) {
+      parser_next(p);
+      while (isnum(parser_get(p))) {
+        parser_next(p);
+      }
     }
   } else if (isalpha(parser_get(p))) {
     res.type = TokenType_Instr;
@@ -145,11 +154,19 @@ bool parser_put_instr(Parser *p, Instr instr) {
 
 float token_to_number(Token t) {
   float res = 0;
+  float frac = 0;
   while (isnum(*t.str)) {
     res = res * 10 + (*t.str++ - '0');
   }
+  if (*t.str == '.') {
+    t.str++;
+    while (isnum(*t.str)) {
+      frac += (*t.str++ - '0');
+      frac /= 10;
+    }
+  }
 
-  return res;
+  return res + frac;
 }
 
 bool token_to_register(Token t, Reg *reg_out) {
@@ -197,6 +214,10 @@ bool emit_value(Parser *p, Token t) {
 }
 
 bool parse_call(Parser *p, Token name) {
+  if (name.type == TokenType_Newline) {
+    return 0;
+  }
+
   if (name.type != TokenType_Instr) {
     // TODO: Log error
     tprintf("Error: `{}` Is not an instruction\n", Span{name.str, name.len});
@@ -224,10 +245,14 @@ again:
 
     if (span_equal({name.str, name.len}, {"ADD", 3})) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Add}));
+    } else if (span_equal({name.str, name.len}, {"SUB", 3})) {
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Sub}));
     } else if (span_equal({name.str, name.len}, {"MOD", 3})) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Mod}));
     } else if (span_equal({name.str, name.len}, {"MUL", 3})) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Mul}));
+    } else if (span_equal({name.str, name.len}, {"DIV", 3})) {
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Div}));
     } else {
       // TODO: Log error
       CHECKOUT(1);
@@ -236,7 +261,7 @@ again:
     name = t;
   }
 
-  if (p->going) {
+  if (p->going && name.type == TokenType_Instr) {
     CHECKOUT(parse_call(p, name));
   }
   return 0;
@@ -245,7 +270,7 @@ again:
 bool parse_tape(Parser *p) {
   Token t;
   CHECKOUT(fetch_token(p, &t));
-  if (t.type == TokenType_Instr || t.type == TokenType_Register) {
+  if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
     CHECKOUT(emit_value(p, t));
     CHECKOUT(fetch_token(p, &t));
   }
@@ -256,6 +281,7 @@ bool parse_tape(Parser *p) {
 
 bool parser_parse(Program *output, const char *source) {
   current_prog.instrs = current_prog_instrs;
+  current_prog.instrs_len = 0;
 
   Parser p;
   p.source = source;

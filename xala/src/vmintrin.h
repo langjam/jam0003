@@ -37,7 +37,7 @@ struct Program {
   uint instrs_len;
 };
 
-#define STACK_MAX (1 << 16)
+#define STACK_MAX (1 << 10)
 
 struct CallStack {
   uint return_addrs[STACK_MAX];

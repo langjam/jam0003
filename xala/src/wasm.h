@@ -29,6 +29,7 @@ enum Wasm_StreamId {
 WASM_EXPORT void wasm_main();
 WASM_IMPORT void wasm_putchar(Wasm_StreamId stream, int ch);
 WASM_IMPORT void wasm_render(u8 *bytes);
+WASM_EXPORT void wasm_accept(u8 c);
 
 
 #endif // H_WASM_SRC
