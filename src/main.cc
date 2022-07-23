@@ -1,6 +1,9 @@
 #include <fstream>
 #include <sstream>
 
+#include "lexer.h"
+#include "parser.h"
+
 auto read_file(std::string file_path) -> std::string {
     std::ifstream t(file_path);
     std::stringstream buffer;
@@ -8,4 +11,9 @@ auto read_file(std::string file_path) -> std::string {
     return buffer.str();
 }
 
-auto main() -> int { return 0; }
+auto main() -> int { 
+    auto chars = read_file("poop.gml");
+    Lexer lex;
+    lex.lex(chars);
+    return 0;
+}

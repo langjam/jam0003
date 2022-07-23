@@ -22,6 +22,11 @@ ErrorOr<bool> Parser::match_token(Token::Type type) {
     return true;
 }
 
+void Parser::set_error(std::string error_message) {
+    has_error = true;
+    m_error_message = error_message;
+}
+
 ErrorOr<void> Parser::expect_newline(bool do_error) {
     if (is_eof())
         return true;

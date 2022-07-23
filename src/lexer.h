@@ -3,7 +3,6 @@
 #include <string>
 
 class Lexer {
-<<<<<<< HEAD
 public:
     Lexer(std::string stream)
         : m_token(stream), m_stream(stream) { }
