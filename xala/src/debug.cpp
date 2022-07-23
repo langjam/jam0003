@@ -50,9 +50,9 @@ void putval(double v) {
     putval('-');
   }
 
-  putval(int(v));
+  putval(sint(v));
   putval('.');
-  putval(int((v-int(v)) * 1000000));
+  putval(sint((v-sint(v)) * 1000000));
 }
 
 void putval(float v) {

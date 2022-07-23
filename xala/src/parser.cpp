@@ -146,7 +146,7 @@ bool parser_put_instr(Parser *p, Instr instr) {
 float token_to_number(Token t) {
   float res = 0;
   while (isnum(*t.str)) {
-    res += res * 10 + (*t.str++ - '0');
+    res = res * 10 + (*t.str++ - '0');
   }
 
   return res;
@@ -180,7 +180,7 @@ bool emit_value(Parser *p, Token t) {
   switch (t.type) {
     case TokenType_Immediate: {
       float fv = token_to_number(t);
-      CHECKOUT(parser_put_instr(p, Instr{InstrType_Imm, *(uint*)&fv}));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Imm, *reinterpret_cast<uint*>(&fv)}));
     } break;
     case TokenType_Register: {
       Reg reg;
@@ -226,6 +226,8 @@ again:
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Add}));
     } else if (span_equal({name.str, name.len}, {"MOD", 3})) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Mod}));
+    } else if (span_equal({name.str, name.len}, {"MUL", 3})) {
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Mul}));
     } else {
       // TODO: Log error
       CHECKOUT(1);

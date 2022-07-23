@@ -18,6 +18,8 @@ typedef unsigned int u32;
 
 typedef u32 uint;
 typedef i32 sint;
+static_assert(sizeof(float) == sizeof(uint), "sizeof(float) != sizeof(uint)");
+
 
 enum Wasm_StreamId {
   WASM_STDOUT,

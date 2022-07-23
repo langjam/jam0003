@@ -73,7 +73,7 @@ void dither() {
 
 WASM_EXPORT void wasm_main() {
   const char *source_code = 
-    "%X ADD %Y MOD 2 INTO %OUT; add numbers bruh\n";
+    "%X ADD %Y MOD 2 MUL 255 INTO %OUT; add numbers bruh\n";
   Program prog;
   if (parser_parse(&prog, source_code)) {
     tprintf("Error!");
