@@ -18,6 +18,7 @@ ErrorOr<void> Parser::parse_all() {
         auto instruction = maybe_instruction.value();
         if (!instruction)
             break;
+        expect_newline();
         m_instructions.push_back(instruction);
     }
     auto backtrack = index();
@@ -164,7 +165,7 @@ ErrorOr<AstExpr*> Parser::parse_paren() {
     if (maybe_matched.is_error())
         return { };
     // If failed to match
-    if (maybe_matched.value())
+    if (!maybe_matched.value())
         return nullptr;
 
     auto maybe_expr = parse_expr();
@@ -172,19 +173,15 @@ ErrorOr<AstExpr*> Parser::parse_paren() {
         return { };
     auto expr = maybe_expr.value();
     if (!expr) {
-        delete expr;
         set_error("expected expr after '('");
         return { };
     }
 
     maybe_matched = match_token(Token::Type::LeftParen);
-    if (maybe_matched.is_error()) {
-        delete expr;
+    if (maybe_matched.is_error())
         return { };
-    }
     // If failed to match
     if (!maybe_matched.value()) {
-        delete expr;
         set_error("expected ')'");
         return { };
     }
@@ -232,24 +229,19 @@ ErrorOr<AstExpr*> Parser::parse_product() {
     for (;;) {
         auto backtrack = index();
         auto maybe_lex = lex();
-        if (maybe_lex.is_error()) {
-            delete expr;
+        if (maybe_lex.is_error())
             return nullptr;
-        }
         // If not lexed, break
         if (!maybe_lex.value())
             break;
         if (token().type() != Token::Type::Asterisk) {
             set_index(backtrack);
-            delete expr;
             set_error("unexpected token");
             return { };
         }
         auto maybe_rhs = parse_single();
-        if (maybe_rhs.is_error()) {
-            delete expr;
+        if (maybe_rhs.is_error())
             return { };
-        }
         auto rhs = maybe_rhs.value();
         if (!rhs) {
             set_index(backtrack);
@@ -271,24 +263,19 @@ ErrorOr<AstExpr*> Parser::parse_sum() {
     for (;;) {
         auto backtrack = index();
         auto maybe_lex = lex();
-        if (maybe_lex.is_error()) {
-            delete expr;
+        if (maybe_lex.is_error())
             return nullptr;
-        }
         // If not lexed, break
         if (!maybe_lex.value())
             break;
         if (token().type() != Token::Type::Plus) {
             set_index(backtrack);
-            delete expr;
             set_error("unexpected token");
             return { };
         }
         auto maybe_rhs = parse_product();
-        if (maybe_rhs.is_error()) {
-            delete expr;
+        if (maybe_rhs.is_error())
             return { };
-        }
         auto rhs = maybe_rhs.value();
         if (!rhs) {
             set_index(backtrack);
