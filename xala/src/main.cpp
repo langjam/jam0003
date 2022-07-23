@@ -1,4 +1,5 @@
 #include "wasm.h"
+#include "debug.h"
 
 void putstr(Wasm_StreamId stream, const char *s) {
   while (*s) {
@@ -8,13 +9,15 @@ void putstr(Wasm_StreamId stream, const char *s) {
 
 u8 bytes[256][256] = {};
 u8 new_bytes[256][256] = {};
+u8 source[1 << 16];
+uint source_len;
 
 bool in_bounds(int x, int y) {
   return x >= 0 && y >= 0 && x < 256 && y < 256;
 }
 
 void dither() {
-  const int thresh[16][16] = {  
+  const u8 thresh[16][16] = {  
     {     0, 191,  48, 239,  12, 203,  60, 251,   3, 194,  51, 242,  15, 206,  63, 254  }, 
     {   127,  64, 175, 112, 139,  76, 187, 124, 130,  67, 178, 115, 142,  79, 190, 127  },
     {    32, 223,  16, 207,  44, 235,  28, 219,  35, 226,  19, 210,  47, 238,  31, 222  },
@@ -54,10 +57,14 @@ void dither() {
 }
 
 WASM_EXPORT void wasm_main() {
-  putstr(WASM_STDOUT, "Hello world!");
+  const char *source_code = 
+    "%X ADD %Y MOD 2 INTO %OUT";
+
+  tprintf("Can't see this\1");
+  tprintf("Hello world {} {} '{}'\n", 1, 1.5, "test");
   for (int i = 0; i < 256; ++i) {
     for (int j = 0; j < 256; ++j) {
-      bytes[j][i] = j+i;
+      bytes[j][i] = i;
     }
   }
   dither();

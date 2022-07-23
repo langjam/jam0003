@@ -42,11 +42,16 @@
     let renderData = new Uint8Array(256*256), ctx;
 
     function render() {
+      ctx.fillStyle = "#382b26";
+      ctx.fillRect(0, 0, 512, 512)
+      ctx.fillStyle = `#b8c2b9`
+
       for (i in renderData) {
-        ctx.fillStyle = `rgb(${renderData[i]}, ${renderData[i]}, ${renderData[i]})`
-        ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
+        if (renderData[i]) {
+          ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
+        }
       }
- //     window.requestAnimationFrame(render)
+      window.requestAnimationFrame(render)
     }
 
     window.addEventListener("load", () => {
@@ -62,6 +67,11 @@
             renderData = new Uint8Array(instance.exports.memory.buffer, buffer, 256*256);
           },
           wasm_putchar: (stream, ch) => {
+            if (ch == 1) {
+              stdoutEl.innerText = "";
+              return;
+            }
+
             if (stream == 0) { // stdout
               stdoutEl.innerText += String.fromCharCode(ch)
             } else if (stream == 1) { // stderr
