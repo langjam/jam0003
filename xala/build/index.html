@@ -13,30 +13,59 @@
       margin: 10px;
       box-sizing: border-box;
       flex: 1;
+      min-width: 40%;
     }
     .cont {
       display: flex;
       width: 100vw;
       height: 100vh;
-
+      flex-direction: column;
+     align-items: center;
     }
     body {
       margin: 0;
+    }
+    canvas {
+      border: 1px solid black;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
   <div class="cont">
+    <div>
+      <canvas id="canvas" width="512" height="512"></canvas>
+    </div>
     <pre id="stdout"></pre>
   </div>
   <script>
+    let renderData = new Uint8Array(256*256), ctx;
+
+    function render() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, 512, 512)
+      ctx.fillStyle = "white"
+
+      for (i in renderData) {
+        if (renderData[i]) {
+          ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
+        }
+      }
+      window.requestAnimationFrame(render)
+    }
+
     window.addEventListener("load", () => {
+      var canvas = document.getElementById("canvas");
+      ctx = canvas.getContext("2d");
       var stdoutEl = document.getElementById("stdout");
 
       (async () => {
         const wasm = await fetch("main.wasm");
         const buffer = await wasm.arrayBuffer();
         const result = await WebAssembly.instantiate(buffer, { env: {
+          wasm_render: (buffer) => {
+            renderData = new Uint8Array(instance.exports.memory.buffer, buffer, 256*256);
+          },
           wasm_putchar: (stream, ch) => {
             if (stream == 0) { // stdout
               stdoutEl.innerText += String.fromCharCode(ch)
@@ -49,6 +78,7 @@
         }});
         const instance = result.instance;
         instance.exports.wasm_main();
+        window.requestAnimationFrame(render)
       })()
     })
   </script>
