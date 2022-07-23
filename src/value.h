@@ -1,7 +1,7 @@
 #pragma once
 
 class Value {
-  public:
+   public:
     Value();
 
     virtual void display() = 0;
@@ -15,7 +15,7 @@ enum CommandKind {
 };
 
 class Command : public Value {
-  public:
+   public:
     CommandKind tag;
 
     void display();

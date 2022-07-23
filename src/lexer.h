@@ -1,11 +1,10 @@
 #include <string>
 
 class Lexer {
-public:
+   public:
     Lexer(std::string input);
 
     bool lex();
 
-private:
-
+   private:
 };

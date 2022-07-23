@@ -4,7 +4,7 @@
 #include <string>
 
 class Token final {
-public:
+   public:
     enum Type {
         Undefined,
         Identifier,
@@ -17,9 +17,8 @@ public:
         Plus
     };
 
-    Token(std::string& stream)
-        : m_stream(stream) { }
-    ~Token() { }
+    Token(std::string& stream) : m_stream(stream) {}
+    ~Token() {}
 
     void set_type(Type type) { m_type = type; }
     void set_index(size_t index) { m_index = index; }
@@ -29,9 +28,9 @@ public:
     size_t index() { return m_index; }
     size_t size() { return m_size; }
 
-private:
-    Type m_type { Undefined };
+   private:
+    Type m_type{Undefined};
     std::string& m_stream;
-    size_t m_index { 0 };
-    size_t m_size { 0 };
+    size_t m_index{0};
+    size_t m_size{0};
 };

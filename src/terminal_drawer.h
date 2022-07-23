@@ -3,8 +3,7 @@
 #include "drawer.h"
 
 class TerminalDrawer : public Drawer {
-  private:
-
-  public:
+   private:
+   public:
     TerminalDrawer();
 }

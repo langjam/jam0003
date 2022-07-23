@@ -3,9 +3,8 @@
 #include "grid.h"
 
 class Drawer {
-  private:
-
-  public:
+   private:
+   public:
     Drawer();
 
     void draw(Grid grid);
