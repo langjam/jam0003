@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "lexer.h"
 #include "parser.h"
@@ -20,7 +21,7 @@ auto main(int argc, char* argv[]) -> int {
         return 1;
     }
     std::string char_stream;
-    if (read_file(argv[1], char_stream)) {
+    if (!read_file(argv[1], char_stream)) {
         std::cerr << "Unable to open file" << std::endl;
         return 1;
     }

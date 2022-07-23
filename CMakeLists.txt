@@ -4,12 +4,13 @@ project(jam3 VERSION 1.0.0 LANGUAGES CXX)
 
 set(SOURCES
     src/main.cc
+    src/token.cc
+    src/lexer.cc
+    src/parser.cc
     src/drawer.cc
     src/terminal_drawer.cc
     src/grid.cc
     src/value.cc
-    src/lexer.cc
-    src/parser.cc
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

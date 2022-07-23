@@ -1,5 +1,7 @@
 #pragma once
 
+#include "expr.h"
+
 class BinExpr : public AstExpr {
 public:
     BinExpr(AstExpr* lhs, AstExpr* rhs)

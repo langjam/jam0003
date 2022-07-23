@@ -1,12 +1,15 @@
 #pragma once
 
 #include "instruction.h"
+#include "../exprs/expr.h"
 
-class AstAssignInstruction : public AstInstruction {
+class AstGenerateInstruction : public AstInstruction {
 public:
-    AstAssignInstruction(AstExpr* expr)
-        : m_expr(expr) { }
+    AstGenerateInstruction(AstExpr* expr)
+        : m_value_expr(expr) { }
 
 private:
     AstExpr* m_value_expr;
+
+    AstExpr* value_expr() { return m_value_expr; }
 };

@@ -16,25 +16,30 @@ public:
     ErrorOr<bool> lex();
 
 private:
-    bool has_error { false };
+    bool m_has_error { false };
     std::string m_error_message { "" };
     Token m_token;
     std::string m_stream;
     size_t m_index { 0 };
 
-    void set_error(std::string error_message);
+    bool has_error() { return m_has_error; }
     Token& token() { return m_token; }
     size_t index() { return m_index; }
     size_t remaining() { return m_stream.length(); }
     size_t is_eof() { return remaining() == 0; }
+    void set_error(std::string error_message);
+    void show_error();
     char get_char(size_t idx = 0);
     void advance(size_t amount = 1);
     void set_index(size_t index) { m_index = index; }
 
-    bool lex_single_character();
-    ErrorOr<bool> lex_identifier();
+    void clear_whitespace();
     bool lex_keyword(std::string value, Token::Type token_type);
+    bool lex_newline();
+    bool lex_single_character();
+    bool lex_number();
     bool lex_any_keyword();
+    ErrorOr<bool> lex_identifier();
 
     static inline bool is_identifier_start_char(char c) { return isalpha(c) || c == '_' || c == '$'; }
     static inline bool is_identifier_char(char c) { return is_identifier_start_char(c) || isdigit(c); }

@@ -4,6 +4,7 @@
 #include "ast/exprs/expr.h"
 #include "ast/instructions/instruction.h"
 #include "utils/erroror.h"
+#include <vector>
 
 class Parser final {
 public:
@@ -12,11 +13,18 @@ public:
     ~Parser() { }
 
     ErrorOr<void> parse_all();
+    void show_error();
 
 private:
     Lexer& m_lexer;
+    bool m_has_error { false };
+    std::string m_error_message { };
+    std::vector<AstInstruction*> m_instructions;
 
     ErrorOr<bool> lex() { return m_lexer.lex(); }
+    bool has_error() { return m_has_error; }
+    bool is_eof() { return m_lexer.is_eof(); }
+    Token& token() { return m_lexer.token(); }
     size_t index() { return m_lexer.index(); }
     void set_index(size_t index) { m_lexer.set_index(index); }
     void set_error(std::string error_message);
@@ -25,6 +33,7 @@ private:
 
     ErrorOr<AstInstruction*> parse_assignment();
     ErrorOr<AstInstruction*> parse_generate();
+    ErrorOr<AstInstruction*> parse_instruction();
 
     ErrorOr<AstExpr*> parse_number();
     ErrorOr<AstExpr*> parse_paren();

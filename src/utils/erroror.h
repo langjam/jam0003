@@ -26,7 +26,7 @@ private:
     std::optional<T> m_value;
 };
 
-template<typename T>
+template<>
 class ErrorOr<void> {
 public:
     ErrorOr(bool is_value)
@@ -38,7 +38,4 @@ public:
 
 private:
     bool m_is_error;
-
-    // Just so don't get screamed at
-    T value() { }
 };

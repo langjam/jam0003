@@ -1,6 +1,6 @@
 #pragma once
 
-#include "expr.h"
+#include "binexpr.h"
 
 class AstMulExpr : public BinExpr {
 public:
