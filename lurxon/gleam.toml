@@ -3,6 +3,7 @@ version = "0.1.0"
 
 [dependencies]
 gleam_stdlib = "~> 0.22"
+gleam_erlang = "~> 0.10"
 
 [dev-dependencies]
 gleeunit = "~> 0.6"
