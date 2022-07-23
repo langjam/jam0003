@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "common.h"
 #include "vm.h"
 #include "vmintrin.h"
@@ -5,7 +6,7 @@
 
 static
 int vm_pop(VM *vm, float *o) {
-	if (!vm->sk.values_len) return 1;
+	CHECKOUT(!vm->sk.values_len);
 	*o = vm->sk.values[--vm->sk.values_len];
 
 	return 0;
@@ -15,7 +16,7 @@ static
 int vm_push(VM *vm, float v) {
 	if (vm->sk.values_len >= STACK_MAX - 1) {
 		putstr(WASM_STDOUT, "VM: stack overflow");
-		return 1;
+		CHECKOUT(1)
 	}
 
 	vm->sk.values[vm->sk.values_len++] = v;
@@ -26,8 +27,7 @@ int vm_push(VM *vm, float v) {
 static
 int vm_instr_add(VM *vm) {
 	float a, b;
-	if (vm_pop(vm, &a) || vm_pop(vm, &b))
-		return 1;
+	CHECKOUT(vm_pop(vm, &a) || vm_pop(vm, &b));
 	
 	return vm_push(vm, b + a);
 }
@@ -35,8 +35,7 @@ int vm_instr_add(VM *vm) {
 static
 int vm_instr_mul(VM *vm) {
 	float a, b;
-	if (vm_pop(vm, &a) || vm_pop(vm, &b))
-		return 1;
+	CHECKOUT(vm_pop(vm, &a) || vm_pop(vm, &b));
 	
 	return vm_push(vm, b + a);
 }
@@ -44,8 +43,7 @@ int vm_instr_mul(VM *vm) {
 static
 int vm_instr_sub(VM *vm) {
 	float a, b;
-	if (vm_pop(vm, &a) || vm_pop(vm, &b))
-		return 1;
+	CHECKOUT(vm_pop(vm, &a) || vm_pop(vm, &b));
 	
 	return vm_push(vm, b - a);
 }
@@ -53,12 +51,11 @@ int vm_instr_sub(VM *vm) {
 static
 int vm_instr_div(VM *vm) {
 	float a, b;
-	if (vm_pop(vm, &a) || vm_pop(vm, &b))
-		return 1;
+	CHECKOUT(vm_pop(vm, &a) || vm_pop(vm, &b));
 
 	if (a == 0) {
 		putstr(WASM_STDOUT, "VM: error: division by zero\n");
-		return 1;
+		CHECKOUT(1)
 	}
 	
 	return vm_push(vm, b / a);
@@ -67,12 +64,11 @@ int vm_instr_div(VM *vm) {
 static
 int vm_instr_mod(VM *vm) {
 	float a, b;
-	if (vm_pop(vm, &a) || vm_pop(vm, &b))
-		return 1;
+	CHECKOUT(vm_pop(vm, &a) || vm_pop(vm, &b));
 
 	if (a == 0) {
 		putstr(WASM_STDOUT, "VM: error: division by zero\n");
-		return 1;
+		CHECKOUT(1);
 	}
 	
 	return vm_push(vm, (int)b % (int)a);
@@ -84,19 +80,19 @@ int vm_run(VM *vm) {
 
 		switch (vm->prog.instrs[vm->ip].type) {
 		case InstrType_Add:
-			if (vm_instr_add(vm)) return 1;
+			CHECKOUT(vm_instr_add(vm));
 			break;
 		case InstrType_Mul:
-			if (vm_instr_mul(vm)) return 1;
+			CHECKOUT(vm_instr_mul(vm));
 			break;
 		case InstrType_Sub:
-			if (vm_instr_sub(vm)) return 1;
+			CHECKOUT(vm_instr_sub(vm));
 			break;
 		case InstrType_Div:
-			if (vm_instr_div(vm)) return 1;
+			CHECKOUT(vm_instr_div(vm));
 			break;
 		case InstrType_Mod:
-			if (vm_instr_mod(vm)) return 1;
+			CHECKOUT(vm_instr_mod(vm));
 			break;
 
 		case InstrType_Pop:
@@ -106,16 +102,16 @@ int vm_run(VM *vm) {
 			break;
 
 		case InstrType_Imm:
-			if (vm_push(vm, arg)) return 1;
+			CHECKOUT(vm_push(vm, arg));
 			break;
 
 		case InstrType_Load:
-			if (vm_push(vm, vm->regs[arg])) return 1;
+			CHECKOUT(vm_push(vm, vm->regs[arg]));
 			break;
 
 		case InstrType_Store:
 			float a;
-			if (vm_pop(vm, &a)) return 1;
+			CHECKOUT(vm_pop(vm, &a));
 
 			vm->regs[arg] = a;
 			break;

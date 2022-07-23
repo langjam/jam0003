@@ -4,7 +4,6 @@
 #include "debug.h"
 
 #define UNHANG {static int c = 0; if (c++ > 1000) {CHECKOUT(1);}}
-#define CHECKOUT(x) if (x) { tprintf("LAST SEEN: {}\n", __LINE__); return 1; }
 #define CPINSTR_MAX (1 << 12)
 static Instr current_prog_instrs[CPINSTR_MAX];
 static Program current_prog;
