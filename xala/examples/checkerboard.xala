@@ -1,1 +1,12 @@
 %X ADD %Y MOD 2 INTO %OUT
+
+;; Parse tape ;;
+; LOAD X
+;; Parse call ;;
+; LOAD Y
+; ADD
+;; Parse call ;;
+; IMM 2
+; MOD
+;; Parse call ;;
+; STORE OUT

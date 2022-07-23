@@ -1,5 +1,20 @@
+#include "vmintrin.h"
 #include "wasm.h"
 #include "debug.h"
+#include "parser.h"
+
+bool span_equal(Span a, Span b) {
+  if (a.l != b.l) {
+    return false;
+  }
+  while (a.l && *a.s && *b.s) {
+    if (*a.s++ != *b.s++) {
+      return false;
+    }
+    a.l -= 1;
+  }
+  return true;
+}
 
 void putstr(Wasm_StreamId stream, const char *s) {
   while (*s) {
@@ -58,10 +73,12 @@ void dither() {
 
 WASM_EXPORT void wasm_main() {
   const char *source_code = 
-    "%X ADD %Y MOD 2 INTO %OUT";
+    "%X ADD %Y MOD 2 INTO %OUT; add numbers bruh\n";
+  Program prog;
+  if (parser_parse(&prog, source_code)) {
+    tprintf("Error!");
+  }
 
-  tprintf("Can't see this\1");
-  tprintf("Hello world {} {} '{}'\n", 1, 1.5, "test");
   for (int i = 0; i < 256; ++i) {
     for (int j = 0; j < 256; ++j) {
       bytes[j][i] = i;

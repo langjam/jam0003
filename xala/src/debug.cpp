@@ -35,6 +35,10 @@ void putval(sint v) {
   }
 }
 
+void putval(uint v) {
+  putval(sint(v));
+}
+
 void putval(double v) {
   if (v < 0) {
     v *= -1;
@@ -48,6 +52,13 @@ void putval(double v) {
 
 void putval(float v) {
   putval(double(v));
+}
+
+void putval(Span v) {
+  while (v.l > 0 && *v.s) {
+    v.l -= 1;
+    putval(*v.s++);
+  }
 }
 
 void tprintf(const char* format) {

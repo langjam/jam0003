@@ -4,4 +4,11 @@
 
 void putstr(Wasm_StreamId stream, const char *s);
 
+struct Span {
+  const char *s;
+  uint l;
+};
+
+bool span_equal(Span a, Span b);
+
 #endif

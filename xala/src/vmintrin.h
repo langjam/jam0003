@@ -4,8 +4,11 @@
 #include "wasm.h"
 
 enum Reg {
-  Reg_Ret,
-  Reg_Out,
+  Reg_X,
+  Reg_Y,
+  Reg_Ret, // Return value
+  Reg_Out, // Output pixel
+
 	REG_COUNT
 };
 
@@ -20,6 +23,8 @@ enum InstrType {
   InstrType_Imm, // (NUMBER) Push immediate value
   InstrType_Load, // (REGISTER) Push register value onto stack
   InstrType_Store, // (REGISTER) Pop stack value into register
+
+  INSTRTYPE_COUNT
 };
 
 struct Instr {
