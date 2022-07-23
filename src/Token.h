@@ -13,8 +13,8 @@ public:
         RightArrow,
         Caret,
         Comma,
-        Asterisk,
-        Plus
+        Plus,
+        Asterisk
     };
 
     Token(std::string& stream)
