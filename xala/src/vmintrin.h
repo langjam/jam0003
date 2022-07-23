@@ -5,7 +5,8 @@
 
 enum Reg {
   Reg_Ret,
-  Reg_Out
+  Reg_Out,
+	REG_COUNT
 };
 
 enum InstrType {
@@ -41,6 +42,18 @@ struct CallStack {
 struct Stack {
   float values[STACK_MAX];
   uint values_len;
+};
+
+struct VM {
+  Program prog;
+  CallStack csk;
+  Stack sk;
+
+  uint ip;
+  float *sp;
+  uint *csp;
+
+  float regs[REG_COUNT];
 };
 
 #endif
