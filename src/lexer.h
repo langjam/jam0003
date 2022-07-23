@@ -8,7 +8,7 @@ public:
         : m_token(stream), m_stream(stream) { }
     ~Lexer() { }
 
-    ErrorOr<void> lex();
+    ErrorOr<bool> lex();
 
 private:
     bool has_error { false };

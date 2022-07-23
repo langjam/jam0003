@@ -14,7 +14,10 @@ public:
         Caret,
         Comma,
         Plus,
-        Asterisk
+        Asterisk,
+        LeftParen,
+        RightParen,
+        Newline
     };
 
     Token(std::string& stream)

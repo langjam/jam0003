@@ -18,8 +18,41 @@ void Lexer::advance(size_t amount) {
     m_index = new_index;
 }
 
+void Lexer::clear_whitespace() {
+    for (;;) {
+        if (is_eof())
+            break;
+        bool found_whitespace;
+        switch (get_char()) {
+        case '\t':
+        case ' ':
+            found_whitespace = true;
+            break;
+        default:
+            found_whitespace = false;
+        }
+        if (!found_whitespace)
+            break;
+    }
+}
+
+bool Lexer::lex_newline() {
+    auto start_index = index();
+    if (get_char() != '\n')
+        return false;
+    size_t size = 0;
+    do {
+        advance();
+        ++size;
+        clear_whitespace();
+    } while (!is_eof() && get_char() == '\n');
+    token()->set_type(Token::Type::Newline);
+    token()->set_index(index);
+    token()->set_size(size);
+    return true;
+}
+
 bool Lexer::lex_single_character() {
-    assert(!is_eof());
     auto start_index = index();
     Token::Type token_type;
     switch (get_char()) {
@@ -41,6 +74,12 @@ bool Lexer::lex_single_character() {
     case '*':
         token_type = Token::Type::Asterisk;
         break;
+    case '(':
+        token_type = Token::Type::LeftParen;
+        break;
+    case ')':
+        token_type = Token::Type::RightParen;
+        break;
     default:
         return false;
     }
@@ -53,7 +92,6 @@ bool Lexer::lex_single_character() {
 }
 
 ErrorOr<bool> Lexer::lex_identifier() {
-    assert(!is_eof());
     auto start_index = index();
     if (get_char() != '$')
         return false;
@@ -84,7 +122,8 @@ ErrorOr<bool> Lexer::lex_identifier() {
 }
 
 bool Lexer::lex_keyword(std::string value, Token::Type token_type) {
-    assert(remaining() < value.length());
+    if (remaining() < value.length())
+        return false;
     auto start_index = index();
     for (size_t i = 0; i < value.length(); ++i) {
         if (tolower(get_char(i)) != tolower(value[i]))
@@ -108,7 +147,12 @@ bool Lexer::lex_any_keyword() {
     return false;
 }
 
-ErrorOr<void> Lexer::lex() {
+ErrorOr<bool> Lexer::lex() {
+    clear_whitespace();
+    if (is_eof())
+        return false;
+    if (lex_newline())
+        return true;
     if (lex_single_character())
         return true;
     if (lex_identifier())
@@ -116,5 +160,5 @@ ErrorOr<void> Lexer::lex() {
     if (lex_any_keyword())
         return true;
     set_error("failed to lex");
-    return false;
+    return { };
 }
