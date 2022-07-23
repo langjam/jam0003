@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vm.h"
 #include "vmintrin.h"
 #include "wasm.h"
 
@@ -126,4 +127,12 @@ int vm_run(VM *vm) {
 	}
 
 	return 0;
+}
+
+VM vm_init(Program prog) {
+	VM vm = VM{};
+
+	vm.prog = prog;
+
+	return vm;
 }

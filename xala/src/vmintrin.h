@@ -44,16 +44,4 @@ struct Stack {
   uint values_len;
 };
 
-struct VM {
-  Program prog;
-  CallStack csk;
-  Stack sk;
-
-  uint ip;
-  float *sp;
-  uint *csp;
-
-  float regs[REG_COUNT];
-};
-
 #endif
