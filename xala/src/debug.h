@@ -2,6 +2,7 @@
 #define H_DEBUG_SRC
 
 #include "wasm.h"
+#include "vmintrin.h"
 
 void putval(char c);
 void putval(const char *s);
@@ -25,5 +26,7 @@ void tprintf(const char* format, T value, Targs... Fargs) {
     putval(*format);
   }
 }
+
+void dump_prog(Program prog);
 
 #endif // H_DEBUG_SRC

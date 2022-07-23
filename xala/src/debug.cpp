@@ -53,3 +53,18 @@ void putval(float v) {
 void tprintf(const char* format) {
   putval(format);
 }
+
+void dump_prog(Program prog) {
+  static const char *names[] = {
+    "ADD", "SUB", "MUL", "DIV",
+    "MOD", "POP", "IMM", "LOAD", "STORE"
+  };
+
+  tprintf("<pre>");
+  for (sint i=0; i < prog.instrs_len; i++)
+    tprintf("<span color=\"blue\">{}</span> {} {}\n",
+            i,
+            names[prog.instrs[i].type],
+            (sint)prog.instrs[i].argument);
+  tprintf("<pre>");
+}
