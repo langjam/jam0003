@@ -16,8 +16,8 @@ static_assert(sizeof(int) == 4, "sizeof(int) != 4");
 typedef int i32;
 typedef unsigned int u32;
 
-typedef u32 usize;
-typedef i32 isize;
+typedef u32 uint;
+typedef i32 sint;
 
 enum Wasm_StreamId {
   WASM_STDOUT,

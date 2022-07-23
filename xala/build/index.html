@@ -42,16 +42,11 @@
     let renderData = new Uint8Array(256*256), ctx;
 
     function render() {
-      ctx.fillStyle = "black";
-      ctx.fillRect(0, 0, 512, 512)
-      ctx.fillStyle = "white"
-
       for (i in renderData) {
-        if (renderData[i]) {
-          ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
-        }
+        ctx.fillStyle = `rgb(${renderData[i]}, ${renderData[i]}, ${renderData[i]})`
+        ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
       }
-      window.requestAnimationFrame(render)
+ //     window.requestAnimationFrame(render)
     }
 
     window.addEventListener("load", () => {
