@@ -1,6 +1,29 @@
+use crate::Spanned;
 use std::fmt::Display;
 
-pub type Ast = Vec<Expression>;
+pub struct Ast {
+    inner: Vec<Spanned<Expression>>,
+    index: usize,
+}
+
+#[derive(Debug, Clone)]
+pub enum Expression {
+    Value(Value),
+    Operator(Operator),
+    Control(Control),
+}
+
+impl Display for Expression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let message = match self {
+            Self::Value(value) => format!("Value {{ {value} }}"),
+            Self::Operator(operator) => format!("Operator {{ {operator} }}"),
+            Self::Control(control) => format!("Control {{ {control} }}"),
+        };
+
+        write!(f, "{message}")
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum Value {
@@ -112,25 +135,6 @@ impl Display for Control {
                 format!("If {{\n  condition: {condition:#?}\n  block: {block:#?}\n}}")
             }
             Self::Else(block) => format!("Else(block: {block:#?})"),
-        };
-
-        write!(f, "{message}")
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum Expression {
-    Value(Value),
-    Operator(Operator),
-    Control(Control),
-}
-
-impl Display for Expression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            Self::Value(value) => format!("Value {{ {value} }}"),
-            Self::Operator(operator) => format!("Operator {{ {operator} }}"),
-            Self::Control(control) => format!("Control {{ {control} }}"),
         };
 
         write!(f, "{message}")
