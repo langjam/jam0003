@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xala</title>
+  <style>
+    pre {
+      background: #eeeecc;
+      border: 1px solid #dcca;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px;
+      box-sizing: border-box;
+      flex: 1;
+    }
+    .cont {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+
+    }
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="cont">
+    <pre id="stdout"></pre>
+  </div>
+  <script>
+    window.addEventListener("load", () => {
+      var stdoutEl = document.getElementById("stdout");
+
+      (async () => {
+        const wasm = fetch("main.wasm");
+        const { instance } = await WebAssembly.instantiateStreaming(wasm, { env: {
+          wasm_putchar: (stream, ch) => {
+            if (stream == 0) { // stdout
+              stdoutEl.innerText += String.fromCharCode(ch)
+            } else if (stream == 1) { // stderr
+              stdoutEl.innerText += "[TODO: STDERR]"
+            } else {
+              console.error("wasm_putchar: Unknown stream")
+            }
+          }
+        }})
+
+        instance.exports.wasm_main();
+      })()
+    })
+  </script>
+</body>
+</html>
