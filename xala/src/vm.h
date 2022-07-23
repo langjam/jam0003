@@ -13,5 +13,7 @@ struct VM {
 };
 
 VM vm_init(Program prog);
+void vm_run_for_pixel(VM *vm, u8 screen[256][256], sint x, sint y);
+int vm_run(VM *vm);
 
 #endif

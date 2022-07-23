@@ -1,3 +1,4 @@
+#include "vm.h"
 #include "vmintrin.h"
 #include "wasm.h"
 #include "debug.h"
@@ -81,9 +82,12 @@ WASM_EXPORT void wasm_main() {
     tprintf("{}", prog);
   }
 
+	VM vm = vm_init(prog);
+
   for (int i = 0; i < 256; ++i) {
     for (int j = 0; j < 256; ++j) {
-      bytes[j][i] = i;
+			vm_run_for_pixel(&vm, bytes, j, i);
+      //bytes[j][i] = i;
     }
   }
   dither();

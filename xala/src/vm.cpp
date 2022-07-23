@@ -129,6 +129,15 @@ int vm_run(VM *vm) {
 	return 0;
 }
 
+void vm_run_for_pixel(VM *vm, u8 screen[256][256], sint x, sint y) {
+	vm->regs[Reg_X] = x;
+	vm->regs[Reg_Y] = y;
+
+	vm_run(vm);
+
+	screen[x][y] = vm->regs[Reg_Out] * 255;
+}
+
 VM vm_init(Program prog) {
 	VM vm = VM{};
 
