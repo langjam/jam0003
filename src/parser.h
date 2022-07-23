@@ -37,6 +37,7 @@ private:
 
     ErrorOr<AstExpr*> parse_number();
     ErrorOr<AstExpr*> parse_paren();
+    ErrorOr<AstExpr*> parse_variable();
     ErrorOr<AstExpr*> parse_single();
     ErrorOr<AstExpr*> parse_product();
     ErrorOr<AstExpr*> parse_sum();

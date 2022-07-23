@@ -2,6 +2,7 @@
 #include "ast/exprs/addexpr.h"
 #include "ast/exprs/mulexpr.h"
 #include "ast/exprs/numberexpr.h"
+#include "ast/exprs/variableexpr.h"
 #include "ast/instructions/instruction.h"
 #include "ast/instructions/assigninstruction.h"
 #include "ast/instructions/generateinstruction.h"
@@ -191,6 +192,15 @@ ErrorOr<AstExpr*> Parser::parse_paren() {
     return expr;
 }
 
+ErrorOr<AstExpr*> Parser::parse_variable() {
+    auto maybe_matched = match_token(Token::Type::Identifier);
+    if (maybe_matched.is_error())
+        return { };
+    if (!maybe_matched.value())
+        return nullptr;
+    return new AstVariableExpr(token().to_string());
+}
+
 ErrorOr<AstExpr*> Parser::parse_single() {
     auto maybe_parsed = parse_number();
     if (maybe_parsed.is_error())
@@ -203,6 +213,12 @@ ErrorOr<AstExpr*> Parser::parse_single() {
         return { };
     if (maybe_parsed.value())
         return maybe_parsed.value();
+
+    maybe_parsed = parse_variable();
+    if (maybe_parsed.is_error())
+        return { };
+    if (!maybe_parsed.value())
+        return nullptr;
 
     return nullptr;
 }
