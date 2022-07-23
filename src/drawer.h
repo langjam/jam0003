@@ -1,8 +1,12 @@
+#pragma once
+
+#include "grid.h"
+
 class Drawer {
   private:
 
   public:
     Drawer();
 
-    int draw();
-}
+    void draw(Grid grid);
+};

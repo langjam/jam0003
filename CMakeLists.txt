@@ -4,6 +4,8 @@ project(jam3 VERSION 1.0.0 LANGUAGES CXX)
 
 set(SOURCES
     src/main.cc
+    src/drawer.cc
+    src/grid.cc
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
