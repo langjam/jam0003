@@ -9,7 +9,6 @@
     "dev": "nodemon index.ts"
   },
   "devDependencies": {
-    "concurrently": "^7.3.0",
     "nodemon": "^2.0.19",
     "typescript": "^4.7.4"
   }
