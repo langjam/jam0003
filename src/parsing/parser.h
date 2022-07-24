@@ -38,6 +38,7 @@ class Parser final {
     ErrorOr<AstExpr::Ptr> parse_number();
     ErrorOr<AstExpr::Ptr> parse_paren();
     ErrorOr<AstExpr::Ptr> parse_variable();
+    ErrorOr<AstExpr::Ptr> parse_special();
     ErrorOr<AstExpr::Ptr> parse_single();
     ErrorOr<AstExpr::Ptr> parse_product();
     ErrorOr<AstExpr::Ptr> parse_sum();

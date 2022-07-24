@@ -3,6 +3,7 @@
 #include <ast/exprs/addexpr.h>
 #include <ast/exprs/mulexpr.h>
 #include <ast/exprs/numberexpr.h>
+#include <ast/exprs/specialexpr.h>
 #include <ast/exprs/variableexpr.h>
 #include <ast/instructions/assigninstruction.h>
 #include <ast/instructions/generateinstruction.h>
@@ -101,7 +102,8 @@ ErrorOr<AstInstruction::Ptr> Parser::parse_assignment() {
         return {};
     }
 
-    return (AstInstruction::Ptr)std::make_shared<AstAssignInstruction>(varname, expr);
+    return (AstInstruction::Ptr)std::make_shared<AstAssignInstruction>(varname,
+                                                                       expr);
 }
 
 ErrorOr<AstInstruction::Ptr> Parser::parse_generate() {
@@ -117,7 +119,6 @@ ErrorOr<AstInstruction::Ptr> Parser::parse_generate() {
         set_error("failed to find expr");
         return {};
     }
-
 
     return (AstInstruction::Ptr)std::make_shared<AstGenerateInstruction>(expr);
 }
@@ -174,6 +175,34 @@ ErrorOr<AstExpr::Ptr> Parser::parse_variable() {
     return (AstExpr::Ptr)std::make_shared<AstVariableExpr>(token().to_string());
 }
 
+ErrorOr<AstExpr::Ptr> Parser::parse_special() {
+    auto start_index = index();
+    auto maybe_lex = lex();
+    if (maybe_lex.is_error()) return {};
+    if (!maybe_lex.value()) return AstExpr::Ptr(nullptr);
+
+    AstSpecialExpr::Type special_type;
+    switch (token().type()) {
+        case Token::Type::LeftArrow:
+            special_type = AstSpecialExpr::Type::GoLeft;
+            break;
+        case Token::Type::RightArrow:
+            special_type = AstSpecialExpr::Type::GoRight;
+            break;
+        case Token::Type::Caret:
+            special_type = AstSpecialExpr::Type::GoUp;
+            break;
+        case Token::Type::Comma:
+            special_type = AstSpecialExpr::Type::GoDown;
+            break;
+        default:
+            set_index(start_index);
+            return AstExpr::Ptr(nullptr);
+    }
+
+    return (AstExpr::Ptr)std::make_shared<AstSpecialExpr>(special_type);
+}
+
 ErrorOr<AstExpr::Ptr> Parser::parse_single() {
     auto maybe_parsed = parse_number();
     if (maybe_parsed.is_error()) return {};
@@ -184,6 +213,10 @@ ErrorOr<AstExpr::Ptr> Parser::parse_single() {
     if (maybe_parsed.value()) return maybe_parsed.value();
 
     maybe_parsed = parse_variable();
+    if (maybe_parsed.is_error()) return {};
+    if (maybe_parsed.value()) return maybe_parsed.value();
+
+    maybe_parsed = parse_special();
     if (maybe_parsed.is_error()) return {};
     if (maybe_parsed.value()) return maybe_parsed.value();
 
