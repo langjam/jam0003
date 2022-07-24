@@ -128,7 +128,12 @@ fn run_repl() -> Result<()> {
                 ":d" | ":define" => {
                     mode = Mode::Definiton(0);
                 }
-                _ => bail!("Unknown command: `{}`", &line[1..]),
+                _ => eprintln!(
+                    "{}",
+                    Colour::Red
+                        .bold()
+                        .paint(format!("Unknown command: `{}`", &line[1..]))
+                ),
             },
             Ok(line) if matches!(mode, Mode::Definiton(_)) => {
                 definition_buf.push_str(&line);
@@ -138,9 +143,9 @@ fn run_repl() -> Result<()> {
 
                 let tokens = lexer.parse(line).unwrap();
                 match statement_parser.parse(tokens) {
-                    Err(errors) => bail!(
+                    Err(errors) => eprintln!(
                         "{}\n{}",
-                        Colour::Red.bold().paint("Could not parse program:"),
+                        Colour::Red.bold().paint("ParseError:"),
                         errors
                             .into_iter()
                             .map(|err| { err.to_string() })
@@ -157,9 +162,9 @@ fn run_repl() -> Result<()> {
 
                 let tokens = lexer.parse(lines).unwrap();
                 match program_parser.parse(tokens) {
-                    Err(errors) => bail!(
+                    Err(errors) => eprintln!(
                         "{}\n{}",
-                        Colour::Red.bold().paint("Could not parse program:"),
+                        Colour::Red.bold().paint("ParseError:"),
                         errors
                             .into_iter()
                             .map(|err| { err.to_string() })
@@ -169,9 +174,13 @@ fn run_repl() -> Result<()> {
                     Ok(program) => {
                         // This should really be a single machine
                         for machine in program.machines {
-                            types::check_machine_def(&mut type_env, &machine).with_context(
-                                || format!("Type error while checking machine definition"),
-                            )?;
+                            types::check_machine_def(&mut type_env, &machine)
+                                .with_context(|| {
+                                    format!("Type error while checking machine definition")
+                                })
+                                .map_err(|err| {
+                                    eprintln!("{}", Colour::Red.bold().paint(format!("{err}")),)
+                                });
 
                             factory.bind_definition(machine.name.clone(), machine)
                         }
