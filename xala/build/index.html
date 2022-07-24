@@ -88,7 +88,7 @@
       for (let v of buf) {
         instance.exports.wasm_accept(v);
       }
-      instance.exports.wasm_accept(0);
+      instance.exports.wasm_run();
       render();
     }
 
@@ -125,6 +125,7 @@
           }
         }});
         instance = result.instance;
+        instance.exports.wasm_init()
         window.requestAnimationFrame(render)
       })()
     })
