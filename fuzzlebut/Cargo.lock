@@ -23,9 +23,7 @@ dependencies = [
 name = "interpreter"
 version = "0.1.0"
 dependencies = [
- "parser",
  "rand",
- "stack",
 ]
 
 [[package]]
@@ -33,10 +31,6 @@ name = "libc"
 version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
-
-[[package]]
-name = "parser"
-version = "0.1.0"
 
 [[package]]
 name = "ppv-lite86"
@@ -73,10 +67,6 @@ checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 dependencies = [
  "getrandom",
 ]
-
-[[package]]
-name = "stack"
-version = "0.1.0"
 
 [[package]]
 name = "wasi"

@@ -46,6 +46,9 @@ pub enum Cell {
     Debug,
     RandInt,
     RandFloat,
+    ListRotateLeft,
+    ListRotateRight,
+    CharCast,
     Number(char),
     Other(char),
 }
@@ -95,6 +98,9 @@ impl Cell {
             Debug=>'?',
             RandInt=>'@',
             RandFloat=>'&',
+            ListRotateLeft=>'[',
+            ListRotateRight=>']',
+            CharCast=>'$',
             Number(n)=>n,
             Other(c)=>c,
         }
@@ -144,6 +150,9 @@ impl Cell {
             '?'=>Debug,
             '@'=>RandInt,
             '&'=>RandFloat,
+            '['=>ListRotateLeft,
+            ']'=>ListRotateRight,
+            '$'=>CharCast,
             '0'..='9'=>Number(c),
             _=>Other(c),
         }

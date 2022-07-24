@@ -48,6 +48,7 @@ Uses the top two numbers and performs the operation on them with `left=stack[top
 ### Additional info for Add
 Can concat strings, and concat a formatted object.
 Can append items to a list.
+Acts as logical OR for two Bool values
 
 ### Additional info for Sub
 Can remove characters from a string; `right.type==Int` and `right>0`.
@@ -56,6 +57,9 @@ Can remove fields from objects; `right.type==String`.
 
 ### Additional info for Div
 Div pushes the result then remainder.
+
+### Additional info for Mul
+Acts as logical AND for two Bool values
 
 ## 'O'
 The O instruction creates a new object with no fields
@@ -200,6 +204,16 @@ If both popped ints are zero, then `min=i64::MIN` and `max=i64::MAX`.
 ## '&'
 Random Floats between `popped[0]` and `popped[1]`.
 If both popped floats are zero, then `min=f64::MIN` and `max=f64::MAX`.
+
+## '['
+Rotate a list at the top of the stack to the left.
+
+## ']'
+Rotate a list at the top of the stack to the right.
+
+## '$'
+Changes an int to a char and vice versa.
+Throws an error if the int is an invalid char.
 
 ## Other, unmentioned characters
 Does nothing. Acts like a wire cross.

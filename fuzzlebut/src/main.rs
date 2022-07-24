@@ -26,6 +26,10 @@ use parser::{
 use stack::Stack;
 
 
+mod stack;
+mod parser;
+
+
 type ProgramStack=Stack<Value>;
 
 
@@ -58,6 +62,11 @@ impl Display for Value {
                             f.write_str(s)?;
                             f.write_str("\"")?;
                         },
+                        Char(c)=>{
+                            f.write_str("'")?;
+                            c.fmt(f)?;
+                            f.write_str("'")?;
+                        },
                         v=>v.fmt(f)?,
                     }
                     if i+1<l.len() {
@@ -78,6 +87,11 @@ impl Display for Value {
                             f.write_str("\"")?;
                             f.write_str(s)?;
                             f.write_str("\"")?;
+                        },
+                        Char(c)=>{
+                            f.write_str("'")?;
+                            c.fmt(f)?;
+                            f.write_str("'")?;
                         },
                         v=>v.fmt(f)?,
                     }
@@ -133,6 +147,7 @@ struct ProgramState {
     borders:Stack<Rect>,
     functions:HashMap<String,(Rect,usize)>,
     rng:SmallRng,
+    call_stack:Stack<String>,
 }
 impl ProgramState {
     fn new(mut cells:Cells)->Self {
@@ -156,6 +171,7 @@ impl ProgramState {
             direction:Direction::Right,
             functions:HashMap::new(),
             rng:SmallRng::from_entropy(),
+            call_stack:Stack::new(),
         }
     }
     fn next_cell(&mut self) {
@@ -225,9 +241,20 @@ impl ProgramState {
     }
     /// Evaluate the program
     fn run(&mut self) {
+        if self.cells.len()==0 {
+            return;
+        } else if self.cells[0].len()==0 {
+            return;
+        }
         use Cell::*;
         use Direction::*;
+        let mut iters=0;
+        self.direction=Right;
         loop {
+            if iters>5000 {
+                // return;
+            }
+            iters+=1;
             match self.current_cell() {
                 DoubleQuote=>{
                     let mut string=String::new();
@@ -298,6 +325,7 @@ impl ProgramState {
                             f1+=f2;
                             self.stacks[0].push(Value::Float(f1));
                         },
+                        (Value::Bool(b1),Value::Bool(b2))=>self.stacks[0].push(Value::Bool(b1||b2)),
                         _=>panic!("Invalid types in add at {:?}",self.cursors[0]),
                     }
                 },
@@ -346,6 +374,7 @@ impl ProgramState {
                             f1*=f2;
                             self.stacks[0].push(Value::Float(f1));
                         },
+                        (Value::Bool(b1),Value::Bool(b2))=>self.stacks[0].push(Value::Bool(b1&&b2)),
                         _=>panic!("Invalid types in mul at {:?}",self.cursors[0]),
                     }
                 },
@@ -387,13 +416,13 @@ impl ProgramState {
                 SetRight=>self.direction=Right,
                 WireVert=>{
                     match self.direction {
-                        Left|Right=>panic!("Hit a vertical wire while going horizontal at {:?}. Please use direction changes.",self.cursors[0]),
+                        Left|Right=>panic!("Hit a vertical wire while going {:?} at {:?}. Please use direction changes.",self.direction,self.cursors[0]),
                         _=>{},
                     }
                 },
                 WireHoriz=>{
                     match self.direction {
-                        Up|Down=>panic!("Hit a horizontal wire while going vertical at {:?}. Please use direction changes.",self.cursors[0]),
+                        Up|Down=>panic!("Hit a horizontal wire while going {:?} at {:?}. Please use direction changes.",self.direction,self.cursors[0]),
                         _=>{},
                     }
                 },
@@ -501,7 +530,14 @@ impl ProgramState {
                     self.stacks[0].push(Value::Bool(left==right));
                 },
                 True=>self.stacks[0].push(Value::Bool(true)),
-                Exit=>break,
+                Exit=>{
+                    // if self.call_stack.len()>0 {
+                    //     println!("Returning from {}",self.call_stack[0]);
+                    // } else {
+                    //     println!("Returning from root");
+                    // }
+                    break;
+                },
                 ListCreate=>self.stacks[0].push(Value::List(Vec::new())),
                 Rotate=>self.stacks[0].rotate(),
                 RotateRev=>self.stacks[0].rotate_rev(),
@@ -517,15 +553,20 @@ impl ProgramState {
                         cursor[1]+=1;
                         self.cursors.push(cursor);
                         self.stacks.push(ProgramStack::new());
-                        let mut items=Vec::new();
-                        for _ in 0..*args {
+                        let mut items=vec![Value::Bool(false);*args];
+                        for i in (0..*args).rev() {
                             let arg=self.stacks[1].pop().unwrap();
-                            items.push(arg);
+                            items[i]=arg;
                         }
                         for item in items.into_iter().rev() {
                             self.stacks[0].push(item);
                         }
+                        let ret_dir=self.direction;
+                        // println!("Call {}",name);
+                        self.call_stack.push(name);
                         self.run();
+                        self.call_stack.pop();
+                        self.direction=ret_dir;
                         self.borders.pop();
                         if let Some(item)=self.stacks[0].pop() {
                             self.stacks[1].push(item);
@@ -622,7 +663,14 @@ impl ProgramState {
                         _=>self.stacks[0].push(Value::Int(0)),
                     }
                 },
-                Debug=>self.stacks[0].debug_print(),
+                Debug=>{
+                    if self.call_stack.len()>0 {
+                        print!("{} ",self.call_stack[0]);
+                    } else {
+                        print!("Root ");
+                    }
+                    self.stacks[0].debug_print();
+                },
                 RandInt=>{
                     let max=self.stacks[0].pop().unwrap();
                     let min=self.stacks[0].pop().unwrap();
@@ -662,6 +710,35 @@ impl ProgramState {
                             let random=self.rng.gen();
                             self.stacks[0].push(Value::Float(random));
                         },
+                    }
+                },
+                ListRotateLeft=>{
+                    match &mut self.stacks[0][0] {
+                        Value::List(list)=>list.rotate_left(1),
+                        _=>{},
+                    }
+                },
+                ListRotateRight=>{
+                    match &mut self.stacks[0][0] {
+                        Value::List(list)=>list.rotate_right(1),
+                        _=>{},
+                    }
+                },
+                CharCast=>{
+                    match self.stacks[0].pop().unwrap() {
+                        Value::Char(c)=>{
+                            self.stacks[0].push(Value::Int(c as u32 as i64));
+                        },
+                        Value::Int(i)=>{
+                            if i>(char::MAX as i64) {
+                                panic!("Number `{}` out of range for char cast {:?}",i,self.cursors[0]);
+                            }
+                            match char::from_u32(i as u32) {
+                                Some(c)=>self.stacks[0].push(Value::Char(c)),
+                                None=>panic!("Number {} is not a valid char {:?}",i,self.cursors[0]),
+                            }
+                        },
+                        i=>self.stacks[0].push(i),
                     }
                 },
             }
