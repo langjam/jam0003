@@ -8,4 +8,4 @@
 
 let _ = BUILTIN(identity)
 
-_
+_ .ballots _

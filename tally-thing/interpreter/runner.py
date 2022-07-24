@@ -28,6 +28,13 @@ def apply_expr(expr, json, env):
       for e in lets[name].exprs:
         j = apply_expr(e, j, env) # TODO env should be adjusted for lets[name].params
       return j
+    case Projection(key):
+      print("----PROJECTION")
+      if not isinstance(json, dict):
+        raise Exception("Tried to project using '." + key + "' into non-record data: " + str(json))
+      if key not in json:
+        raise Exception("Tried to access a member ('." + key + "') the record doesn't have: " + str(json))
+      return json[key]
 
 def apply_builtin(which, json):
   print("-- applying BUILTIN ", which, " to ", json)

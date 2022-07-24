@@ -18,6 +18,8 @@ term = name + Opt(
     Suppress("(").leave_whitespace() + delimited_list(Word(alphas)) + Suppress(")")
   )
 
+projection = Combine(Suppress(".") + Word(alphas))
+
 record_prpty = Group(name + Suppress("=") + val_expr[...], aslist=True)
 record_val = Suppress("{") + eol[...] + Opt(
     record_prpty + (("," | eol) + eol[...] + record_prpty)[...]
@@ -25,7 +27,7 @@ record_val = Suppress("{") + eol[...] + Opt(
 bag_val = Suppress("[") + (val_expr | eol)[...] + Suppress("]")
 
 type_expr <<= Word(alphas)[...]
-val_expr <<= term | record_val | bag_val
+val_expr <<= term | projection | record_val | bag_val
 
 data = LineStart() + CaselessKeyword("data") + term + ":" + Group(type_expr[...], aslist=True) + eol
 let = LineStart() + CaselessKeyword("let") + term + "=" + Group(val_expr[...], aslist=True) + eol
@@ -38,6 +40,10 @@ def create_term(tokens):
     return Term(tokens[0], tokens[1:])
   else:
     return Term(tokens[0], [])
+
+@projection.set_parse_action
+def create_projection(tokens):
+  return Projection(tokens[0])
 
 @record_val.set_parse_action
 def create_record_val(tokens):

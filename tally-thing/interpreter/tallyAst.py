@@ -29,6 +29,13 @@ class Term:
       more = "(" + ", ".join(self.params) + ")"
     return "<term " + self.name + more + ">"
 
+class Projection:
+  __match_args__ = ('key',)
+  def __init__(self, key):
+    self.key = key
+  def __repr__(self):
+    return "<projection " + self.key + ">"
+
 class BagVal: #not actually a value, but a function bag->bag
   __match_args__ = ('exprs',)
   def __init__(self, exprs):
