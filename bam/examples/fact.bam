@@ -1,0 +1,8 @@
+
+machine Fact {
+    let input_check, input_rec, input_add = input -> Dup3;
+
+    ((input_check, 1) -> Lt)
+        ? 1
+        : ((input_rec, 1) -> Sub -> Fact), input_add -> Add
+}

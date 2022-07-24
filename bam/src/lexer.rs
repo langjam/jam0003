@@ -22,8 +22,9 @@ lazy_static! {
         ":" => Token::Colon,
         ";" => Token::Semicolon,
         "->" => Token::Pipe,
-        "let" =>  Token::Let,
-        "machine" => Token::Machine
+        "let" => Token::Let,
+        "machine" => Token::Machine,
+        "null" => Token::Null
     ]);
 }
 
@@ -45,6 +46,7 @@ pub enum Token {
     Semicolon,
     Pipe,
     Machine,
+    Null
 }
 
 impl Display for Token {
@@ -113,9 +115,7 @@ impl LexerBuilder {
             .ignore_then(filter(|c: &char| *c != '"').repeated())
             .then_ignore(just('"'))
             .collect::<String>()
-            .map(|value| {
-                Token::StringLit(value)
-            })
+            .map(|value| Token::StringLit(value))
     }
 
     #[inline]
@@ -139,6 +139,7 @@ impl LexerBuilder {
         choice((
             keyword("machine").to(Token::Machine),
             keyword("let").to(Token::Let),
+            keyword("null").to(Token::Null),
         ))
     }
 
