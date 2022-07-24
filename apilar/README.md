@@ -40,9 +40,10 @@ Processors can disappear if:
 
 - they run an explicit "END" instruction.
 
-Computers exist in a 2d qworld. The world is a grid of locations, and each
+Computers exist in a 2d world. The world is a grid of locations, and each
 location has resources and potentially a computer. Programs can cause a
-computer to split into multiple pieces, or merge multiple computers together.
+computer to split into two pieces (into a neighbor), or merge a neighbor into
+itself.
 
 Repeated splitting of its memory would make a computer very small. So a
 computer can also grow its memory. To do so it needs to eat resources.
@@ -58,7 +59,7 @@ random computer's memory is mutated.
 This is usually not very useful, but sometimes a mutation may help a replicator
 grow.
 
-Apilar is inspired by
+Apilar is inspired by the famous alife simulation
 [Tierra](<https://en.wikipedia.org/wiki/Tierra_(computer_simulation)>).
 
 ## How to build and use
@@ -69,8 +70,21 @@ You need to have a recent stable Rust installed. Then:
 cargo run --release
 ```
 
-This creates a world, seeds it with a single hard-coded replicator,
-and then lets it run. You can see the world evolve in the terminal.
-Mysterious? It is mysterious to me as well.
+This creates a world, seeds it with a single hard-coded replicator, and then
+lets it run. You can see the world evolve in the terminal. Sometimes the worlds
+are duds and growth stops. Sometimes growth is slow. Sometimes growth
+accelerates; it all depends on what mutations occurred.
 
-## Documentation link
+If you want to see a new world, just `ctrl-C` to stop and run again.
+
+Is your terminal confused after you break out of the simulation? For me typing
+the `reset` command helps.
+
+What is going on in these worlds? It's a bit of a mystery without more careful
+analysis.
+
+## langjam 3 documentation link
+
+More documentation may appear here in the next few days:
+
+https://github.com/faassen/apilar
