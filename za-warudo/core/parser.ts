@@ -1,6 +1,6 @@
 import { Token } from "./tokenizer";
 
-interface World {
+export interface World {
   regions: Region[];
   legends: Legend[];
 }
@@ -35,11 +35,10 @@ export function parse(tokens: Token[][]): [World, ParseError | null] {
     return [world, new ParseError("No input", 0)];
   }
 
-  tokens.forEach((line, lineNumber) => {
+  for (const [lineNumber, line] of tokens.entries()) {
     if (line.length == 0) {
       return [world, new ParseError("Empty line?", lineNumber)];
     }
-    // TODO: rest
     if (line[0].type != 'symbol') {
       return [world, new ParseError("Doesn't start with a symbol", lineNumber)];
     }
@@ -57,7 +56,6 @@ export function parse(tokens: Token[][]): [World, ParseError | null] {
         subRegions: []
       };
       world.regions.push(region);
-      // TODO: legend
     } else if (line[0].value == 'legend') {
       if (line.length != 3) {
         return [world, new ParseError("`legend` expects 2 arguments", lineNumber)];
@@ -127,7 +125,6 @@ export function parse(tokens: Token[][]): [World, ParseError | null] {
       }
     }
   }
-  );
 
   return [world, null];
 }

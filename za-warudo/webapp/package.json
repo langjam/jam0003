@@ -22,6 +22,7 @@
     "ngx-monaco-editor": "^12.0.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.3.0",
+    "za-warudo-core": "file:.yalc/za-warudo-core",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
