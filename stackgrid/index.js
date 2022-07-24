@@ -62,6 +62,7 @@ class Scanner {
         // TODO: multiple separators
         break;
       case ' ':
+      case '"': // just discards \", there should be a better way
         break;
       case '\n':
         this.addToken(TokenType.NewLine, null);
@@ -72,7 +73,6 @@ class Scanner {
         } else if (this.isAlpha(char)) {
           this.identifier();
         } else {
-          throw new Error('Unexpected character:' + char);
         }
         break;
     }
@@ -271,7 +271,9 @@ class Interpreter {
   }
 
   interpret() {
-    this.state = Array.from(new Array(20), () => Array.from(new Array(5), () => null));
+    this.state = Array.from(new Array(this.rows.length + 5), () =>
+      Array.from(new Array(this.rows[0].cells.length), () => null)
+    );
 
     for (let i = 0; i < this.rows.length; i++) {
       const row = this.rows[i];
@@ -357,25 +359,54 @@ class Interpreter {
         case this.operators.AND:
         case this.operators.OR:
         case this.operators.XOR:
-        case this.operators.NAND:
-        case this.operators.NOT: {
-          const [stack] = operands;
-          const [row, column] = this.getPosition(stack);
-          // TODO: recheck pop positions
-          const op2 = this.pop(row, column);
-          const op1 = this.pop(row, column);
+        case this.operators.NAND: {
+          const [stack1, stack2] = operands;
 
-          // TODO: Fill in
+          const [row1, column1] = this.getPosition(stack1);
+          const op2 = parseInt(this.pop(row1, column1).value);
+
+          let op1;
+          if (stack2) {
+            const [row2, column2] = this.getPosition(stack2);
+            op1 = parseInt(this.pop(row2, column2).value);
+          } else {
+            op1 = parseInt(this.pop(row1, column1).value);
+          }
+
           let value;
           switch (operator) {
             case this.operators.ADD:
-              value = (parseInt(op1.value) + parseInt(op2.value)).toString();
+              value = op2 + op1;
+              break;
+            case this.operators.SUB:
+              value = op2 - op1;
+              break;
+            case this.operators.MUL:
+              value = op2 * op1;
+              break;
+            case this.operators.DIV:
+              value = op2 / op1;
+              break;
+            case this.operators.MOD:
+              value = op2 % op1;
+              break;
+            case this.operators.AND:
+              value = op2 & op1;
+              break;
+            case this.operators.OR:
+              value = op2 | op1;
+              break;
+            case this.operators.XOR:
+              value = op2 ^ op1;
+              break;
+            case this.operators.NAND:
+              value = ~(op2 & op1);
               break;
             default:
-              throw new Error('unknown operator');
+              throw new Error('unknown operator: ' + operator);
           }
 
-          this.push(row, column, value);
+          this.push(row1, column1, value.toString());
           break;
         }
         case this.operators.JEQ: {
@@ -395,11 +426,43 @@ class Interpreter {
           }
           break;
         }
+        case this.operators.JNE: {
+          const [stack1, stack2, target] = operands;
+
+          const [row1, column1] = this.getPosition(stack1);
+          const head1 = this.peek(row1, column1);
+
+          const [row2, column2] = this.getPosition(stack2);
+          const head2 = this.peek(row2, column2);
+
+          if (head1.value !== head2.value) {
+            const [targetRow, targetColumn] = this.getPosition(target);
+
+            this.currentRow = targetRow;
+            this.currentColumn = targetColumn;
+            break;
+          }
+
+          break;
+        }
         case this.operators.INC: {
           const [stack] = operands;
           const [row, column] = this.getPosition(stack);
           const value = this.pop(row, column);
           this.push(row, column, (parseInt(value.value) + 1).toString());
+          break;
+        }
+        case this.operators.COPY: {
+          const [stack1, stack2] = operands;
+          const [row1, column1] = this.getPosition(stack1);
+          const [row2, column2] = this.getPosition(stack2);
+          this.copy(row1, column1, row2, column2);
+          break;
+        }
+        case this.operators.POP: {
+          const [stack1] = operands;
+          const [row, column] = this.getPosition(stack1);
+          this.pop(row, column);
           break;
         }
         case this.operators.EXIT: {
@@ -417,6 +480,7 @@ class Interpreter {
     JUMP: 'JUMP', // JUMP [target]
     JUMP_IF_STACK_EMPTY: 'JSE', // JSE [stack] [target]
     JEQ: 'JEQ', // JEQ [stack 1] [stack 2] [target]
+    JNE: 'JNE', // JNE [stack 1] [stack 2] [target]
 
     READASCII: 'READASCII', // READASCII [stack]
     PRINTASCII: 'PRINTASCII', // PRINTASCII [stack]
@@ -426,10 +490,10 @@ class Interpreter {
 
     EXIT: 'EXIT', // EXIT
 
-    // TODO: implement pushing from one stack to another, maybe MOVE
-    PUSH: 'PUSH',
+    POP: 'POP',
     CYCLE: 'CYCLE',
     INC: 'INC',
+    COPY: 'COPY',
 
     // TODO: Change instruction pointer direction
     ROTATE: 'ROTATE', // rotate the instruction pointer direction clockwise
@@ -458,7 +522,7 @@ class Interpreter {
   }
 
   getPosition(address) {
-    const [column, row] = address.split('');
+    const [column, row] = address.match(/[A-Z]+|[0-9]+/g);
     return [parseInt(row) - 1, column.charCodeAt(0) - 'A'.charCodeAt(0)];
   }
 
@@ -475,6 +539,30 @@ class Interpreter {
       toPrint += ' ';
     }
     process.stdout.write(toPrint);
+  }
+
+  copy(sourceRow, sourceColumn, targetRow, targetColumn) {
+    // loop through source, push to target, reverse target
+    let head = this.state[sourceRow][sourceColumn];
+    if (head === null || head.value.length === 0) {
+      return;
+    }
+
+    this.push(targetRow, targetColumn, head.value);
+
+    while (true) {
+      const next = this.state[sourceRow + 1][sourceColumn];
+      if (next === null || next.value.length === 0) {
+        break;
+      }
+
+      this.push(targetRow, targetColumn, next.value);
+
+      sourceRow++;
+      head = next;
+    }
+
+    return;
   }
 
   /**
@@ -576,8 +664,21 @@ class Interpreter {
     return cell === undefined || cell === null || cell.value.length === 0;
   }
 
+  halt() {
+    this.debug();
+    throw new Error();
+  }
+
   debug() {
-    console.log(this.state.map((row) => row.map((cell) => (cell === null ? null : cell.value))));
+    console.log(
+      this.state
+        .map(
+          (row, i) =>
+            `${(i + 1).toString().padEnd(3, ' ')}` +
+            row.map((cell) => (cell === null ? ''.padEnd(30, ' ') : cell.value.padEnd(30, ' '))).join('|')
+        )
+        .join('\n')
+    );
   }
 }
 
