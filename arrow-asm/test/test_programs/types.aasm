@@ -1,0 +1,15 @@
+type sometype {
+  ctor(long) {
+    add op0, 1, 1
+  }
+  a : long
+  b : double
+  c : ptr<long>
+  d : ptr<ptr<long>>
+  d : ptr<othertype>
+}
+
+type othertype {
+  a : long
+  b : double
+}
