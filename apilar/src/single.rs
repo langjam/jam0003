@@ -64,7 +64,6 @@ pub fn main() -> std::io::Result<()> {
 
     computer.add_processor(0);
 
-    let mut i = 0;
     let mut total = 0;
     let mut dump_count = 0;
     loop {
@@ -92,7 +91,6 @@ pub fn main() -> std::io::Result<()> {
         // if i % 1000000 == 0 {
         //     computer.mutate_processors(&mut small_rng, 1);
         // }
-        i += 1;
     }
 
     // let words = assembler.disassemble_to_words(&computer.memory.values);
@@ -102,5 +100,5 @@ pub fn main() -> std::io::Result<()> {
     //     file.write(word.as_bytes())?;
     //     file.write("\n".as_bytes())?;
     // }
-    Ok(())
+    // Ok(())
 }
