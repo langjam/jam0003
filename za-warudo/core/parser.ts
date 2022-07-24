@@ -35,7 +35,41 @@ export function parser(tokens: Token[][]): [World, ParseError | null] {
       return [world, new ParseError("Empty line?", lineNumber)];
     }
     // TODO: rest
-  });
+    if (line[0].type != 'symbol') {
+      return [world, new ParseError("Doesn't start with a symbol", lineNumber)];
+    }
+      if (line[0].value == 'region') {
+	if (line.length != 2) {
+	  return [world, new ParseError("`region` expects 1 argument", lineNumber)];
+	} else {
+	  if (line[1].type == 'symbol') {
+	    var region: Region = {
+	      name: line[1].value,
+	      percent: -1,
+	      maxSize: [-1, -1],
+	      subRegions: []
+	    };
+	    world.regions.push(region);
+	  } else {
+	  return [world, new ParseError("`region` expects a region name as argument", lineNumber)];	    
+	  }
+	}
+      } else {
+	switch(line.length) {
+	  case 2:
+	    if (line[0].type != 'symbol') {
+	      return [world, new ParseError("Expected symbol got something else", lineNumber)];
+	    } else {
+	      // TODO: iterate through world region names to check if this exists
+	      
+	    }
+	    break;
+	  case 3: break;
+	  default: return [world, new ParseError("Unexpected number of arguments", lineNumber)];
+	}
+      }
+    }
+  );
 
   return [world, null];
 }
