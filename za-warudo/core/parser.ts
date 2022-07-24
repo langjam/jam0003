@@ -52,15 +52,55 @@ export function parser(tokens: Token[][]): [World, ParseError | null] {
         subRegions: []
       };
       world.regions.push(region);
+      // TODO: legend
     } else {
       switch (line.length) {
         case 2:
-          if (line[0].type != 'symbol') {
+          const first = line[0];
+          if (first.type != 'symbol') {
             return [world, new ParseError("Expected symbol got something else", lineNumber)];
           }
-          // TODO: iterate through world region names to check if this exists
+          const found = world.regions.find(r => r.name == first.value);
+          if (!found) {
+            return [world, new ParseError(`Region not found: ${first.value}`, lineNumber)];
+          }
+          const second = line[1];
+          switch (second.type) {
+            case "percent":
+              found.percent = second.value;
+              break;
+            case "size":
+              found.maxSize = [second.first, second.second];
+              break;
+            default: return [world, new ParseError("Expected percent or size", lineNumber)];
+          }
           break;
-        case 3: break;
+        case 3:
+          const forst = line[0];
+          const secind = line[1];
+          const third = line[2];
+          if (forst.type != 'symbol') {
+            return [world, new ParseError("Expected symbol got something else", lineNumber)];
+          }
+          const foundRegion = world.regions.find(r => r.name == forst.value);
+          if (!foundRegion) {
+            return [world, new ParseError(`Region not found: ${forst.value}`, lineNumber)];
+          }
+          if (secind.type != 'symbol') {
+            return [world, new ParseError("Expected symbol in 2nd place", lineNumber)];
+          }
+          // TODO: check if legend exists
+          if (third.type != 'percent') {
+            return [world, new ParseError("Expected percent in 3rd place", lineNumber)];
+          }
+          const subRegion: SubRegion = {
+            name: secind.value,
+            // TODO: take from legend
+            color: '#000000',
+            percent: third.value
+          };
+          foundRegion.subRegions.push(subRegion);
+          break;
         default: return [world, new ParseError("Unexpected number of arguments", lineNumber)];
       }
     }
