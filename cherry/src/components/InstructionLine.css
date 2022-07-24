@@ -1,0 +1,26 @@
+.line {
+	background-color: #fafafa;
+	border-radius: 8px;
+}
+
+.line > * {
+	padding: 12px;
+	border-radius: 8px;
+}
+
+.type {
+	display: inline-block;
+	background-color: #eee;
+	color: #333;
+	width: 128px;
+}
+
+.form {
+	display: flex;
+	flex-direction: row;
+	gap: 12px;
+
+	background-color: #fafafa;
+	border-radius: 8px;
+	padding: 16px;
+}
