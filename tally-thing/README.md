@@ -5,8 +5,16 @@ Tally Thing
 
 By Daniel Sherlock.
 
+Example Code:
+
 ```
-TODO: Provide example.
+;; a prelude goes here - it still need to be copy-pasted in
+
+.ballots by(constituency)  ;; takes a the ballots from the json
+                           ;; and sorts them into bunches of like constituency
+
+  ;; sadly, I didn't get any futher than that
+	;; (I mean, it can do a no-op too (just use `_`)
 ```
 
 Background
@@ -84,6 +92,10 @@ programs to _jq_ scripts. If it works nicely then I'll just have to put up with
 all the extra `|` symbols in the syntax, and see if I can write a few
 election-specific functions.
 
+**Update:** As of the end of the jam, I have at least got data flowing through
+the script, and can modify it in two very siple ways and one trivial way. The
+parser is slightly more capable than the runner.
+
 Running the Interpreter
 -----------------------
 
@@ -91,7 +103,7 @@ Written in python, uses the [`pyparsing`](https://pypi.org/project/pyparsing/)
 library. If you have it installed then:
 
 ```
-...\tally-thing> python3 interpreter examples\test.tally
+...\tally-thing> python3 interpreter examples\test.tally examples\test.json
 ```
 
 (adjust depending on OS, or how you prefer to run things in python environments)

@@ -6,6 +6,7 @@
 	;;constituencies = _
 ;;}
 
-let _ = BUILTIN(identity)
+let _ = BUILTIN(_identity)
+let by(key) = BUILTIN(_by, key)
 
-_ .ballots _
+.ballots by(constituency) _

@@ -1,7 +1,7 @@
 from pyparsing import *
 from tallyAst import *
 
-DATA_items = {}
+#DATA_items = {}
 LET_items = {}
 
 # Handle newlines explicitly
@@ -15,7 +15,7 @@ eol = Suppress(Opt(comment) + "\n")
 
 name = Word(alphas+"_'?", alphas+nums+"-#_<>?")
 term = name + Opt(
-    Suppress("(").leave_whitespace() + delimited_list(Word(alphas)) + Suppress(")")
+    Suppress("(").leave_whitespace() + delimited_list(Word(alphas+"_")) + Suppress(")")
   )
 
 projection = Combine(Suppress(".") + Word(alphas))
@@ -29,10 +29,11 @@ bag_val = Suppress("[") + (val_expr | eol)[...] + Suppress("]")
 type_expr <<= Word(alphas)[...]
 val_expr <<= term | projection | record_val | bag_val
 
-data = LineStart() + CaselessKeyword("data") + term + ":" + Group(type_expr[...], aslist=True) + eol
+#data = LineStart() + CaselessKeyword("data") + term + ":" + Group(type_expr[...], aslist=True) + eol
 let = LineStart() + CaselessKeyword("let") + term + "=" + Group(val_expr[...], aslist=True) + eol
 
-whole_file = (data | let | eol)[...] + val_expr[...] + eol[...]
+#whole_file = (data | let | eol)[...] + val_expr[...] + eol[...]
+whole_file = (let | eol)[...] + val_expr[...] + eol[...]
 
 @term.set_parse_action
 def create_term(tokens):
@@ -55,11 +56,11 @@ def create_record_val(tokens):
 def create_bag_val(tokens):
   return BagVal(tokens)
 
-@data.set_parse_action
-def register_data(tokens):
-  global DATA_items
-  DATA_items[tokens[1].name] = (tokens[1].params, tokens[3])
-  return []
+#@data.set_parse_action
+#def register_data(tokens):
+#  global DATA_items
+#  DATA_items[tokens[1].name] = (tokens[1].params, tokens[3])
+#  return []
 @let.set_parse_action
 def register_let(tokens):
   global LET_items
@@ -68,7 +69,8 @@ def register_let(tokens):
 
 def parse_file(file):
   output = whole_file.parse_file(file, parse_all=True)
-  return Program(DATA_items, LET_items, output)
+  #return Program(DATA_items, LET_items, output)
+  return Program(LET_items, output)
 
 if __name__ == "__main__":
   comment.run_tests("""\

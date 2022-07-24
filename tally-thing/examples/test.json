@@ -1,3 +1,32 @@
 {
-  "ballots": [1, 2, 3, 4, 5]
+  "ballots": [
+	  {
+      "constituency" : "London",
+	    "candidate" : {"name": "Alf", "party": "Red"}
+    },{
+      "constituency" : "London",
+	    "candidate" : {"name": "Beth", "party": "Green"}
+    },{
+      "constituency" : "The North",
+	    "candidate" : {"name": "Gemma", "party": "Red"}
+    },{
+      "constituency" : "The North",
+	    "candidate" : {"name": "Duncan", "party": "Blue"}
+    },{
+      "constituency" : "Elsewhere",
+	    "candidate" : {"name": "Ethan", "party": "Independent"}
+    },{
+      "constituency" : "London",
+	    "candidate" : {"name": "Beth", "party": "Green"}
+    },{
+      "constituency" : "The North",
+	    "candidate" : {"name": "Gemma", "party": "Red"}
+    },{
+      "constituency" : "Elsewhere",
+	    "candidate" : {"name": "Zandra", "party": "Blue"}
+    },{
+      "constituency" : "Elsewhere",
+	    "candidate" : {"name": "Eloise", "party": "Green"}
+    }
+	]
 }

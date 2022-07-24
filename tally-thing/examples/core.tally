@@ -36,6 +36,7 @@ let context = {part = _, whole = _} into(part)
 ;;    [val1, val2, ...]
 ;; -> [{part = val1, whole = [val1, val2, ...]}, {part = val2, whole = [val1, val2, ...]}, ...]
 
+;; currently BUILTIN... needn't be
 let by(prpty) = {k = _, v = _} into(k) [
     {k = .k .prpty, ...}
 	  into(v)

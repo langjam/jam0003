@@ -1,14 +1,16 @@
 class Program:
-  def __init__(self, datas, lets, exprs):
-    self.datas = datas
+  #def __init__(self, datas, lets, exprs):
+  def __init__(self, lets, exprs):
+    #self.datas = datas
     self.lets = lets
     self.exprs = exprs
   def __repr__(self):
     return (
-        "<program\n\n  datas: " + str(self.datas) +
+        "<program" + 
+        #"\n\n  datas: " + str(self.datas) +
         "\n\n  lets: " + str(self.lets) + 
         "\n\n  exprs:" + " ".join(str(x) for x in self.exprs) + 
-      "\n>")
+      "\n\n>")
 
 class LetBody:
   __match_args__ = ('params', 'exprs')

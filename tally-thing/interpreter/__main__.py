@@ -16,6 +16,6 @@ from runner import run_program
 
 program = parse_file(args.file)
 with open(args.data, "r") as data_file:
-    data = json.load(data_file)
-    result = run_program(program, data)
-    print(result)
+  data = json.load(data_file)
+result = run_program(program, data)
+print(result)
