@@ -48,7 +48,14 @@ with carefully chosen syntax and useful built-in functions
 that act as "tallying primitives" to build your system to fit the
 much more complex structures of real-life legislatures.
 
-Build & Run
------------
+Running the Interpreter
+-----------------------
 
-TODO: Documentation.
+Written in python, uses the [`pyparsing`](https://pypi.org/project/pyparsing/)
+library. If you have it installed then:
+
+```
+...\tally-thing> python3 interpreter examples\test.tally
+```
+
+(adjust depending on OS, or how you prefer to run things in python environments)
