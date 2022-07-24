@@ -29,6 +29,9 @@ enum InstrType {
 
   InstrType_Exit, // () Exit program
 
+	InstrType_Call, // (ADDRESS) pushes IP to the call stack and jumps to ADDRESS
+	InstrType_Ret, // Pops from the call stack and jumps to the popped value
+
   INSTRTYPE_COUNT
 };
 
@@ -44,9 +47,14 @@ struct Program {
 
 #define STACK_MAX (1 << 10)
 
+struct Call {
+	uint ret;
+	uint base;
+};
+
 struct CallStack {
-  uint return_addrs[STACK_MAX];
-  uint return_addrs_len;
+  Call calls[STACK_MAX];
+  uint calls_len;
 };
 
 struct Stack {
