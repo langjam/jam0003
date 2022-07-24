@@ -5,6 +5,7 @@
 #include <ast/exprs/numberexpr.h>
 #include <ast/exprs/specialexpr.h>
 #include <ast/exprs/variableexpr.h>
+#include <ast/exprs/keywordexpr.h>
 #include <ast/instructions/assigninstruction.h>
 #include <ast/instructions/generateinstruction.h>
 #include <ast/instructions/instruction.h>
@@ -22,12 +23,10 @@ ErrorOr<void> Parser::parse_all() {
         expect_newline();
         m_instructions.push_back(instruction);
     }
-    auto backtrack = index();
     auto maybe_lex = lex();
     if (maybe_lex.is_error()) return false;
     // If managed to lex, error
     if (maybe_lex.value()) {
-        set_index(backtrack);
         set_error("unexpected token");
         return false;
     }
@@ -35,16 +34,13 @@ ErrorOr<void> Parser::parse_all() {
 }
 
 ErrorOr<bool> Parser::match_token(Token::Type type) {
-    auto backtrack = index();
     auto maybe_lex = lex();
     if (maybe_lex.is_error()) return {};
     // If got eof
     if (!maybe_lex.value()) {
-        set_index(backtrack);
         return false;
     }
     if (type != token().type()) {
-        set_index(backtrack);
         return false;
     }
     return true;
@@ -59,7 +55,7 @@ void Parser::show_error() {
     if (m_lexer.has_error()) {
         m_lexer.show_error();
     } else if (has_error()) {
-        std::cerr << "ParserError: " << m_error_message << std::endl;
+        std::cerr << "ParserError: " << m_lexer.filename() << "(" << new_lines << ", " << index() - newline_index << "): " << m_error_message << std::endl;
     } else {
         assert(0);
     }
@@ -70,7 +66,11 @@ ErrorOr<void> Parser::expect_newline(bool do_error) {
     auto maybe_match = match_token(Token::Type::Newline);
     if (maybe_match.is_error()) return false;
     // If matches
-    if (maybe_match.value()) return true;
+    if (maybe_match.value()) {
+        new_lines++;
+        newline_index = index();
+        return true;
+    }
 
     if (!do_error) return true;
 
@@ -204,7 +204,11 @@ ErrorOr<AstExpr::Ptr> Parser::parse_special() {
 }
 
 ErrorOr<AstExpr::Ptr> Parser::parse_single() {
-    auto maybe_parsed = parse_number();
+    auto maybe_parsed = parse_special();
+    if (maybe_parsed.is_error()) return {};
+    if (maybe_parsed.value()) return maybe_parsed.value();
+
+    maybe_parsed = parse_number();
     if (maybe_parsed.is_error()) return {};
     if (maybe_parsed.value()) return maybe_parsed.value();
 
@@ -229,7 +233,6 @@ ErrorOr<AstExpr::Ptr> Parser::parse_product() {
     auto expr = maybe_parsed.value();
 
     for (;;) {
-        auto backtrack = index();
         auto maybe_lex = lex();
         if (maybe_lex.is_error()) return AstExpr::Ptr(nullptr);
         // If not lexed, break
@@ -242,7 +245,6 @@ ErrorOr<AstExpr::Ptr> Parser::parse_product() {
         if (maybe_rhs.is_error()) return {};
         auto rhs = maybe_rhs.value();
         if (!rhs) {
-            set_index(backtrack);
             set_error("unexpected expr after operator");
             return AstExpr::Ptr(nullptr);
         }
@@ -258,7 +260,6 @@ ErrorOr<AstExpr::Ptr> Parser::parse_sum() {
     auto expr = maybe_parsed.value();
 
     for (;;) {
-        auto backtrack = index();
         auto maybe_lex = lex();
         if (maybe_lex.is_error()) return AstExpr::Ptr(nullptr);
         // If not lexed, break
@@ -271,7 +272,6 @@ ErrorOr<AstExpr::Ptr> Parser::parse_sum() {
         if (maybe_rhs.is_error()) return {};
         auto rhs = maybe_rhs.value();
         if (!rhs) {
-            set_index(backtrack);
             set_error("unexpected expr after operator");
             return AstExpr::Ptr(nullptr);
         }

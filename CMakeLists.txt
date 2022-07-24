@@ -11,6 +11,7 @@ set(SOURCES
     src/runtime/terminal_drawer.cc
     src/runtime/grid.cc
     src/runtime/value.cc
+    src/runtime/interpreter.cc
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
