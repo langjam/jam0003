@@ -96,10 +96,10 @@
         instance.exports.wasm_accept(v);
       }
       instance.exports.wasm_run();
-      window.requestAnimationFrame(render)
     }
 
     window.addEventListener("load", () => {
+      window.requestAnimationFrame(render)
       var canvas = document.getElementById("canvas");
       ctx = canvas.getContext("2d");
       var stdoutEl = document.getElementById("stdout");
