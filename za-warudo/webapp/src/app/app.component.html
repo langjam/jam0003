@@ -1,10 +1,10 @@
-<div>
-<canvas
-    id="za-warudo-canvas"
-    ngModel
-    #canvas
-    width="500"
-    height="500"
->
-</canvas>
+<div class="flex flex-row h-screen">
+  <div class="w-1/2 h-screen">
+    <ngx-monaco-editor
+      style="height: 100%"
+      [options]="editorOptions"
+      [(ngModel)]="code"
+    ></ngx-monaco-editor>
+  </div>
+  <div class="w-1/2 h-full">Render here</div>
 </div>

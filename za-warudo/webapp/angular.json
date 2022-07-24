@@ -6,10 +6,8 @@
     "webapp": {
       "projectType": "application",
       "schematics": {
-        "@schematics/angular": {
-          "component": {
-            "spec": false
-          }
+        "@schematics/angular:application": {
+          "strict": true
         }
       },
       "root": "",
@@ -24,7 +22,15 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor",
+                "output": "assets/monaco-editor"
+              }
+            ],
             "styles": ["src/styles.css"],
             "scripts": []
           },
@@ -94,7 +100,5 @@
       }
     }
   },
-  "cli": {
-    "analytics": false
-  }
+  "defaultProject": "webapp"
 }
