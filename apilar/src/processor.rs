@@ -4,11 +4,13 @@ use rand::rngs::SmallRng;
 use crate::direction::Direction;
 use crate::instruction::Instruction;
 use crate::memory::Memory;
+use serde_big_array::BigArray;
+use serde_derive::{Deserialize, Serialize};
 
 const STACK_SIZE: usize = 64;
 const ADDRESS_DISTANCE: usize = 1024;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Processor {
     pub ip: usize,
     stack_pointer: usize,
@@ -19,6 +21,7 @@ pub struct Processor {
     pub want_merge: Option<Direction>,
     pub want_eat: bool,
     pub want_grow: bool,
+    #[serde(with = "BigArray")]
     stack: [u64; STACK_SIZE],
 }
 

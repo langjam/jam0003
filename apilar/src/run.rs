@@ -4,6 +4,8 @@ use crate::render::{render_start, render_update};
 use crate::world::World;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
+use std::error::Error;
+use std::fs::File;
 
 pub fn run(
     width: usize,
@@ -15,11 +17,13 @@ pub fn run(
     instructions_per_update: usize,
     mutation_frequency: u64,
     redraw_frequency: u64,
+    save_frequency: u64,
     memory_mutation_amount: u64,
     processor_stack_mutation_amount: u64,
     eat_amount: u64,
+    dump: bool,
     words: Vec<&str>,
-) {
+) -> Result<(), Box<dyn Error>> {
     let assembler = Assembler::new();
 
     let mut computer = Computer::new(starting_memory_size, max_processors, starting_resources);
@@ -33,9 +37,12 @@ pub fn run(
 
     render_start();
     let mut i: u64 = 0;
+    let mut save_nr = 0;
+
     loop {
         let redraw = i % redraw_frequency == 0;
         let mutate = i % mutation_frequency == 0;
+        let save = i % save_frequency == 0;
 
         world.update(&mut small_rng, instructions_per_update);
         if mutate {
@@ -49,6 +56,11 @@ pub fn run(
             render_update();
             println!("{}", world);
         }
-        i += 1;
+        if save && dump {
+            let file = File::create(format!("apilar-dump{}.cbor", save_nr))?;
+            serde_cbor::to_writer(file, &world)?;
+            save_nr += 1;
+        }
+        i = i.wrapping_add(1);
     }
 }

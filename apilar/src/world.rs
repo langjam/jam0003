@@ -2,12 +2,15 @@ use crate::computer::Computer;
 use crate::direction::Direction;
 use rand::rngs::SmallRng;
 use rand::Rng;
+use serde_derive::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Location {
     pub resources: u64,
     pub computer: Option<Computer>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct World {
     width: usize,
     height: usize,

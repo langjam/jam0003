@@ -1,6 +1,7 @@
 extern crate num;
 #[macro_use]
 extern crate num_derive;
+extern crate serde_big_array;
 
 pub mod assembler;
 pub mod computer;
@@ -21,6 +22,7 @@ use crate::assembler::text_to_words;
 use crate::run::run;
 use crate::starter::PROGRAM_TEXT;
 use clap::Parser;
+use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -58,6 +60,9 @@ struct Cli {
     redraw_frequency: Option<u64>,
 
     #[clap(long, value_parser)]
+    save_frequency: Option<u64>,
+
+    #[clap(long, value_parser)]
     memory_mutation_amount: Option<u64>,
 
     #[clap(long, value_parser)]
@@ -65,9 +70,12 @@ struct Cli {
 
     #[clap(long, value_parser)]
     eat_amount: Option<u64>,
+
+    #[clap(long, value_parser)]
+    dump: Option<bool>,
 }
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
     let contents = match cli.filename {
         Some(filename) => {
@@ -90,10 +98,12 @@ fn main() -> std::io::Result<()> {
         cli.instructions_per_update.unwrap_or(10),
         cli.mutation_frequency.unwrap_or(100000),
         cli.redraw_frequency.unwrap_or(100000),
+        cli.save_frequency.unwrap_or(100000000),
         cli.memory_mutation_amount.unwrap_or(5),
         cli.processor_stack_mutation_amount.unwrap_or(0),
         cli.eat_amount.unwrap_or(100),
+        cli.dump.unwrap_or(false),
         words,
-    );
+    )?;
     Ok(())
 }
