@@ -1,5 +1,9 @@
-# Exavitor language very good
+# Excavator language
 ## build 
+```
+cmake .
+make
+```
 ### dependencies
 You would need a c++20 capable compiler, cmake, your favorite build system, and ncurses. 
 ### quick start
