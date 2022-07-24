@@ -94,7 +94,7 @@ Here are some animations that have already been written for your enjoyment:
 %MEMORY MUL %MEMORY INTO %MEMORY
 %MEMORY ADD %X MOD 1.0 INTO %OUT
 ```
-```
+```asm
 @V2MAK
   %0 INTO %BASE
   %1 INTO %MEMORY
