@@ -23,7 +23,7 @@ The operands of StackGrid instructions are cell addresses (exactly like the ones
 
 For example, the following program prints "Hello World!":
 
-![hello world](./examples/hello-world.png)
+![hello world](./images/hello-world.png)
 
 - `JSE B2 A5` jumps to cell `A5` if the stack at `B2` is empty
 - `PRINTASCII B2` prints the cell at the top of the stack `B2` (`72` on the first run) as an ASCII value
@@ -36,7 +36,7 @@ StackGrid has no explicit comment syntax. Any cell that is unreachable and unuse
 
 For example, in this program, the "Hello world" in cell B2 is ignored:
 
-![hello-world-comment](examples/hello-world-comment.png)
+![hello-world-comment](images/hello-world-comment.png)
 
 ### Flipping
 
@@ -44,9 +44,9 @@ StackGrid has a special `FLIP` instruction that changes the direction of the ins
 
 The following programs both implement a simple `cat` (read from stdin into a stack and write the stack to stdout):
 
-![cat](examples/cat.png)
+![cat](images/cat.png)
 
-![cat-flipped](examples/cat-flipped.png)
+![cat-flipped](images/cat-flipped.png)
 
 ### Instruction Set
 
@@ -74,4 +74,4 @@ But also, with the `JUMP` and `FLIP` instructions, it's possible to write a prog
 
 Such a program would be quite difficult to write (not to mention, debug), but these were my inspirations for StackGrid. I made a very little grid editor and a very little demo of what it might look like. Below shows the "Hello, World" program popping its stack to print a message:
 
-![stack-grid](examples/stackgrid.gif)
+![stack-grid](images/stackgrid.gif)
