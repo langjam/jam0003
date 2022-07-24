@@ -1,4 +1,5 @@
 from pyparsing import *
+from tallyAst import *
 
 DATA_items = {}
 LET_items = {}
@@ -31,9 +32,37 @@ let = LineStart() + CaselessKeyword("let") + term + "=" + Group(val_expr[...], a
 
 whole_file = (data | let | eol)[...] + val_expr[...] + eol[...]
 
+@term.set_parse_action
+def create_term(tokens):
+  if len(tokens) > 1:
+    return Term(tokens[0], tokens[1:])
+  else:
+    return Term(tokens[0], [])
+
+@record_val.set_parse_action
+def create_record_val(tokens):
+  d = {}
+  for prpty in tokens:
+    d[prpty[0]] = prpty[1:]
+  return RecordVal(d)
+@bag_val.set_parse_action
+def create_bag_val(tokens):
+  return BagVal(tokens)
+
+@data.set_parse_action
+def register_data(tokens):
+  global DATA_items
+  DATA_items[tokens[1].name] = (tokens[1].params, tokens[3])
+  return []
+@let.set_parse_action
+def register_let(tokens):
+  global LET_items
+  LET_items[tokens[1].name] = LetBody(tokens[1].params,tokens[3])
+  return []
+
 def parse_file(file):
   output = whole_file.parse_file(file, parse_all=True)
-  return (DATA_items, LET_items, output)
+  return Program(DATA_items, LET_items, output)
 
 if __name__ == "__main__":
   comment.run_tests("""\
