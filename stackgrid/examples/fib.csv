@@ -1,5 +1,5 @@
 ,,,
-JEQ C2 D2 A9,0,0,20
+JEQ C2 D2 A10,0,0,20
 DUP B2,1,,
 PRINT B2,,,
 INC C2,,,

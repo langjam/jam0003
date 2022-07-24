@@ -47,16 +47,6 @@ class Scanner {
     const char = this.advance();
 
     switch (char) {
-      case '/':
-        if (this.peek() === '*') {
-          while (!(this.peek() === '*' && this.peekNext() === '/')) {
-            this.advance();
-          }
-          this.advance();
-          this.advance();
-          break;
-        }
-      // TODO: test the edge case of slash starting program but not comment, even though should fail parsing error
       case ',':
         this.addToken(TokenType.NewColumn, null);
         // TODO: multiple separators
@@ -256,6 +246,7 @@ class Value {
 }
 
 class Interpreter {
+  width = 1000;
   /**
    *
    * @param {Row[]} rows
@@ -268,12 +259,23 @@ class Interpreter {
     this.state = [];
     this.currentRow = 0;
     this.currentColumn = 0;
+    this.flipped = false;
+  }
+
+  flip() {
+    // Advance already took this forward, need to correct in the new direction
+    if (!this.flipped) {
+      this.currentRow--;
+      this.currentColumn++;
+    } else {
+      this.currentColumn--;
+      this.currentRow++;
+    }
+    this.flipped = !this.flipped;
   }
 
   interpret() {
-    this.state = Array.from(new Array(this.rows.length + 5), () =>
-      Array.from(new Array(this.rows[0].cells.length), () => null)
-    );
+    this.state = Array.from(new Array(this.width), () => Array.from(new Array(this.width), () => null));
 
     for (let i = 0; i < this.rows.length; i++) {
       const row = this.rows[i];
@@ -468,13 +470,15 @@ class Interpreter {
         case this.operators.EXIT: {
           break program;
         }
+        case this.operators.FLIP: {
+          this.flip();
+          break;
+        }
         default:
           throw new Error('unhandled interpret: ' + operator);
       }
     }
   }
-
-  c = 2;
 
   operators = {
     JUMP: 'JUMP', // JUMP [target]
@@ -485,7 +489,6 @@ class Interpreter {
     READASCII: 'READASCII', // READASCII [stack]
     PRINTASCII: 'PRINTASCII', // PRINTASCII [stack]
 
-    READ: 'READ',
     PRINT: 'PRINT', // PRINT [stack]
 
     EXIT: 'EXIT', // EXIT
@@ -494,11 +497,10 @@ class Interpreter {
     CYCLE: 'CYCLE',
     INC: 'INC',
     COPY: 'COPY',
+    DUP: 'DUP',
 
-    // TODO: Change instruction pointer direction
-    ROTATE: 'ROTATE', // rotate the instruction pointer direction clockwise
+    FLIP: 'FLIP', // flip the instruction pointer direction
 
-    // TODO: Arithmetic operations
     ADD: 'ADD',
     SUB: 'SUB',
     MUL: 'MUL',
@@ -510,15 +512,19 @@ class Interpreter {
     XOR: 'XOR',
     NAND: 'NAND',
     NOT: 'NOT',
-
-    DUP: 'DUP',
   };
 
   advance() {
     if (this.currentRow >= this.state.length) {
       return null;
     }
-    return this.state[this.currentRow++][this.currentColumn];
+    if (this.currentColumn >= this.state[this.currentRow].length) {
+      return null;
+    }
+
+    const value = this.state[this.currentRow][this.currentColumn];
+    this.flipped ? this.currentColumn++ : this.currentRow++;
+    return value;
   }
 
   getPosition(address) {
@@ -541,6 +547,13 @@ class Interpreter {
     process.stdout.write(toPrint);
   }
 
+  next(row, column) {
+    if (this.flipped) {
+      return [row, column + 1];
+    }
+    return [row + 1, column];
+  }
+
   copy(sourceRow, sourceColumn, targetRow, targetColumn) {
     // loop through source, push to target, reverse target
     let head = this.state[sourceRow][sourceColumn];
@@ -551,14 +564,16 @@ class Interpreter {
     this.push(targetRow, targetColumn, head.value);
 
     while (true) {
-      const next = this.state[sourceRow + 1][sourceColumn];
+      const [nextRow, nextColumn] = this.next(sourceRow, sourceColumn);
+      const next = this.state[nextRow][nextColumn];
       if (next === null || next.value.length === 0) {
         break;
       }
 
       this.push(targetRow, targetColumn, next.value);
 
-      sourceRow++;
+      sourceRow = nextRow;
+      sourceColumn = nextColumn;
       head = next;
     }
 
@@ -579,27 +594,33 @@ class Interpreter {
     }
 
     while (true) {
-      const next = this.state[stackRow + 1][stackColumn];
+      const [nextRow, nextColumn] = this.next(stackRow, stackColumn);
+
+      const next = this.state[nextRow][nextColumn];
       if (next === null || next.value.length === 0) {
         break;
       }
 
-      stackRow++;
+      stackRow = nextRow;
+      stackColumn = nextColumn;
       head = next;
     }
 
-    this.state[stackRow + 1][stackColumn] = new Value(value);
+    const [nextRow, nextColumn] = this.next(stackRow, stackColumn);
+    this.state[nextRow][nextColumn] = new Value(value);
   }
 
   peek(stackRow, stackColumn) {
     let head = this.state[stackRow][stackColumn];
     while (true) {
-      const next = this.state[stackRow + 1][stackColumn];
+      const [nextRow, nextColumn] = this.next(stackRow, stackColumn);
+      const next = this.state[nextRow][nextColumn];
       if (next === null || next.value.length === 0) {
         break;
       }
 
-      stackRow++;
+      stackRow = nextRow;
+      stackColumn = nextColumn;
       head = next;
     }
     return head;
@@ -614,12 +635,14 @@ class Interpreter {
   pop(stackRow, stackColumn) {
     let head = this.state[stackRow][stackColumn];
     while (true) {
-      const next = this.state[stackRow + 1][stackColumn];
+      const [nextRow, nextColumn] = this.next(stackRow, stackColumn);
+      const next = this.state[nextRow][nextColumn];
       if (next === null || next.value.length === 0) {
         break;
       }
 
-      stackRow++;
+      stackRow = nextRow;
+      stackColumn = nextColumn;
       head = next;
     }
 
@@ -637,24 +660,35 @@ class Interpreter {
     let row = stackRow;
     let column = stackColumn;
     while (true) {
-      const next = this.state[row + 1][column];
+      const [nextRow, nextColumn] = this.next(row, column);
+      const next = this.state[nextRow][nextColumn];
       if (next === null || next.value.length === 0) {
         break;
       }
 
-      row++;
+      row = nextRow;
+      column = nextColumn;
       head = next;
     }
 
-    // has to be a more performant way to do this
+    if (this.flipped) {
+      const stackCopy = [];
+      for (let i = stackColumn; i <= column; i++) {
+        stackCopy.push(new Value(this.state[row][i].value));
+      }
 
-    const stackCopy = [];
-    for (let i = stackRow; i <= row; i++) {
-      stackCopy.push(new Value(this.state[i][column].value));
-    }
+      for (let i = stackColumn; i <= column; i++) {
+        this.state[stackRow][i] = new Value(stackCopy[(i + 1) % stackCopy.length].value);
+      }
+    } else {
+      const stackCopy = [];
+      for (let i = stackRow; i <= row; i++) {
+        stackCopy.push(new Value(this.state[i][column].value));
+      }
 
-    for (let i = stackRow; i <= row; i++) {
-      this.state[i][stackColumn] = new Value(stackCopy[(i + 1) % stackCopy.length].value);
+      for (let i = stackRow; i <= row; i++) {
+        this.state[i][stackColumn] = new Value(stackCopy[(i + 1) % stackCopy.length].value);
+      }
     }
   }
 

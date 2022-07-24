@@ -1,54 +1,83 @@
 # StackGrid
 
+StackGrid is a fun, new take on assembly language, stacks, and grids.
+
 ## Setup
 
 ```shell
 npm install
-```
-
-## Usage
-
-```shell
 node index.js --file <path>
 ```
 
-See the [examples directory](./examples/).
+See the [examples directory](./examples/) for example files.
 
-## Notes
+## About
 
-- Stacks are grid columns. The first is actually where you write the instructions and every other column is a possible stack.
+### Cells and stacks
 
-- Stacks default to B, making one line programs in the A column
+A StackGrid program is laid out on a grid whose cells contain [instructions](#instruction-set) or data. (The file format used for the CLI is CSV.)
 
-Examples:
+The interpreter starts from the top-left-most cell containing an instruction and then reads down the column until it reaches an `EXIT` instruction. (So any number of empty rows and columns may be added before the first instruction. In the "Hello World" program, for example, we see that the first instruction is on the second line.)
 
-- Hello world
+The operands of StackGrid instructions are cell addresses (exactly like the ones you would use in a spreadsheet application): rows are numbered from top to bottom starting from "1", while columns are lettered from left to right starting from "A".
 
-```
-A                                                                         B
-Jump if stack-empty (cell number to jump to, column letter of the stack)  33
-Output ascii (column letter of the stack)                                 100
-Jump (cell number of print loop)                                          108
-```
+For example, the following program prints "Hello World!":
 
-- Chat bot: with questions and answers in other stack
+![hello world](./examples/hello-world.png)
 
-- Take an input program add it to a column, and execute that column
+- `JSE B2 A5` jumps to cell `A5` if the stack at `B2` is empty
+- `PRINTASCII B2` prints the cell at the top of the stack `B2` (`72` on the first run) as an ASCII value
+- `JUMP A2` jumps back to cell `A2`
+- `EXIT` exits the program
 
-- Fizzbuzz
+### Comments
 
-- Comments
+StackGrid has no explicit comment syntax. Any cell that is unreachable and unused by the program can be used for commenting.
 
-TODO:
+For example, in this program, the "Hello world" in cell B2 is ignored:
 
-- Maybe the instructions can themselves be laid out in the grid as numbers (but then has to be one after the other, operator and operands on different lines.)
+![hello-world-comment](examples/hello-world-comment.png)
 
-- Think about how quotes in the CSV should be handled
+### Flipping
 
-- Write Docs
+StackGrid has a special `FLIP` instruction that changes the direction of the instruction pointer. When the program is flipped, instructions (as well as data) are read from left-to-right instead of top-to-bottom.
 
-- Deploy docs to GitHub Pages
+The following programs both implement a simple `cat` (read from stdin into a stack and write the stack to stdout):
 
-## Inspirations
+![cat](examples/cat.png)
 
-- [Super Stack!](https://esolangs.org/wiki/Super_Stack)
+![cat-flipped](examples/cat-flipped.png)
+
+### Instruction Set
+
+The instruction set for StackGrid is as follows:
+
+- `JUMP [target]`: Jumps to `target`
+
+- `JSE [stack] [target]`: Jumps to `target` if `stack` is empty
+
+- `JEQ [stack1] [stack2] [target]`: Jumps to `target` if the top of `stack1` and `stack2` are equal
+
+- `JNE [stack1] [stack2] [target]`: Jumps to `target` if the top of `stack1` and `stack2` are not equal
+
+- `READASCII [stack]`: Reads from stdin into `stack`
+
+- `PRINTASCII [stack]`: Prints the top of `stack` as ASCII and followed by a space character
+
+- `PRINT [stack]`: Prints the top of `stack`
+
+- `EXIT`: Exits the program
+
+- `POP [stack]`: Pops the top of `stack`
+
+- `CYCLE [stack]`: Cycles `stack`
+
+- `INC [stack]`: Increments the value at the top of `stack`
+
+- `COPY [stack1] [stack2]`: Copies `stack1` into `stack2`
+
+- `FLIP`: Changes the direction of the instruction pointer
+
+- `DUP [stack]`: Duplicates the value at the top of `stack`
+
+- `ADD/SUB/MUL/DIV/MOD/AND/OR/XOR/NAND/NOT [stack1] [stack2]`: Performs the corresponding math operation on `stack1` and `stack2`.
