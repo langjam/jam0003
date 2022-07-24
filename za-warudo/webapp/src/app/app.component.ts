@@ -19,11 +19,11 @@ export class AppComponent {
   code: string = `
 world hello
 
-legend water #0000ff
-legend sand #ff0000
-legend grass #00ff00
-legend rock_lower #899012
-legend rock_upper #999999
+legend water #2ebdbd
+legend sand #ceae7f
+legend grass #33480d
+legend rock_lower #41474a
+legend rock_upper #504543
 
 region island
 island 50%
@@ -40,7 +40,6 @@ rocks rock_lower 50%
   `;
 
   constructor(private compiler: CompilerService) {
-    this.noise = new tumult.Simplex2();
   }
 
   ngOnInit() {}
@@ -61,15 +60,7 @@ rocks rock_lower 50%
       return;
     }
     this.ctx = ctx;
-
-    const [world, error] = this.compile(this.code);
-
-    if (error) {
-      console.log('Error go brr', error);
-    }
-
-    console.log(world);
-    this.generate(world);
+    this.run();
   }
 
   compile(program: string) {
@@ -86,21 +77,21 @@ rocks rock_lower 50%
     let data = image.data;
 
     let regionPerc = 0;
-    const regions = world.regions.map((region) => {
+    const regions = world.regions.map(region => {
+      const previousRegionPerc = regionPerc;
       regionPerc += region.percent / 100;
-      return regionPerc;
+      return previousRegionPerc;
     });
-    regions.unshift(0);
     console.log(regions);
-    // 0.5, 1
+    // 0, 0.5
 
     const subregions = world.regions.map((region) => {
       let subregionPerc = 0;
-      const subregions = region.subRegions.map((subregion) => {
+      const subregions = region.subRegions.map(subregion => {
+        const previousSubregionPerc = subregionPerc;
         subregionPerc += subregion.percent / 100;
-        return subregionPerc;
+        return previousSubregionPerc;
       });
-      subregions.unshift(0);
       console.log(subregions);
       return subregions;
     });
@@ -117,8 +108,8 @@ rocks rock_lower 50%
         }
         regionIndex--;
 
-        console.log('selection', selection);
-        console.log('regionIndex', regionIndex);
+        // console.log("selection", selection);
+        // console.log("regionIndex", regionIndex);
 
         const region = world.regions[regionIndex];
         const subregions_ = subregions[regionIndex];
@@ -135,16 +126,16 @@ rocks rock_lower 50%
         }
         subregionIndex--;
 
-        console.log('noise', noise);
-        console.log('subregionindex', subregionIndex);
+        // console.log("noise", noise);
+        // console.log("subregionindex", subregionIndex);
 
         const subregion = region.subRegions[subregionIndex];
 
         const [r, g, b] = this.convertColor(subregion.color);
         const index = (j * canvas.width + i) * 4;
-        data[index] = r * 255;
-        data[index + 1] = g * 255;
-        data[index + 2] = b * 255;
+        data[index] = r;
+        data[index + 1] = g;
+        data[index + 2] = b;
         data[index + 3] = 255;
       }
     }
@@ -152,9 +143,18 @@ rocks rock_lower 50%
     ctx.putImageData(image, 0, 0);
   }
 
-  editorOptions = { theme: 'vs-dark', language: 'javascript' };
+  editorOptions = { theme: 'vs-dark', language: 'text' };
 
   run() {
-    console.log('yeet');
+    this.noise = new tumult.Simplex2();
+
+    const [world, error] = this.compile(this.code);
+
+    if (error) {
+      console.log('Error go brr', error);
+    }
+
+    console.log(world);
+    this.generate(world);
   }
 }
