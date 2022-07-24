@@ -1,5 +1,6 @@
 #![allow(unused)]
 use chumsky::Parser;
+use clap;
 use tracing::{info, level_filters, Level};
 
 mod eval;
@@ -19,8 +20,27 @@ pub use crate::{
 pub type Span = std::ops::Range<usize>;
 pub type Spanned<T> = (T, Span);
 
+#[derive(clap::Parser, Debug)]
+#[clap(version, about, long_about = None)]
+struct Args {
+    #[clap(help = "The source file to execute")]
+    source: Option<String>
+}
+
 fn main() {
-    // tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt::init();
+    let args: Args = clap::Parser::parse();
+
+    match args.source {
+        None => run_repl(),
+        Some(source) => run(&source)
+    }
+
+    run("examples/hello.bam")
+}
+
+fn run_repl() {
+    todo!()
 }
 
 fn run(path: &str) {
