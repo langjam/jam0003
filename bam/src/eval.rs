@@ -23,6 +23,11 @@ impl Factory {
         }
     }
 
+    // Add a named machine to the factory.
+    pub fn bind_machine(&self, name: String, machine: Machine) {
+        self.machines.borrow_mut().insert(name, machine);
+    }
+
     /// Perform one step of builtin machine evaluation.
     pub fn run_builtin_machine(&self, builtin: &Builtin, value: Value) -> Value {
         match builtin {
@@ -106,7 +111,7 @@ impl Factory {
     /// Perform one step of user-supplied machine evaluation.
     pub fn run_defined_machine(
         &self,
-        body: &[Statement],
+        body: &mut [Statement],
         result: &mut Stream,
         value: Value,
     ) -> Value {
@@ -114,7 +119,7 @@ impl Factory {
             .borrow_mut()
             .insert("input".to_string(), Stream::Const(value));
 
-        for stmt in body {
+        for mut stmt in body {
             match stmt {
                 Statement::Let(names, stream) => {
                     if names.len() == 1 {
@@ -129,7 +134,7 @@ impl Factory {
                     }
                 }
                 Statement::Consume(stream) => {
-                    self.advance_stream(&mut stream.clone());
+                    self.advance_stream(stream);
                 }
             }
         }
@@ -138,15 +143,15 @@ impl Factory {
     }
 
     /// Perform one step of a machine's evaluation.
-    pub fn run_machine(&self, machine: &Machine, value: Value) -> Value {
+    pub fn run_machine(&self, machine: &mut Machine, value: Value) -> Value {
         match machine {
             Machine::Var(var) => {
-                let machines = self.machines.borrow();
-                self.run_machine(machines.get(var).expect("Error: undefined stream."), value)
+                let mut machines = self.machines.borrow_mut();
+                self.run_machine(machines.get_mut(var).expect("Error: undefined stream."), value)
             }
             Machine::Builtin(builtin) => self.run_builtin_machine(builtin, value),
             Machine::Defined(body, result) => {
-                self.run_defined_machine(body, &mut result.clone(), value)
+                self.run_defined_machine(body, result, value)
             }
         }
     }
@@ -156,13 +161,13 @@ impl Factory {
         match stream {
             Stream::Var(var) => self
                 .streams
-                .borrow()
-                .get(var)
-                .map(|s| self.advance_stream(&mut s.clone()))
+                .borrow_mut()
+                .get_mut(var)
+                .map(|s| self.advance_stream(s))
                 .expect("Error: undefined stream."),
             Stream::Const(value) => value.clone(),
             Stream::Pipe(stream, machine) => {
-                let value = self.advance_stream(&mut stream.clone());
+                let value = self.advance_stream(stream);
                 self.run_machine(machine, value)
             }
             Stream::Zip(streams) => {
