@@ -6,7 +6,7 @@ StackGrid is a fun, new take on assembly language, stacks, and grids.
 
 ```shell
 npm install
-node index.js --file <path>
+node cli.js --file <path>
 ```
 
 See the [examples directory](./examples/) for example files.
@@ -15,7 +15,7 @@ See the [examples directory](./examples/) for example files.
 
 ### Cells and stacks
 
-A StackGrid program is laid out on a grid whose cells contain [instructions](#instruction-set) or data. (The file format used for the CLI is CSV.)
+A StackGrid program is laid out on a grid whose cells contain [instructions](#instruction-set) or data. (The file format used for the CLI is CSV, and program are probably best edited using a spreadsheet application.)
 
 The interpreter starts from the top-left-most cell containing an instruction and then reads down the column until it reaches an `EXIT` instruction. (So any number of empty rows and columns may be added before the first instruction. In the "Hello World" program, for example, we see that the first instruction is on the second line.)
 
@@ -50,34 +50,22 @@ The following programs both implement a simple `cat` (read from stdin into a sta
 
 ### Instruction Set
 
-The instruction set for StackGrid is as follows:
-
 - `JUMP [target]`: Jumps to `target`
-
 - `JSE [stack] [target]`: Jumps to `target` if `stack` is empty
-
 - `JEQ [stack1] [stack2] [target]`: Jumps to `target` if the top of `stack1` and `stack2` are equal
-
 - `JNE [stack1] [stack2] [target]`: Jumps to `target` if the top of `stack1` and `stack2` are not equal
-
 - `READASCII [stack]`: Reads from stdin into `stack`
-
 - `PRINTASCII [stack]`: Prints the top of `stack` as ASCII and followed by a space character
-
 - `PRINT [stack]`: Prints the top of `stack`
-
 - `EXIT`: Exits the program
-
 - `POP [stack]`: Pops the top of `stack`
-
 - `CYCLE [stack]`: Cycles `stack`
-
 - `INC [stack]`: Increments the value at the top of `stack`
-
 - `COPY [stack1] [stack2]`: Copies `stack1` into `stack2`
-
 - `FLIP`: Changes the direction of the instruction pointer
-
 - `DUP [stack]`: Duplicates the value at the top of `stack`
-
 - `ADD/SUB/MUL/DIV/MOD/AND/OR/XOR/NAND/NOT [stack1] [stack2]`: Performs the corresponding math operation on `stack1` and `stack2`.
+
+### Theme
+
+StackGrid plays to the theme of LangJam (Assembly) with its assembly-like syntax and cells that work like registers. Watching the interpreter state change as the program runs also feels like watching the program and data get assembled.
