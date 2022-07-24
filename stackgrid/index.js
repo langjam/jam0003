@@ -184,13 +184,15 @@ class Parser {
   }
 
   parse() {
+    this.rows.push(new Row(this.row, [new Cell(this.row, this.column, new Value(''))]));
+
     while (!this.isAtEnd()) {
       if (this.match(TokenType.NewLine)) {
         this.column = 0;
-        this.rows.push(new Row(this.row++, [new Cell(this.column++, this.row, new Value(''))]));
+        this.rows.push(new Row(this.row++, [new Cell(this.column, this.row, new Value(''))]));
       } else if (this.match(TokenType.NewColumn)) {
         const currentRow = this.rows[this.rows.length - 1];
-        currentRow.cells.push(new Cell(this.column++, this.row, new Value('')));
+        currentRow.cells.push(new Cell(++this.column, this.row, new Value('')));
       } else {
         const currentRow = this.rows[this.rows.length - 1];
         const currentCell = currentRow.cells[currentRow.cells.length - 1];
@@ -279,9 +281,11 @@ class Interpreter {
       }
     }
 
+    this.debug();
+
     program: while (true) {
       const next = this.advance();
-      if (next === null) {
+      if (next === null || next.value === '') {
         continue;
       }
 
@@ -449,6 +453,9 @@ class Interpreter {
   };
 
   advance() {
+    if (this.currentRow >= this.state.length) {
+      return null;
+    }
     return this.state[this.currentRow++][this.currentColumn];
   }
 
@@ -466,8 +473,10 @@ class Interpreter {
     let toPrint = value.value;
     if (isAscii) {
       toPrint = String.fromCharCode(parseInt(toPrint));
+    } else {
+      toPrint += ' ';
     }
-    process.stdout.write(toPrint + ' ');
+    process.stdout.write(toPrint);
   }
 
   /**

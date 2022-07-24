@@ -32,3 +32,7 @@ TODO:
 - Write Docs
 
 - Deploy docs to GitHub Pages
+
+## Inspirations
+
+- https://esolangs.org/wiki/Super_Stack! Super Stack!
