@@ -18,17 +18,38 @@ pub mod world;
 #[cfg(test)]
 pub mod testutil;
 
-use crate::assembler::text_to_words;
+use crate::assembler::{text_to_words, Assembler};
 use crate::run::run;
 use crate::starter::PROGRAM_TEXT;
-use clap::Parser;
+use crate::world::World;
+use clap::{Args, Parser, Subcommand};
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
+#[clap(propagate_version = true)]
 struct Cli {
+    #[clap(subcommand)]
+    command: Commands,
+}
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+    Run(Run),
+    Disassemble {
+        #[clap(value_parser)]
+        filename: String,
+        #[clap(value_parser)]
+        x: usize,
+        #[clap(value_parser)]
+        y: usize,
+    },
+}
+
+#[derive(Debug, Args)]
+struct Run {
     #[clap(value_parser)]
     filename: Option<String>,
 
@@ -77,33 +98,62 @@ struct Cli {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
-    let contents = match cli.filename {
-        Some(filename) => {
-            let mut file = File::open(filename)?;
-            let mut contents = String::new();
-            file.read_to_string(&mut contents)?;
-            contents
-        }
-        None => PROGRAM_TEXT.to_string(),
-    };
-    let words = text_to_words(&contents);
 
-    run(
-        cli.width.unwrap_or(70),
-        cli.height.unwrap_or(40),
-        cli.starting_memory_size.unwrap_or(300),
-        cli.starting_resources.unwrap_or(500),
-        cli.max_processors.unwrap_or(10),
-        cli.world_resources.unwrap_or(400),
-        cli.instructions_per_update.unwrap_or(10),
-        cli.mutation_frequency.unwrap_or(100000),
-        cli.redraw_frequency.unwrap_or(100000),
-        cli.save_frequency.unwrap_or(100000000),
-        cli.memory_mutation_amount.unwrap_or(5),
-        cli.processor_stack_mutation_amount.unwrap_or(0),
-        cli.eat_amount.unwrap_or(100),
-        cli.dump.unwrap_or(false),
-        words,
-    )?;
+    match &cli.command {
+        Commands::Run(cli) => {
+            let contents = match cli.filename.clone() {
+                Some(filename) => {
+                    let mut file = File::open(filename)?;
+                    let mut contents = String::new();
+                    file.read_to_string(&mut contents)?;
+                    contents
+                }
+                None => PROGRAM_TEXT.to_string(),
+            };
+            let words = text_to_words(&contents);
+            run(
+                cli.width.unwrap_or(70),
+                cli.height.unwrap_or(40),
+                cli.starting_memory_size.unwrap_or(300),
+                cli.starting_resources.unwrap_or(500),
+                cli.max_processors.unwrap_or(10),
+                cli.world_resources.unwrap_or(400),
+                cli.instructions_per_update.unwrap_or(10),
+                cli.mutation_frequency.unwrap_or(100000),
+                cli.redraw_frequency.unwrap_or(100000),
+                cli.save_frequency.unwrap_or(100000000),
+                cli.memory_mutation_amount.unwrap_or(5),
+                cli.processor_stack_mutation_amount.unwrap_or(0),
+                cli.eat_amount.unwrap_or(100),
+                cli.dump.unwrap_or(false),
+                words,
+            )?;
+        }
+        Commands::Disassemble { filename, x, y } => {
+            let file = File::open(filename)?;
+            let world: World = serde_cbor::from_reader(file)?;
+            if *x >= world.width {
+                println!("x out of range");
+                return Ok(());
+            }
+            if *y >= world.height {
+                println!("y out of range");
+                return Ok(());
+            }
+
+            let location = world.get((*x, *y));
+            match &location.computer {
+                Some(computer) => {
+                    let assembler = Assembler::new();
+                    let text = assembler.line_disassemble(&computer.memory.values);
+                    println!("{}", text);
+                }
+                None => {
+                    println!("No computer at this location")
+                }
+            }
+        }
+    }
+
     Ok(())
 }

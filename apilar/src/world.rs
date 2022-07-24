@@ -12,8 +12,8 @@ pub struct Location {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct World {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
     eat_amount: u64,
     pub rows: Vec<Vec<Location>>,
 }
