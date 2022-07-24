@@ -1,0 +1,13 @@
+[book]
+title = "beautiful-asm"
+description = "2022 Rivos+ Langjam Language Description"
+authors = ["Achierius", "j1ah0ng", "jsg831", "Sc2ad", "StackDoubleFlow"]
+language = "end"
+multilingual = false
+src = "src"
+
+[rust]
+edition = "2018"
+
+[output.html]
+mathjax-support = true

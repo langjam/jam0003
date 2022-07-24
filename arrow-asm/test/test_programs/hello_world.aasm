@@ -1,0 +1,16 @@
+fn main {
+  printch 72 
+  printch 101
+  printch 108
+  printch 108
+  printch 111
+  printch 32
+  printch 87
+  printch 111
+  printch 114
+  printch 108
+  printch 100
+  printch 33
+  printch 10
+  exit 0
+}

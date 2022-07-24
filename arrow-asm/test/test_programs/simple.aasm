@@ -1,0 +1,26 @@
+fn main {
+  add l0, 0, 1
+  if l0 {
+    add l1, 0, 0
+    if l1 {
+      print 50
+    } else l0 {
+      print 1000
+    } else {
+      print 5000
+    }
+    print 5
+  } else {
+    print l0
+  }
+  add op0, 0, 15
+  call test
+  print op0
+  exit 0
+}
+
+fn test(long) {
+  print p0
+  add rr0, p0, 19
+  ret
+}

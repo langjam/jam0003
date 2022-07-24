@@ -1,0 +1,25 @@
+load("@com_github_google_cel-cpp//bazel:antlr.bzl", "antlr_cc_library")
+
+cc_library(
+    name = "parser",
+    hdrs = [
+        "parser.hh",
+        "ast_builder_visitor.hh",
+    ],
+    srcs = [
+        "parser.cc",
+        "ast_builder_visitor.cc",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//src/ast:ast",
+        ":Aasm_cc_parser",
+        ":Aasm_grammar",
+    ],
+)
+
+antlr_cc_library(
+    name = "Aasm",
+    src = "Aasm.g4",
+    package = "parser",
+)
