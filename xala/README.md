@@ -56,7 +56,7 @@ These operators require two parameters and can be used in two ways; using either
   ; is equivalent to
   ADD %X %Y
 ```
-You must use the `INTO` keyword which to store the result in a register. If you store the result in the `%OUT` register, this will update the appearance of the screen.
+You must use the `INTO` keyword to store the result in a register. If you store the result in the `%OUT` register, this will update the appearance of the screen.
 
 ### Code Samples
 Here are some animations that have already been written for your enjoyment:
