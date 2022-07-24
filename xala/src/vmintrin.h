@@ -44,6 +44,7 @@ struct Instr {
 };
 
 struct Program {
+  uint start = 0;
   Instr *instrs;
   uint instrs_len;
 };

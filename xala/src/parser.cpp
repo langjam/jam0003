@@ -64,6 +64,13 @@ bool labels_put(Parser *p, LabelInfo *li, Token t) {
     CHECKOUT(1);
   }
 
+  t.str += 1;
+  t.len -= 1;
+
+  if (span_equal(Span{"MAIN", 4}, Span{t.str, t.len})) {
+    current_prog.start = current_prog.instrs_len;
+  }
+
   for (int i = 0; i < li->labels_len; ++i) {
     if (span_equal(li->labels[i].name, Span{t.str, t.len})) {
       tprintf("ERROR: {} Label redefined\n", tok2li(t));
@@ -80,19 +87,14 @@ bool labels_put(Parser *p, LabelInfo *li, Token t) {
 }
 
 bool labels_get(LabelInfo *li, Token t, uint *out_ip) {
-  if (t.type != TokenType_Label) {
-    tprintf("ERROR: {} Is not a label\n", tok2li(t));
-    CHECKOUT(1);
-  }
-
   for (int i = 0; i < li->labels_len; ++i) {
     if (span_equal(li->labels[i].name, Span{t.str, t.len})) {
       *out_ip = li->labels[i].ip;
-      CHECKOUT(1);
+      return 0;
     }
   }
 
-  tprintf("ERROR: {} Label redefined\n", tok2li(t));
+  tprintf("ERROR: {} Label doesn't exist\n", tok2li(t));
   CHECKOUT(1);
 }
 

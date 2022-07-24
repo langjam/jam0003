@@ -161,10 +161,8 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Ret:
-				CHECKOUT(vm->csk.calls_len);
-
 				vm->ip = vm->csk.calls[vm->csk.calls_len--].ret;
-
+				continue;
 				break;
 
 			case InstrType_Sin:
@@ -180,7 +178,7 @@ int vm_run(VM *vm) {
 				break;
 
 			default:
-				tprintf("VM: unknown instruction\n");
+				tprintf("VM {}: unknown instruction\n", vm->ip);
 				return 1;
 		}
 		vm->ip += 1;
@@ -195,7 +193,9 @@ int vm_run(VM *vm) {
 int vm_run_scr(VM *vm, u8 screen[256][256]) {
 	for (int x = 0; x < 256; ++x) {
 		for (int y = 0; y < 256; ++y) {
-			vm->ip = 0;
+			vm->ip = vm->prog.start;
+
+
 			vm->csk.calls_len = 0;
 			vm->sk.values_len = 3;
 			vm->regs[Reg_X] = x/255.0;
