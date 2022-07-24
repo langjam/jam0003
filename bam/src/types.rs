@@ -38,7 +38,7 @@ lazy_static! {
         Builtin::Sqrt => {   // Num -> Num
             MachineType {
                 var_count: 0,
-                input: Type::Tuple(vec![Type::Num]),
+                input: Type::Num,
                 output: Type::Num
             }
         },
@@ -104,10 +104,12 @@ impl Display for Type {
             Self::Bool => "bool".to_owned(),
             Self::String => "string".to_owned(),
             Self::Tuple(value) => format!(
-                "{})",
+                "({})",
                 value
                     .iter()
-                    .fold("(".to_owned(), |acc, ty| format!("{acc} {ty}"))
+                    .map(|ty| {format!("{ty}")})
+                    .collect::<Vec<_>>()
+                    .join(", ")
             ),
             Self::TyVar(value) => format!("Type Var: {value}"),
             Self::UnifVar(value) => format!("Uniform Var: {value}"),
@@ -130,8 +132,16 @@ pub struct MachineType {
     output: Type,
 }
 
-struct GlobalTypeEnv {
+pub struct GlobalTypeEnv {
     machine_types: HashMap<String, MachineType>,
+}
+
+impl GlobalTypeEnv {
+    pub fn new() -> Self {
+        GlobalTypeEnv {
+            machine_types: HashMap::new(),
+        }
+    }
 }
 
 struct LocalTypeEnv {
@@ -141,16 +151,14 @@ struct LocalTypeEnv {
 }
 
 pub fn check(program: &Program) -> Result<(), TypeError> {
-    let mut global_env = GlobalTypeEnv {
-        machine_types: HashMap::new(),
-    };
+    let mut global_env = GlobalTypeEnv::new();
     for machine in &program.machines {
         check_machine_def(&mut global_env, machine)?;
     }
     Ok(())
 }
 
-fn check_machine_def(
+pub fn check_machine_def(
     global_env: &mut GlobalTypeEnv,
     machine: &Definition,
 ) -> Result<(), TypeError> {
@@ -165,12 +173,14 @@ fn check_machine_def(
     let machine_type_output = new_unif_var(&mut local_env);
     let machine_type = MachineType {
         var_count: 0,
-        input: machine_type_input,
+        input: machine_type_input.clone(),
         output: machine_type_output.clone(),
     };
     global_env
         .machine_types
         .insert(machine.name.clone(), machine_type.clone());
+
+    local_env.var_types.insert("input".to_owned(), machine_type_input);
 
     for statement in &machine.body {
         check_statement(global_env, &mut local_env, statement);

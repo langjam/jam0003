@@ -163,6 +163,7 @@ impl ParserBuilder {
             match tok {
                 Token::Ident(ident) => Ok(match ident.as_str() {
                     "Add" => Machine::Builtin(Builtin::Add),
+                    "Sqrt" => Machine::Builtin(Builtin::Sqrt),
                     // TODO: Remaining builtins
                     "Print" => Machine::Builtin(Builtin::Print),
                     _ => Machine::Var(ident),

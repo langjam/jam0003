@@ -11,6 +11,7 @@ mod types;
 mod util;
 
 pub use lexer::{LexerBuilder, Token, KEYWORD_MAP};
+use types::GlobalTypeEnv;
 
 pub use crate::{
     parser::ParserBuilder,
@@ -43,7 +44,42 @@ fn main() {
 }
 
 fn run_repl() {
-    todo!()
+    let mut rl = rustyline::Editor::<()>::new().unwrap();
+    let lexer = LexerBuilder::build();
+    let parser = ParserBuilder::build();
+
+    let mut type_env = GlobalTypeEnv::new();
+    loop {
+        match rl.readline("\x1b[36m*> \x1b[0m") {
+            Err(rustyline::error::ReadlineError::Eof) => break,
+            Err(err) => panic!("ReadlineError: {err}"),
+            Ok(line) => {
+                let tokens = lexer.parse(line).unwrap();
+
+                // TODO: Currently, this parses the entire program.
+                // Ideally, we should parse a single machine definition or a stream expression.
+                match parser.parse(tokens) {
+                    Err(errors) => {
+                        println!(
+                            "\x1b[31mParse Errors:\n{}\x1b[0m",
+                            errors.into_iter().map(|err| { err.to_string() }).collect::<Vec<_>>().join("\n")
+                        )
+                    }
+                    Ok(program) => {
+                        // This should really be a single machine
+                        for machine in &program.machines {
+                            match types::check_machine_def(&mut type_env, machine) {
+                                Err(err) => {
+                                    println!("\x1b[31mType Error: {err}")
+                                }
+                                Ok(_) => ()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn run(path: &str) {
