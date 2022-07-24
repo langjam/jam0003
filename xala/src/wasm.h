@@ -33,6 +33,7 @@ WASM_EXPORT void wasm_accept(u8 c);
 WASM_EXPORT void wasm_init();
 WASM_EXPORT void wasm_frame(float dt);
 WASM_EXPORT void wasm_run();
+WASM_EXPORT float pow(float a, float b);
 
 
 #endif // H_WASM_SRC

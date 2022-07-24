@@ -94,7 +94,7 @@ bool labels_get(LabelInfo *li, Token t, uint *out_ip) {
     }
   }
 
-  tprintf("ERROR: {} Label doesn't exist\n", tok2li(t));
+  tprintf("ERROR: {} Label or instruction doesn't exist\n", tok2li(t));
   CHECKOUT(1);
 }
 
@@ -233,14 +233,15 @@ bool parser_put_instr(Parser *p, Instr instr) {
 float token_to_number(Token t) {
   float res = 0;
   float frac = 0;
+  float div = 10;
   while (isnum(*t.str)) {
     res = res * 10 + (*t.str++ - '0');
   }
   if (*t.str == '.') {
     t.str++;
     while (isnum(*t.str)) {
-      frac += (*t.str++ - '0');
-      frac /= 10;
+      frac += (*t.str++ - '0')/div;
+      div *= 10;
     }
   }
 
@@ -281,9 +282,17 @@ bool emit_value(Parser *p, Token t) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Imm, *reinterpret_cast<uint*>(&fv)}));
     } break;
     case TokenType_Register: {
-      Reg reg;
-      CHECKOUT(token_to_register(t, &reg));
-      CHECKOUT(parser_put_instr(p, Instr{InstrType_Load, reg}));
+      if (isnum(t.str[1])) {
+        t.str += 1;
+        t.len -= 1;
+        float fv = token_to_number(t);
+
+        CHECKOUT(parser_put_instr(p, Instr{InstrType_Copy, uint(fv)}));
+      } else {
+        Reg reg;
+        CHECKOUT(token_to_register(t, &reg));
+        CHECKOUT(parser_put_instr(p, Instr{InstrType_Load, reg}));
+      }
     } break;
     default: {
       tprintf("ERROR: {} Can not be used as a value\n", tok2li(t));
@@ -314,7 +323,6 @@ bool parse_call(Parser *p, Token name, int argc) {
     tprintf("ERROR: {} Is not an instruction\n", tok2li(name));
     CHECKOUT(1);
   }
-
 
   if (span_equal({name.str, name.len}, {"INTO", 4})) {
     Token t;
@@ -374,8 +382,14 @@ again:
       CHECKOUT(arg_count(name, argc, 1));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Cos}));
 
+    } else if (span_equal({name.str, name.len}, {"POW", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 2));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Pow}));
+
     } else {
       uint ip;
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_SetBase, uint(argc)}));
       CHECKOUT(labels_get(&p->labels, name, &ip));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Call, ip}));
     }

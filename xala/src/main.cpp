@@ -98,6 +98,7 @@ WASM_EXPORT void wasm_run() {
   if (parser_parse(&prog, (const char *)source)) {
     tprintf("Error!");
   } else {
+    tprintf("{}\n", prog.start);
     tprintf("{}", prog);
     vm = vm_init(prog);
   }

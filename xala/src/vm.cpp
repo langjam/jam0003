@@ -50,6 +50,14 @@ void vm_instr_div(VM *vm) {
 	vm_push(vm, b / a);
 }
 
+static inline
+void vm_instr_pow(VM *vm) {
+	float a = vm_pop(vm);
+	float b = vm_pop(vm);
+
+	vm_push(vm, pow(b, a));
+}
+
 float fmod(float x, float y) {
   return x - int(x / y) * y;
 }
@@ -61,6 +69,15 @@ void vm_instr_mod(VM *vm) {
 	b = vm_pop(vm);
 	
 	vm_push(vm, fmod(b, a));
+}
+
+static inline
+void vm_instr_copy(VM *vm, int arg) {
+	int base = 0;
+	if (vm->csk.calls_len)
+		base = vm->csk.calls[vm->csk.calls_len - 1].base;
+
+	vm_push(vm, vm->sk.values[base + arg]);
 }
 
 static inline
@@ -106,6 +123,7 @@ int vm_memory_store(VM *vm) {
 }
 
 int vm_run(VM *vm) {
+	uint base = 0;
 	while (true) {
 		const Instr is = vm->prog.instrs[vm->ip];
 
@@ -141,11 +159,16 @@ int vm_run(VM *vm) {
 					vm_push(vm, vm->regs[is.argument]);
 				break;
 
-			case InstrType_Store:
+			case InstrType_Store: {
+			  float v = vm_pop(vm);
 				if (is.argument == Reg_Memory)
 					CHECKOUT(vm_memory_store(vm));
 				else
-					vm->regs[is.argument] = vm_pop(vm);
+					vm->regs[is.argument] = v;
+			} break;
+
+			case InstrType_SetBase:
+				base = vm->sk.values_len-is.argument;
 				break;
 
 			case InstrType_Call:
@@ -154,15 +177,22 @@ int vm_run(VM *vm) {
 
 				vm->csk.calls[vm->csk.calls_len++] = (Call){
 					.ret = vm->ip + 1,
-					.base = vm->sk.values_len
+					.base = base
 				};
 				vm->ip = is.argument;
-
+				continue;
 				break;
 
-			case InstrType_Ret:
-				vm->ip = vm->csk.calls[vm->csk.calls_len--].ret;
+			case InstrType_Ret: {
+			  Call c = vm->csk.calls[vm->csk.calls_len--];
+				vm->ip = c.ret;
+				vm->sk.values_len = c.base;
+				vm_push(vm, vm->regs[Reg_Ret]);
 				continue;
+			} break;
+
+			case InstrType_Copy:
+				vm_instr_copy(vm, is.argument);
 				break;
 
 			case InstrType_Sin:
@@ -171,6 +201,10 @@ int vm_run(VM *vm) {
 
 			case InstrType_Cos:
 				vm_instr_cos(vm);
+				break;
+
+			case InstrType_Pow:
+				vm_instr_pow(vm);
 				break;
 
 			case InstrType_Exit:
@@ -197,7 +231,7 @@ int vm_run_scr(VM *vm, u8 screen[256][256]) {
 
 
 			vm->csk.calls_len = 0;
-			vm->sk.values_len = 3;
+			vm->sk.values_len = 0;
 			vm->regs[Reg_X] = x/255.0;
 			vm->regs[Reg_Y] = (255-y)/255.0;
 
@@ -206,7 +240,6 @@ int vm_run_scr(VM *vm, u8 screen[256][256]) {
 			if (vm->regs[Reg_Out] > 1.0) {
 				vm->regs[Reg_Out] = 1.0;
 			}
-
 			screen[y][x] = vm->regs[Reg_Out] * 255;
 		}
 	}
