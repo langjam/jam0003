@@ -2,10 +2,28 @@
 
 ## About Apilar
 
-Apilar is a language and alife system.
+Apilar is a language and alife system. It was created for [langjam
+3](https://github.com/langjam/jam0003).
+
+The theme for langjam 3 is "Beautiful Assembly".
+
+Apilar is an stack-machine assembly language that supports self-assembly: a
+replicator Apilar program can be written that makes copies of itself in memory
+and in space. New programs then evolve.q
 
 The Apilar language is a stack-based assembly language. There's a virtual
 machine implementation of this.
+
+Here's a little example:
+
+```
+N2
+N3
+ADD
+```
+
+This adds two numbers to the stack, `2` and `3`, and then adds them together.
+In the end the stack contains `5`.
 
 A computer has memory and one or more processors. Each processor has its own
 stack.
