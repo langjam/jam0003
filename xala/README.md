@@ -14,7 +14,7 @@ If you get an `clang: error: unable to execute command: Executable "wasm-ld" doe
 
 ### Running Scripts
 
-You may now play around with the language in your browser. To do that you'll first need to install php-cli if it's not already on your system then you can type these commands:
+You may now play around with the language in your browser. To do that you'll first need to install a web server and use that. If you have python installed, you can use the command `python -m http.server`, otherwise if you don't know what to install, we recommend to install php-cli if it's not already on your system then you can type these commands:
 ```shell
 cd build
 php -S localhost:8080
