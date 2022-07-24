@@ -70,20 +70,6 @@ You need to have a recent stable Rust installed. Then:
 cargo run --release -- run
 ```
 
-There are also a lot of command line arguments to configure, see:
-
-```
-cargo run --release -- run -h
-```
-
-You can also cause dump files to be created regularly during a run using the
-`--dump true` flag. You can then disassemble the memory in particular locations
-using commands like:
-
-```
-cargo run --release -- disassemble apilar-dump2.cbor 35 10
-```
-
 This creates a world, seeds it with a single hard-coded replicator, and then
 lets it run. You can see the world evolve in the terminal, so you please make
 your terminal window big enough.
@@ -98,8 +84,22 @@ If you want to see a new world, just `ctrl-C` to stop and run again.
 Is your terminal confused after you break out of the simulation? For me typing
 the `reset` command helps.
 
+There are also a lot of command line arguments to configure the simulation, see:
+
+```
+cargo run -- run -h
+```
+
 What is going on in these worlds? It's a bit of a mystery without more careful
 analysis.
+
+To do some analysis, you can cause dump files to be created regularly during a
+run using the `--dump true` flag. You can then disassemble the memory in
+particular locations using commands like:
+
+```
+cargo run -- disassemble apilar-dump2.cbor 35 10
+```
 
 ## sample code
 
