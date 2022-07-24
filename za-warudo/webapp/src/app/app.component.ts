@@ -37,14 +37,13 @@ rocks 50%
 rocks 5x5
 rocks rock_upper 50%
 rocks rock_lower 50%
-  `
+  `;
 
   constructor(private compiler: CompilerService) {
     this.noise = new tumult.Simplex2();
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   convertColor(color: string) {
     const r = color.substring(0, 2);
@@ -58,7 +57,7 @@ rocks rock_lower 50%
     const canvas = this.canvas.nativeElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      console.log("aaa no ctx", ctx);
+      console.log('aaa no ctx', ctx);
       return;
     }
     this.ctx = ctx;
@@ -66,7 +65,7 @@ rocks rock_lower 50%
     const [world, error] = this.compile(this.code);
 
     if (error) {
-      console.log("Error go brr", error);
+      console.log('Error go brr', error);
     }
 
     console.log(world);
@@ -80,14 +79,14 @@ rocks rock_lower 50%
   }
 
   generate(world: World) {
-    console.log("aaa");
+    console.log('aaa');
     const canvas = this.canvas.nativeElement;
     const ctx = this.ctx;
     const image = ctx.createImageData(canvas.width, canvas.height);
     let data = image.data;
 
     let regionPerc = 0;
-    const regions = world.regions.map(region => {
+    const regions = world.regions.map((region) => {
       regionPerc += region.percent / 100;
       return regionPerc;
     });
@@ -95,9 +94,9 @@ rocks rock_lower 50%
     console.log(regions);
     // 0.5, 1
 
-    const subregions = world.regions.map(region => {
+    const subregions = world.regions.map((region) => {
       let subregionPerc = 0;
-      const subregions = region.subRegions.map(subregion => {
+      const subregions = region.subRegions.map((subregion) => {
         subregionPerc += subregion.percent / 100;
         return subregionPerc;
       });
@@ -118,8 +117,8 @@ rocks rock_lower 50%
         }
         regionIndex--;
 
-        console.log("selection", selection);
-        console.log("regionIndex", regionIndex);
+        console.log('selection', selection);
+        console.log('regionIndex', regionIndex);
 
         const region = world.regions[regionIndex];
         const subregions_ = subregions[regionIndex];
@@ -136,8 +135,8 @@ rocks rock_lower 50%
         }
         subregionIndex--;
 
-        console.log("noise", noise);
-        console.log("subregionindex", subregionIndex);
+        console.log('noise', noise);
+        console.log('subregionindex', subregionIndex);
 
         const subregion = region.subRegions[subregionIndex];
 
@@ -154,4 +153,8 @@ rocks rock_lower 50%
   }
 
   editorOptions = { theme: 'vs-dark', language: 'javascript' };
+
+  run() {
+    console.log('yeet');
+  }
 }
