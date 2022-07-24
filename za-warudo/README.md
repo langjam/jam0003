@@ -8,7 +8,63 @@ Za Warudo is a highly domain-specific language, used to generate random 2D world
 
 Check it out here: https://jam0003.pages.dev/
 
-## Prerequisites
+## The language
+
+Za warudo is a simple language. It starts with the keyword `world`:
+```
+world world_name
+```
+
+Then you specify the map legend, one on each line. These will be used later.
+```
+legend legend_name #<color-as-hex-code>
+```
+
+For example, `legend sand #ceae7f`.
+
+A world is made up of several regions. Specify a new region using:
+```
+region region_name
+```
+
+Then specify what percentage of the world is taken up by the region:
+```
+region_name 50%
+```
+
+The region can then be divided into components, each colored by an entry in the legend:
+```
+region_name legend_name 25%
+```
+
+### A complete example
+
+(this is also the default example when you open the webapp)
+
+```
+world hello
+
+legend sand #ceae7f
+legend rock_lower #41474a
+legend rock_upper #2B7A0B
+legend water_deep #2ebdbd
+legend water_shallow #608fc7
+
+region island
+island 40%
+island rock_lower 25%
+island rock_upper 25%
+island sand 50%
+
+region water
+water 60%
+water water_deep 50%
+water water_shallow 50%
+```
+
+## Running locally
+
+### Prerequisites
 
 - Install Node.js which includes Node Package Manager.
 - We recommend using `nvm` to do the same.
@@ -16,7 +72,7 @@ Check it out here: https://jam0003.pages.dev/
 - Install node 16 - `nvm install 16`
 - Install yarn - `npm install -g yarn`
 
-## Setup
+### Setup
 
 - Change directory into webapp:
 
