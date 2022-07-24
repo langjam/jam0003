@@ -24,6 +24,7 @@ struct LabelInfo {
 };
 
 struct Parser {
+  bool putlab;
   LabelInfo labels;
   const char *source;
   bool going;
@@ -58,6 +59,9 @@ void putval(LineInfo li) {
 }
 
 bool labels_put(Parser *p, LabelInfo *li, Token t) {
+  if (!p->putlab) {
+    return 0;
+  }
   (void)p;
   if (t.type != TokenType_Label) {
     tprintf("ERROR: {} Is not a label\n", tok2li(t));
@@ -86,7 +90,15 @@ bool labels_put(Parser *p, LabelInfo *li, Token t) {
   return 0;
 }
 
-bool labels_get(LabelInfo *li, Token t, uint *out_ip) {
+bool labels_get(Parser *p, LabelInfo *li, Token t, uint *out_ip) {
+  if (p->putlab) {
+    return 0;
+  }
+  if (t.type != TokenType_Instr) {
+    tprintf("ERROR: {} Is not a label\n", tok2li(t));
+    CHECKOUT(1);
+  }
+
   for (int i = 0; i < li->labels_len; ++i) {
     if (span_equal(li->labels[i].name, Span{t.str, t.len})) {
       *out_ip = li->labels[i].ip;
@@ -324,6 +336,13 @@ bool arg_count(Token t, int act, int exp) {
   return 0;
 }
 
+bool put_branch(Parser *p, InstrType branchtype, Token namelabel) {
+  uint ip;
+  CHECKOUT(labels_get(p, &p->labels, namelabel, &ip));
+  CHECKOUT(parser_put_instr(p, Instr{branchtype, ip}));
+  return 0;
+}
+
 bool parse_call(Parser *p, Token name, int argc) {
   if (name.type == TokenType_Newline) {
     return 0;
@@ -334,7 +353,37 @@ bool parse_call(Parser *p, Token name, int argc) {
     CHECKOUT(1);
   }
 
-  if (span_equal({name.str, name.len}, {"INTO", 4})) {
+  if (span_equal({name.str, name.len}, {"BA", 2})) {
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
+    CHECKOUT(put_branch(p, InstrType_Ba, t));
+    CHECKOUT(arg_count(name, argc+1, 1));
+    return 0;
+  } else if (span_equal({name.str, name.len}, {"BP", 2})) {
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
+    CHECKOUT(put_branch(p, InstrType_Bp, t));
+    CHECKOUT(arg_count(name, argc+1, 2));
+    return 0;
+  } else if (span_equal({name.str, name.len}, {"BN", 2})) {
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
+    CHECKOUT(put_branch(p, InstrType_Bn, t));
+    CHECKOUT(arg_count(name, argc+1, 2));
+    return 0;
+  } else if (span_equal({name.str, name.len}, {"BZ", 2})) {
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
+    CHECKOUT(put_branch(p, InstrType_Bz, t));
+    CHECKOUT(arg_count(name, argc+1, 2));
+    return 0;
+  } else if (span_equal({name.str, name.len}, {"BNZ", 3})) {
+    Token t;
+    CHECKOUT(fetch_token(p, &t));
+    CHECKOUT(put_branch(p, InstrType_Bnz, t));
+    CHECKOUT(arg_count(name, argc+1, 2));
+    return 0;
+  } else if (span_equal({name.str, name.len}, {"INTO", 4})) {
     Token t;
     CHECKOUT(fetch_token(p, &t));
     Reg reg;
@@ -400,7 +449,7 @@ again:
     } else {
       uint ip;
       CHECKOUT(parser_put_instr(p, Instr{InstrType_SetBase, uint(argc)}));
-      CHECKOUT(labels_get(&p->labels, name, &ip));
+      CHECKOUT(labels_get(p, &p->labels, name, &ip));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Call, ip}));
     }
 
@@ -434,22 +483,37 @@ bool parse_tape(Parser *p) {
   return 0;
 }
 
-bool parser_parse(Program *output, const char *source) {
+bool parse(Parser *p, Program *output, const char *source) {
   current_prog.instrs = current_prog_instrs;
   current_prog.instrs_len = 0;
 
-  Parser p = {};
-  p.source = source;
-  p.going = *source;
-  while (p.going) {
-    if (parse_tape(&p)) {
+
+  while (p->going) {
+    if (parse_tape(p)) {
       // prevent bad program
       current_prog.instrs[0].type = InstrType_Exit;
       current_prog.instrs_len = 1;
       return 1;
     }
   }
-  parser_put_instr(&p, Instr{InstrType_Exit});
+  parser_put_instr(p, Instr{InstrType_Exit});
   *output = current_prog;
   return false;
+}
+
+bool parser_parse(Program *output, const char *source) {
+  Parser p = {};
+  p.putlab = true;
+  p.source = source;
+  p.going = *source;
+
+  CHECKOUT(parse(&p, output, source));
+
+  p.source = source;
+  p.going = *source;
+  p.putlab = false;
+  CHECKOUT(parse(&p, output, source));
+
+
+  return 0;
 }

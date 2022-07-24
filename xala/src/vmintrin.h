@@ -39,6 +39,12 @@ enum InstrType {
   InstrType_Pow,
   InstrType_SetBase,
 
+  InstrType_Ba,
+  InstrType_Bz,
+  InstrType_Bnz,
+  InstrType_Bp,
+  InstrType_Bn,
+
   INSTRTYPE_COUNT
 };
 

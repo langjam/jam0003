@@ -4,12 +4,19 @@
 #include "debug.h"
 #include "parser.h"
 
+char tolower(char c) {
+  if (c >= 'A' && c <= 'Z') {
+    c = c-'A'+'a';
+  }
+  return c;
+}
+
 bool span_equal(Span a, Span b) {
   if (a.l != b.l) {
     return false;
   }
   while (a.l && *a.s && *b.s) {
-    if (*a.s++ != *b.s++) {
+    if (tolower(*a.s++) != tolower(*b.s++)) {
       return false;
     }
     a.l -= 1;
@@ -70,15 +77,11 @@ void dither() {
       }
     }
   }
-
-  for (int i = 0; i < 256; ++i) {
-    for (int j = 0; j < 256; ++j) {
-      bytes[i][j] = new_bytes[i][j];
-    }
-  }
 }
 
 VM vm;
+bool running = false;
+
 WASM_EXPORT void wasm_init() {
   Program prog;
   parser_parse(&prog, "");
@@ -95,19 +98,25 @@ WASM_EXPORT void wasm_accept(u8 c) {
 WASM_EXPORT void wasm_run() {
   source_len = 0;
   Program prog;
+  tprintf("\n");
   if (parser_parse(&prog, (const char *)source)) {
     tprintf("Error!");
   } else {
     tprintf("{}\n", prog.start);
     tprintf("{}", prog);
     vm = vm_init(prog);
+    running = true;
   }
 }
 
 WASM_EXPORT void wasm_frame(float dt) {
-  vm_run_scr(&vm, bytes);
-  dither();
+  if (running) {
+    if (vm_run_scr(&vm, bytes)) {
+      running = false;
+    }
+    dither();
 
-  wasm_render((u8*)bytes);
-  vm.regs[Reg_Time] += dt;
+    wasm_render((u8*)new_bytes);
+    vm.regs[Reg_Time] += dt;
+  }
 }
