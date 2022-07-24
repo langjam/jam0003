@@ -25,6 +25,27 @@ pub use crate::{
 pub type Span = std::ops::Range<usize>;
 pub type Spanned<T> = (T, Span);
 
+const BAM: &str = r#"
+         ▄▄▄▄    ▄▄▄       ███▄ ▄███▓ ▐██▌ 
+        ▓█████▄ ▒████▄    ▓██▒▀█▀ ██▒ ▐██▌ 
+        ▒██▒ ▄██▒██  ▀█▄  ▓██    ▓██░ ▐██▌ 
+        ▒██░█▀  ░██▄▄▄▄██ ▒██    ▒██  ▓██▒ 
+        ░▓█  ▀█▓ ▓█   ▓██▒▒██▒   ░██▒ ▒▄▄  
+        ░▒▓███▀▒ ▒▒   ▓▒█░░ ▒░   ░  ░ ░▀▀▒ 
+        ▒░▒   ░   ▒   ▒▒ ░░  ░      ░ ░  ░ 
+         ░    ░   ░   ▒   ░      ░       ░ 
+         ░            ░  ░       ░    ░    
+              ░                            
+        "Beautifully Assembled Machines"
+"#;
+
+const HELP: &str = r#"
+> Type a stream expression and advance through it with Enter
+> Use the :d command to define a machine
+> Exit all modes, including the REPL, with Ctrl-D
+> Happy streaming!
+"#;
+
 #[derive(clap::Parser, Debug)]
 #[clap(version, about, long_about = None)]
 struct Args {
@@ -64,6 +85,9 @@ enum Mode {
 }
 
 fn run_repl() -> Result<()> {
+    println!("{}", Colour::Purple.bold().paint(BAM));
+    println!("{}", Colour::White.bold().paint(HELP));
+
     let mut rl = Editor::<()>::new().unwrap();
 
     let lexer = LexerBuilder::build();
