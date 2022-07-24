@@ -1,4 +1,4 @@
-/* Prints the first 20 Fibonacci numbers */,,,
+,Prints the first 20 Fibonacci numbers,,
 JEQ C2 D2 A9,0,0,20
 DUP B2,1,,
 PRINT B2,,,
