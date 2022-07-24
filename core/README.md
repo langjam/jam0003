@@ -18,18 +18,18 @@ memory[3] <-- fourth item in memory
   
 number | operation
 ------ | ---------
-0      | [store](#store)
-1      | [write](#write)
-2      | [move](#move)
-3      | [plus](#math-operation)
-4      | [minus](#math-operation)
-5      | [multi](#math-operation)
-6      | [div](#math-operation)
-7      | [equal](#equal)
-8      | [jump](#jump)
-9      | [exit](#exit)
+0      | [STORE](#store)
+1      | [WRITE](#write)
+2      | [MOVE](#move)
+3      | [PLUS](#math-operation)
+4      | [MINUS](#math-operation)
+5      | [MULTI](#math-operation)
+6      | [DIV](#math-operation)
+7      | [EQUAL](#equal)
+8      | [JUMP](#jump)
+9      | [EXIT](#exit)
   
-- D0 to D3 is the data register, each operation depends on and handles these four register differently.  
+- D0 to D2 is the data register, each operation depends on and handles these four register differently.  
 - After all register have been set, do `call` command to execute the operation.  
 - Comment can be done using `//`.  
 - There are only 'int' and 'str' in this language.  
@@ -46,7 +46,6 @@ python core.py hello.core
     
 ### STORE
 Store a byte of data into memory address  
-  
 D0 - memory address  
 D1 - data to be stored  
 ```
@@ -68,7 +67,6 @@ call
   
 ### WRITE
 Write data from memory to STDOUT  
-  
 D0 - memory address
 ```
 // store "hello world" to memory 0
