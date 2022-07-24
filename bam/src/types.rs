@@ -403,9 +403,20 @@ fn replace_unif_var(ty: Type, var: usize, to_replace: &Type) -> Type {
 }
 
 fn apply_substitution(subst: &HashMap<usize, Type>, ty: Type) -> Type {
-    subst.iter().fold(ty, |ty, (var, replacement)| {
-        replace_unif_var(ty, *var, replacement)
-    })
+    match ty {
+        Type::Num | Type::Bool | Type::String | Type::TyVar(_) => ty,
+        Type::UnifVar(var) => {
+            match subst.get(&var) {
+                None => Type::UnifVar(var),
+                Some(ty) => apply_substitution(subst, ty.clone())
+            }
+        }
+        Type::Tuple(tys) => Type::Tuple(
+            tys.into_iter()
+                .map(|ty| apply_substitution(subst, ty))
+                .collect(),
+        ),
+    }
 }
 
 fn unify(local_env: &LocalTypeEnv) -> Result<HashMap<usize, Type>, TypeError> {
