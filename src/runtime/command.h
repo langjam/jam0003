@@ -1,12 +1,27 @@
 #pragma once
 
-class Command {
-   public:
-    enum Type { Undefined, GoLeft, GoRight, GoUp, GoDown };
-    Command(Type type = Undefined) : m_type(type) {}
+#include <cassert>
+#include <vector>
 
-    Type type() { return m_type; }
+class Simulation;
 
-   private:
-    Type m_type;
+enum CommandType { NoCommand, Multiple, GoLeft, GoRight, GoUp, GoDown };
+
+class CommandCell {
+public:
+    CommandCell(CommandType type = CommandType::NoCommand) : m_type(type) {}
+    ~CommandCell() {}
+
+    void run(Simulation& sim);
+    int to_char();
+    void add_command(CommandType type);
+
+    CommandType type() { return m_type; }
+
+private:
+    CommandType m_type;
+    std::vector<CommandCell> m_commands {};
+    size_t m_index { 0 };
+
+    size_t size() { return m_commands.size(); }
 };

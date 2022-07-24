@@ -22,6 +22,8 @@ set(SOURCES
     src/runtime/values/combinationvalue.cc
     src/runtime/values/specialvalue.cc
     src/runtime/interpreter.cc
+    src/runtime/simulation.cc
+    src/runtime/command.cc
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -31,3 +33,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(src/)
 
 add_executable(jam ${SOURCES})
+
+find_package(Curses REQUIRED)
+include_directories(${CURSES_INCLUDE_DIRS})
+target_link_libraries(jam ${CURSES_LIBRARIES})

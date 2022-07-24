@@ -34,5 +34,6 @@ auto main(int argc, char* argv[]) -> int {
     }
     Interpreter interpreter(parser.instructions());
     interpreter.run_code();
+    interpreter.run_simulation();
     return 0;
 }

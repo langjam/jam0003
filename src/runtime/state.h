@@ -20,15 +20,15 @@ class State {
         m_variables.insert(std::make_pair(name, expr));
     }
 
-    void add_command(Command command) {
+    void add_command(CommandCell command) {
         m_commands.push_back(command);
     }
     // Grid& grid() { return m_grid; }
 
-    const std::vector<Command>& commands() { return m_commands; }
+    const std::vector<CommandCell>& commands() { return m_commands; }
 
    private:
     std::map<std::string, Value::Ptr> m_variables;
-    std::vector<Command> m_commands;
+    std::vector<CommandCell> m_commands;
     // Grid m_grid;
 };

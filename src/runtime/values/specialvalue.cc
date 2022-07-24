@@ -6,19 +6,19 @@
 #include <cassert>
 
 void SpecialValue::generate_commands(State& state) {
-    Command command;
+    CommandCell command;
     switch (m_type) {
     case GoLeft:
-        command = Command(Command::Type::GoLeft);
+        command = CommandCell(CommandType::GoLeft);
         break;
     case GoRight:
-        command = Command(Command::Type::GoRight);
+        command = CommandCell(CommandType::GoRight);
         break;
     case GoUp:
-        command = Command(Command::Type::GoUp);
+        command = CommandCell(CommandType::GoUp);
         break;
     case GoDown:
-        command = Command(Command::Type::GoDown);
+        command = CommandCell(CommandType::GoDown);
         break;
     default:
         assert(0);
