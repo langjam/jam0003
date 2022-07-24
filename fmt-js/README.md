@@ -22,6 +22,9 @@ Note that the samples can be loaded by clicking on the appropriate "Use ..." but
 
 # Documentation
 ...to follow (second part of langjam)
+
+https://publish.obsidian.md/programmingsimplicity/2022-07-24-FMT-JS+Documentation
+
 ## Philosophy
 Treat SCNs like bowls of candy.
 
