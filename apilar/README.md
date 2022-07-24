@@ -71,9 +71,13 @@ cargo run --release
 ```
 
 This creates a world, seeds it with a single hard-coded replicator, and then
-lets it run. You can see the world evolve in the terminal. Sometimes the worlds
-are duds and growth stops. Sometimes growth is slow. Sometimes growth
-accelerates; it all depends on what mutations occurred.
+lets it run. You can see the world evolve in the terminal, so you please make
+your terminal window big enough.
+
+Sometimes the worlds are duds and growth stops. Sometimes growth is slow.
+Sometimes growth accelerates; it all depends on what mutations occurred. I did
+one longer run run for a few hours, and I came back to a world somehow filled
+with processors but very few computers; and it looked dead.
 
 If you want to see a new world, just `ctrl-C` to stop and run again.
 
