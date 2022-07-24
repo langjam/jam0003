@@ -67,13 +67,21 @@ Apilar is inspired by the famous alife simulation
 You need to have a recent stable Rust installed. Then:
 
 ```
-cargo run --release
+cargo run --release -- run
 ```
 
 There are also a lot of command line arguments to configure, see:
 
 ```
-cargo run --release -- -h
+cargo run --release -- run -h
+```
+
+You can also cause dump files to be created regularly during a run using the
+`--dump true` flag. You can then disassemble the memory in particular locations
+using commands like:
+
+```
+cargo run --release -- disassemble apilar-dump2.cbor 35 10
 ```
 
 This creates a world, seeds it with a single hard-coded replicator, and then
