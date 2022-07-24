@@ -19,24 +19,22 @@ export class AppComponent {
   code: string = `
 world hello
 
-legend water #2ebdbd
 legend sand #ceae7f
-legend grass #33480d
 legend rock_lower #41474a
-legend rock_upper #504543
+legend rock_upper #2B7A0B
+legend water_deep #2ebdbd
+legend water_shallow #608fc7
 
 region island
-island 50%
-island 7x7  // max size
-island water 25%
-island sand 25%
-island grass 25%
+island 40%
+island rock_lower 25%
+island rock_upper 25%
+island sand 50%
 
-region rocks
-rocks 50%
-rocks 5x5
-rocks rock_upper 50%
-rocks rock_lower 50%
+region water
+water 60%
+water water_deep 50%
+water water_shallow 50%
   `;
 
   constructor(private compiler: CompilerService) {
