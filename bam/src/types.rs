@@ -18,7 +18,21 @@ lazy_static! {
                 output: Type::Num
             }
         },
+        Builtin::Sub => {   // (Num, Num) -> Num
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num, Type::Num]),
+                output: Type::Num
+            }
+        },
         Builtin::Mul => {   // (Num, Num) -> Num
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num, Type::Num]),
+                output: Type::Num
+            }
+        },
+        Builtin::Div => {   // (Num, Num) -> Num
             MachineType {
                 var_count: 0,
                 input: Type::Tuple(vec![Type::Num, Type::Num]),
@@ -67,6 +81,27 @@ lazy_static! {
                 output: Type::Bool
             }
         },
+        Builtin::And => {   // (Bool, Bool) -> Bool
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Bool, Type::Bool]),
+                output: Type::Bool
+            }
+        },
+        Builtin::Or => {   // (Bool, Bool) -> Bool
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Bool, Type::Bool]),
+                output: Type::Bool
+            }
+        },
+        Builtin::Not => {   // Bool -> Bool
+            MachineType {
+                var_count: 0,
+                input: Type::Bool,
+                output: Type::Bool
+            }
+        },
         Builtin::Dup2 => {  // forall a. a -> (a, a)
             MachineType {
                 var_count: 1,
@@ -86,6 +121,13 @@ lazy_static! {
                 var_count: 1,
                 input: Type::TyVar(0),
                 output: Type::TyVar(0)
+            }
+        },
+        Builtin::Read => { // forall a. a -> String
+            MachineType {
+                var_count: 1,
+                input: Type::TyVar(0),
+                output: Type::String
             }
         }
     ]);
