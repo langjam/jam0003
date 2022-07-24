@@ -1,0 +1,10 @@
+// A procedure named "main", which is the entry point
+proc main {
+    rax = 1;
+
+    loop (rax <= 100) {
+        << rax;   // Print value in rax to stdout
+        << "\n";  // Print newline to stdout
+        rax += 1;
+    }
+}
