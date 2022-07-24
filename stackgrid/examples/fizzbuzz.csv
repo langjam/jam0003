@@ -1,0 +1,3 @@
+/* Fizzbuzz */,,,
+JEQ C2 D2 A9,1,1,100
+DUP D2,,,
