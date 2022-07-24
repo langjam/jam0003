@@ -453,6 +453,11 @@ again:
       CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Pow}));
 
+    } else if (span_equal({name.str, name.len}, {"PRINT", 5})) {
+
+      CHECKOUT(arg_count(name, argc, 1));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Print, name.line}));
+
     } else {
       uint ip;
       CHECKOUT(parser_put_instr(p, Instr{InstrType_SetBase, uint(argc)}));
