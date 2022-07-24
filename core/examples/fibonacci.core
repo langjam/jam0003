@@ -1,0 +1,93 @@
+// a, b = 0, 1
+// for _ in range(10):
+//   print(b)
+//   a, b = b, a + b
+
+// store 0 to memory 0 (a)
+op 0
+d0 0
+d1 0
+call
+
+// store 1 to memory 1 (b)
+op 0 
+d0 1
+d1 1
+call
+
+// store 0 to memory 2 (counter)
+op 0
+d0 2
+d1 0
+call
+
+// store 1 to memory 3 (step)
+op 0
+d0 3
+d1 1
+call
+
+// store 10 to memory 4 (target)
+op 0
+d0 4
+d1 20
+call
+
+// store newline to memory 6
+op 0
+d0 6
+d1 "\n"
+call
+
+// increase the counter
+op 3
+d0 2
+d1 3
+d2 2
+call
+
+// print current value of b
+op 1
+d0 1
+call
+
+// print newline
+op 1
+d0 6
+call
+
+// add a and b, then store it to memory 5
+op 3
+d0 0
+d1 1
+d2 5
+call
+
+// move b to a
+op 2
+d0 1
+d1 0
+call
+
+// move sum of a+b to b from memory 5
+op 2
+d0 5
+d1 1
+call
+
+// check the counter, if equal 10, then exit
+op 7
+d0 2
+d1 4
+d2 91
+call
+
+// incase of else jumps back to line 43
+op 8
+d0 43
+call
+
+// exit with 0 code
+op 9
+d0 0
+call
