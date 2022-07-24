@@ -95,30 +95,30 @@ impl fmt::Display for Value {
 
 impl Value {
     /// Try to transform into a tuple.
-    pub fn to_tuple(self) -> Option<Vec<Value>> {
+    pub fn to_tuple(self) -> Vec<Value> {
         match self {
-            Value::Tuple(t) => Some(t),
-            _ => None,
+            Value::Tuple(t) => t,
+            other => panic!("Fatal: expected Tuple in Value, found {other}"),
         }
     }
 
     /// Try to transform into a pair.
-    pub fn to_pair(self) -> Option<(Value, Value)> {
+    pub fn to_pair(self) -> (Value, Value) {
         match self {
             Value::Tuple(mut t) if t.len() == 2 => {
                 let rhs = t.pop().unwrap();
                 let lhs = t.pop().unwrap();
-                Some((lhs, rhs))
+                (lhs, rhs)
             }
-            _ => None,
+            other => panic!("Fatal: expected Pair in Value, found {other}"),
         }
     }
 
     /// Try to transform into a number.
-    pub fn to_num(self) -> Option<f64> {
+    pub fn to_num(self) -> f64 {
         match self {
-            Value::Num(f) => Some(f),
-            _ => None,
+            Value::Num(f) => f,
+            other => panic!("Fatal: expected Num in Value, found {other}"),
         }
     }
 }

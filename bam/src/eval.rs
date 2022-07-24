@@ -3,6 +3,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::stdin;
 
+use anyhow::{anyhow, bail, Context, Result};
+
 /// BAM! execution engine.
 pub struct Factory {
     machines: RefCell<HashMap<String, Machine>>,
@@ -30,106 +32,78 @@ impl Factory {
     }
 
     /// Perform one step of builtin machine evaluation.
-    pub fn run_builtin_machine(&self, builtin: &Builtin, value: Value) -> Value {
+    pub fn run_builtin_machine(&self, builtin: &Builtin, value: Value) -> Result<Value> {
         match builtin {
             Builtin::Add => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Add takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Add should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Add should contain Num elements");
-                Value::Num(lhs + rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Num(lhs + rhs))
             }
             Builtin::Sub => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Sub takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Sub should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Sub should contain Num elements");
-                Value::Num(lhs - rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Num(lhs - rhs))
             }
             Builtin::Mul => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Mul takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Mul should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Mul should contain Num elements");
-                Value::Num(lhs * rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Num(lhs * rhs))
             }
             Builtin::Div => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Div takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Div should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Div should contain Num elements");
-                Value::Num(lhs / rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                if lhs == 0_f64 {
+                    bail!("Division by zero")
+                } else {
+                    Ok(Value::Num(lhs / rhs))
+                }
             }
             Builtin::Mod => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Mod takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Mod should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Mod should contain Num elements");
-                Value::Num(lhs % rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Num(lhs % rhs))
             }
             Builtin::Pow => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Pow takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Pow should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Pow should contain Num elements");
-                Value::Num(lhs.powf(rhs))
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Num(lhs.powf(rhs)))
             }
             Builtin::Sqrt => {
-                let num = value.to_num().expect("Error: Sqrt expects one Num stream.");
-                Value::Num(f64::sqrt(num))
+                let num = value.to_num();
+                Ok(Value::Num(f64::sqrt(num)))
             }
             Builtin::Gt => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Gt takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Gt should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Gt should contain Num elements");
-                Value::Bool(lhs > rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Bool(lhs > rhs))
             }
             Builtin::Lt => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Lt takes two streams.");
-                let lhs = lhs
-                    .to_num()
-                    .expect("Error: First stream to Lt should contain Num elements");
-                let rhs = rhs
-                    .to_num()
-                    .expect("Error: Second stream to Lt should contain Num elements");
-                Value::Bool(lhs < rhs)
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_num();
+                let rhs = rhs.to_num();
+                Ok(Value::Bool(lhs < rhs))
             }
             Builtin::Eq => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Eq takes two streams.");
-                Value::Bool(lhs == rhs)
+                let (lhs, rhs) = value.to_pair();
+                Ok(Value::Bool(lhs == rhs))
             }
-            Builtin::Dup2 => Value::Tuple(vec![value.clone(), value]),
-            Builtin::Dup3 => Value::Tuple(vec![value.clone(), value.clone(), value]),
+            Builtin::Dup2 => Ok(Value::Tuple(vec![value.clone(), value])),
+            Builtin::Dup3 => Ok(Value::Tuple(vec![value.clone(), value.clone(), value])),
             Builtin::Print => {
                 println!("{}", &value);
-                value
+                Ok(value)
             }
             Builtin::Read => {
                 let mut buf = String::new();
                 stdin().read_line(&mut buf);
-                Value::Str(buf)
+                Ok(Value::Str(buf))
             }
         }
     }
@@ -140,7 +114,7 @@ impl Factory {
         body: &mut [Statement],
         result: &mut Stream,
         value: Value,
-    ) -> Value {
+    ) -> Result<Value> {
         self.streams
             .borrow_mut()
             .insert("input".to_string(), Stream::Const(value));
@@ -150,12 +124,16 @@ impl Factory {
                 Statement::Let(names, stream) => {
                     if names.len() == 1 {
                         self.streams
-                            .borrow_mut()
-                            .insert(names.get(0).unwrap().clone(), stream.clone());
+                            .try_borrow_mut()
+                            .map(|mut ss| ss.insert(names.get(0).unwrap().clone(), stream.clone()))
+                            .with_context(|| format!("Unable to access streams"))?;
                     } else {
                         for (index, name) in names.iter().enumerate() {
                             let stream = Stream::Unzip(Box::new(stream.clone()), index);
-                            self.streams.borrow_mut().insert(name.clone(), stream);
+                            self.streams
+                                .try_borrow_mut()
+                                .map(|mut ss| ss.insert(name.clone(), stream))
+                                .with_context(|| format!("Unable to access streams"))?;
                         }
                     }
                 }
@@ -169,7 +147,7 @@ impl Factory {
     }
 
     /// Perform one step of a machine's evaluation.
-    pub fn run_machine(&self, machine: &mut Machine, value: Value) -> Value {
+    pub fn run_machine(&self, machine: &mut Machine, value: Value) -> Result<Value> {
         match machine {
             Machine::Var(var) => {
                 let mut machines = self.machines.borrow_mut();
@@ -184,49 +162,57 @@ impl Factory {
     }
 
     /// Get the next element from the stream.
-    pub fn advance_stream(&self, stream: &mut Stream) -> Value {
+    pub fn advance_stream(&self, stream: &mut Stream) -> Result<Value> {
         match stream {
-            Stream::Var(var) => self
-                .streams
-                .borrow_mut()
-                .get_mut(var)
-                .map(|s| self.advance_stream(s))
-                .expect("Error: undefined stream."),
-            Stream::Const(value) => value.clone(),
+            Stream::Var(var) => {
+                let mut streams = self
+                    .streams
+                    .try_borrow_mut()
+                    .with_context(|| format!("Unable to access streams"))?;
+
+                let stream = streams
+                    .get_mut(var)
+                    .ok_or(anyhow!("Undefined stream: {}", var))?;
+
+                self.advance_stream(stream)
+            }
+            Stream::Const(value) => Ok(value.clone()),
             Stream::Pipe(stream, machine) => {
-                let value = self.advance_stream(stream);
+                let value = self.advance_stream(stream)?;
                 self.run_machine(machine, value)
             }
-            Stream::Zip(streams) => {
-                Value::Tuple(streams.iter_mut().map(|s| self.advance_stream(s)).collect())
-            }
+            Stream::Zip(streams) => streams
+                .iter_mut()
+                .map(|s| self.advance_stream(s))
+                .collect::<Result<Vec<_>>>()
+                .map(Value::Tuple),
             Stream::Unzip(stream, index) => {
-                if let Value::Tuple(values) = self.advance_stream(stream) {
+                if let Value::Tuple(values) = self.advance_stream(stream)? {
                     values
                         .get(*index)
-                        .expect("Fatal: bad index in unzip.")
-                        .clone()
+                        .cloned()
+                        .ok_or(bail!("bad index in unzip: {}", *index))
                 } else {
-                    panic!("Error: unzip on non-tupled stream.")
+                    bail!("called unzip on non-tupled stream: {:?}", stream)
                 }
             }
             Stream::Limit(stream, limit) => {
                 if *limit == 0 {
-                    Value::Null
+                    Ok(Value::Null)
                 } else {
                     *limit -= 1;
                     self.advance_stream(stream)
                 }
             }
             Stream::Cond(cond_stream, then_stream, else_stream) => {
-                if let Value::Bool(cond) = self.advance_stream(cond_stream) {
+                if let Value::Bool(cond) = self.advance_stream(cond_stream)? {
                     if cond {
                         self.advance_stream(then_stream)
                     } else {
                         self.advance_stream(else_stream)
                     }
                 } else {
-                    panic!("Error: non-bool in conditional")
+                    bail!("non-bool value in conditional")
                 }
             }
         }
