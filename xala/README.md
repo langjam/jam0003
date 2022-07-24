@@ -49,8 +49,10 @@ Xala supports some basic mathematical operations with the following keywords whi
 * `MUL`, for multiplication
 * `DIV`, for division
 * `MOD`, for modulo
+* `COS`, for cosine
+* `SIN`, for sine
 
-These operators require two parameters and can be used in two ways; using either the polish notation like so: `operator param1 param2` or the more traditional infix notation as such: `param1 operator param2`. Here is a more concrete example:
+With the exception of `COS` and `SIN`, these operators require two parameters and can be used in two ways; using either the polish notation like so: `operator param1 param2` or the more traditional infix notation as such: `param1 operator param2`. Here is a more concrete example:
 ```asm
   %X ADD %Y
   ; is equivalent to
