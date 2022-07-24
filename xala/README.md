@@ -1,10 +1,10 @@
 # Xala
-### Introduction
+## Introduction
 Welcome to Xala (pronounced shala, from SHader Assembly LAnguage), an assembly language designed to make beautiful monochrome animations.
 
 XALA was developed by [skejeton](https://github.com/skejeton) and [mrms](https://github.com/marekmaskarinec) with some miscellaneous assistance from [Doigt](https://github.com/RealDoigt).
 
-### Playground and docs
+## Playground and docs
 
 Instead of installing and running scripts locally, you can try the language at the online playground here
 
@@ -14,7 +14,7 @@ You can find more documentation here
 
 https://skejeton.github.io/xala/docs
 
-### Installing
+## Installing
 Clone this repository then type this in the terminal:
 ```shell
 cd xala
@@ -22,7 +22,7 @@ cd xala
 ```
 If you get an `clang: error: unable to execute command: Executable "wasm-ld" doesn't exist!` error message, try updating your packages or try this temporary [fix discussed in the clang issue](https://github.com/actions/virtual-environments/issues/5366).
 
-### Running Scripts
+## Running Scripts
 
 You may now play around with the language in your browser. To do that you'll first need to install a web server and use that. If you have python installed, you can use the command `python -m http.server`, otherwise if you don't know what to install, we recommend to install php-cli if it's not already on your system then you can type these commands:
 ```shell
@@ -36,11 +36,11 @@ Once the server is running, don't close the terminal window! Open your favourite
 
 We'll get into how to use the sandbox and what each command does next.
 
-### Overview
+## Overview
 
 Before starting, you should learn how to interact with the environment. Luckily, it's very easy to navigate. You type the code in the text box on your left and when you're done, you click on the button labeled `Run` which is centered atop the text box. You'll see the result in the box to your right. In the box below, error messages will appear if your code doesn't work properly.
 
-#### Registers
+### Registers
 As with other assembly languages, Xala has registers, of which there are 7. Those are:
 
 * `%X`, floating point value of the X coordinate. The value range is between 0 and 1 inclusively.
@@ -51,7 +51,7 @@ As with other assembly languages, Xala has registers, of which there are 7. Thos
 * `%MEMORY ` is a special register which holds more than one value at a time. But only one may be accessed at once. It returns the value stored at the memory address that `%BASE` points to.
 * `%BASE` holds the current memory address of the value that the `%MEMORY` register will return.
 
-#### Arithmetic
+### Arithmetic
 Xala supports some basic mathematical operations with the following keywords which act as operators:
 
 * `ADD`, for addition
@@ -70,7 +70,7 @@ With the exception of `COS` and `SIN`, these operators require two parameters an
 ```
 You must use the `INTO` keyword to store the result in a register. If you store the result in the `%OUT` register, this will update the appearance of the screen.
 
-#### Functions
+### Functions
 Now time to spice things up with some functions. You can declare a function by first typing out its name, however, it must be prefixed with an `@`. If you're using functions, you should have a `@MAIN` function so that the interpreter may know where to start.
 
 Parameters are called like registers in a numbered fashion starting at 0.
