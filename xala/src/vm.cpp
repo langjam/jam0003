@@ -184,7 +184,8 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Ret: {
-			  Call c = vm->csk.calls[vm->csk.calls_len--];
+				CHECKOUT(vm->csk.calls_len == 0);
+			  Call c = vm->csk.calls[--vm->csk.calls_len];
 				vm->ip = c.ret;
 				vm->sk.values_len = c.base;
 				vm_push(vm, vm->regs[Reg_Ret]);

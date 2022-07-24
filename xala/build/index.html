@@ -50,7 +50,14 @@
 <body>
   <div class="row">
     <div class="cont">
-      <textarea id="input">%X ADD %X SUB %X ADD %X SUB %X ADD %Y ADD %TIME MOD 0.5 INTO %OUT ; adds x and y outputs into the screen</textarea>
+      <textarea id="input">@SQUARED
+  %0 MUL %0 INTO %RET
+  RET
+
+@MAIN
+  %TIME COS ADD %X SUB 0.5 SQUARED INTO %X
+  %TIME SIN ADD %Y SUB 0.5 SQUARED INTO %Y
+  %X ADD %Y INTO %OUT</textarea>
       <button class="runbtn" onclick="run()">Run</button>
     </div>
     <div class="cont">
