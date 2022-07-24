@@ -4,9 +4,9 @@ Welcome to Xala (pronounced shala, from SHader Assembly LAnguage), an assembly l
 
 XALA was developed by [skejeton](https://github.com/skejeton) and [mrms](https://github.com/marekmaskarinec) with some miscellaneous assistance from [Doigt](https://github.com/RealDoigt).
 
-Instead of installing and running scripts locally, you can try the language at the online playground here: https://skejeton.github.io/xala/playground
+Instead of installing and running scripts locally, you can try the language at the online playground here: https://mrms.cz/xala/playground
 
-You can find more documentation here: https://skejeton.github.io/xala/docs
+You can find more documentation here: https://mrms.cz/xala/
 
 ### Installing
 Clone this repository then type this in the terminal:
