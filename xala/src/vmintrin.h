@@ -59,7 +59,7 @@ struct Program {
   uint instrs_len;
 };
 
-#define STACK_MAX (1 << 10)
+#define STACK_MAX (1 << 11)
 
 struct Call {
 	uint ret;
