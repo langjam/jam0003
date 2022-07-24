@@ -50,6 +50,24 @@ void vm_instr_div(VM *vm) {
 	vm_push(vm, b / a);
 }
 
+static
+float pow(float x, int n) {
+	if (!n) return 1;
+
+	const float t = pow(x, n / 2);
+	if (n & 1)
+		return t * t * x;
+	return t * t;
+}
+
+static inline
+void vm_instr_pow(VM *vm) {
+	float a = vm_pop(vm);
+	float b = vm_pop(vm);
+
+	vm_push(vm, pow(b, (int)a));
+}
+
 float fmod(float x, float y) {
   return x - int(x / y) * y;
 }
@@ -61,6 +79,15 @@ void vm_instr_mod(VM *vm) {
 	b = vm_pop(vm);
 	
 	vm_push(vm, fmod(b, a));
+}
+
+static inline
+void vm_instr_copy(VM *vm, int arg) {
+	int base = 0;
+	if (vm->csk.calls_len)
+		base = vm->csk.calls[vm->csk.calls_len - 1].base;
+
+	vm_push(vm, vm->sk.values[base + arg]);
 }
 
 static inline
@@ -167,12 +194,20 @@ int vm_run(VM *vm) {
 
 				break;
 
+			case InstrType_Copy:
+				vm_instr_copy(vm, is.argument);
+				break;
+
 			case InstrType_Sin:
 				vm_instr_sin(vm);
 				break;
 
 			case InstrType_Cos:
 				vm_instr_cos(vm);
+				break;
+
+			case InstrType_Pow:
+				vm_instr_pow(vm);
 				break;
 
 			case InstrType_Exit:

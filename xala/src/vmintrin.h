@@ -21,6 +21,7 @@ enum InstrType {
   InstrType_Mul, // () Multiply 2 values from the top of the stack
   InstrType_Div, // () Divide 2 values from the top of the stack
   InstrType_Mod, // () Mod 2 values from the top of the stack
+	InstrType_Pow,
 
   InstrType_Pop, // (NUMBER OF ITEMS TO POP) Remove N items from stack
   InstrType_Imm, // (NUMBER) Push immediate value
@@ -31,6 +32,7 @@ enum InstrType {
 
 	InstrType_Call, // (ADDRESS) pushes IP to the call stack and jumps to ADDRESS
 	InstrType_Ret, // Pops from the call stack and jumps to the popped value
+	InstrType_Copy, // (N) copies stack item N from the base
 
 	InstrType_Sin,
 	InstrType_Cos,
