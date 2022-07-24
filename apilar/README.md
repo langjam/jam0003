@@ -70,6 +70,12 @@ You need to have a recent stable Rust installed. Then:
 cargo run --release
 ```
 
+There are also a lot of command line arguments to configure, see:
+
+```
+cargo run --release -- -h
+```
+
 This creates a world, seeds it with a single hard-coded replicator, and then
 lets it run. You can see the world evolve in the terminal, so you please make
 your terminal window big enough.
