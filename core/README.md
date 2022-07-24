@@ -29,7 +29,7 @@ number | operation
 8      | [JUMP](#jump)
 9      | [EXIT](#exit)
   
-- D0 to D2 is the data register, each operation depends on and handles these four register differently.  
+- D0 to D2 is the data register, each operation depends on and handles these three register differently.  
 - After all register have been set, do `call` command to execute the operation.  
 - Comment can be done using `//`.  
 - Types of data in the language:  
@@ -81,7 +81,7 @@ d0 0
 call
 
 // <STDOUT> hello world
-// write can only write from memory, this means when something needs to be printed,
+// 'write' can only write from memory, this means when something needs to be printed,
 // it needs to be stored first.
 ```
   
