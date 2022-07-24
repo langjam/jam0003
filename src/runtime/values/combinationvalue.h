@@ -29,6 +29,8 @@ class CombinationValue : public Value {
 
     bool is_assemble() override { return true; }
 
+    void generate_commands(State& state) override;
+
    private:
     std::vector<Value::Ptr> m_values;
 };

@@ -28,6 +28,7 @@ class NumberValue : public Value {
 
     int value() { return m_value; }
     bool is_number() override { return true; }
+    void generate_commands(State &state) override;
 
    private:
     int m_value;

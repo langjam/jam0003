@@ -28,6 +28,7 @@ class RepeatValue : public Value {
     int times() { return m_times; }
 
     bool is_repeat() override { return true; }
+    void generate_commands(State &state) override;
 
    private:
     Value::Ptr m_value;

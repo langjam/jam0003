@@ -33,6 +33,6 @@ auto main(int argc, char* argv[]) -> int {
         return 1;
     }
     Interpreter interpreter(parser.instructions());
-    interpreter.run();
+    interpreter.run_code();
     return 0;
 }

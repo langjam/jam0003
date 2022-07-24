@@ -17,3 +17,8 @@ Value::Ptr CombinationType::mul(Value::Ptr lhs, Value::Ptr rhs) {
         return ValueType::mul(lhs, rhs);;
     }
 }
+
+void CombinationValue::generate_commands(State& state) {
+    for (auto v : m_values)
+        v->generate_commands(state);
+}

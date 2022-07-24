@@ -31,3 +31,8 @@ Value::Ptr NumberType::mul(Value::Ptr lhs, Value::Ptr rhs) {
             number_value->value());
     }
 }
+
+void NumberValue::generate_commands(State &state) {
+    // FIXME: Error
+    assert(0);
+}

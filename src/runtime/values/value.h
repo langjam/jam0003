@@ -3,6 +3,7 @@
 #include <memory>
 
 class ValueType;
+class State;
 
 class Value {
    public:
@@ -16,6 +17,7 @@ class Value {
     virtual bool is_repeat() { return false; }
 
     ValueType& type() { return m_type; }
+    virtual void generate_commands(State& state) = 0;
    private:
     ValueType& m_type;
 };

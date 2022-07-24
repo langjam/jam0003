@@ -15,10 +15,12 @@ set(SOURCES
     src/ast/exprs/numberexpr.cc
     src/ast/exprs/specialexpr.cc
     src/ast/exprs/variableexpr.cc
+    src/ast/instructions/generateinstruction.cc
     src/runtime/values/value.cc
     src/runtime/values/numbervalue.cc
     src/runtime/values/repeatvalue.cc
     src/runtime/values/combinationvalue.cc
+    src/runtime/values/specialvalue.cc
     src/runtime/interpreter.cc
 )
 

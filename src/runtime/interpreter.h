@@ -10,7 +10,7 @@ class Interpreter {
    public:
     Interpreter(std::vector<AstInstruction::Ptr> instructions)
         : m_instructions(instructions) {}
-    void run();
+    void run_code();
 
    private:
     State m_state { };

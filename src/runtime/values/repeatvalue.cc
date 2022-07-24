@@ -14,3 +14,8 @@ Value::Ptr RepeatType::mul(Value::Ptr lhs, Value::Ptr rhs) {
         return ValueType::add(lhs, rhs);
     }
 }
+
+void RepeatValue::generate_commands(State &state) {
+    for (int i = 0; i < m_times; ++i)
+        m_value->generate_commands(state);
+}

@@ -19,7 +19,9 @@ class SpecialValue : public Value {
    public:
     enum Type { GoLeft = 1, GoRight, GoUp, GoDown };
     SpecialValue(Type type) : Value(SpecialType::the()), m_type(type) {}
+
     bool is_special() override { return true; }
+    void generate_commands(State &state) override;
 
    private:
     Type m_type;
