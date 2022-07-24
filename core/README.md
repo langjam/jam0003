@@ -32,7 +32,7 @@ number | operation
 - D0 to D2 is the data register, each operation depends on and handles these four register differently.  
 - After all register have been set, do `call` command to execute the operation.  
 - Comment can be done using `//`.  
-- There are only 'int' and 'str' in this language.  
+- Types of data in the language:  
 ```
 5      <-- int
 "core" <-- str
@@ -103,8 +103,9 @@ D0 - first number
 D1 - second number  
 D2 - result address
 ```
-// memory[0] = 2
-// memory[1] = 3
+// assuming:
+// memory[0] is set to 2
+// memory[1] is set to 3
 // add two number from memory address 0 and 1
 op 3
 d0 0
@@ -122,10 +123,11 @@ D0 - first data
 D1 - second data  
 D2 - number of which line to jump to (if true)
 ```
-memory[0] = 9
-memory[1] = 9
-memory[2] = "true"
-memory[3] = "false"
+// assuming:
+// memory[0] is set to 9
+// memory[1] is set to 9
+// memory[2] is set to "true"
+// memory[3] is set to "false"
 
  1: // compare data at address 0 and 1, if true, jumps to line 18
  2: op 7
