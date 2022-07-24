@@ -10,7 +10,7 @@ Clone this repository then type this in the terminal:
 cd xala
 ./build.sh
 ```
-If you get an `clang: error: unable to execute command: Executable "wasm-ld" doesn't exist!`error message, try updating your packages or try this temporary [fix discussed in the clang issue](https://github.com/actions/virtual-environments/issues/5366).
+If you get an `clang: error: unable to execute command: Executable "wasm-ld" doesn't exist!` error message, try updating your packages or try this temporary [fix discussed in the clang issue](https://github.com/actions/virtual-environments/issues/5366).
 
 ### Running Scripts
 
