@@ -257,13 +257,13 @@ bool parse_call(Parser *p, Token name, int argc) {
 
 
   if (span_equal({name.str, name.len}, {"INTO", 4})) {
-    CHECKOUT(arg_count(name, argc, 1));
     Token t;
     CHECKOUT(fetch_token(p, &t));
     Reg reg;
     CHECKOUT(token_to_register(t, &reg));
     CHECKOUT(parser_put_instr(p, Instr{InstrType_Store, reg}));
     CHECKOUT(fetch_token(p, &name));
+    CHECKOUT(arg_count(name, argc+1, 2));
   } else {
     // TODO: Handle too many/few params
 again:
@@ -341,7 +341,12 @@ bool parser_parse(Program *output, const char *source) {
   p.source = source;
   p.going = *source;
   while (p.going) {
-    CHECKOUT(parse_tape(&p));
+    if (parse_tape(&p)) {
+      // prevent bad program
+      current_prog.instrs[0].type = InstrType_Exit;
+      current_prog.instrs_len = 1;
+      return 1;
+    }
   }
   parser_put_instr(&p, Instr{InstrType_Exit});
   *output = current_prog;
