@@ -97,12 +97,10 @@ WASM_EXPORT void wasm_run() {
   Program prog;
   if (parser_parse(&prog, (const char *)source)) {
     tprintf("Error!");
-    return;
   } else {
     tprintf("{}", prog);
+    vm = vm_init(prog);
   }
-
-  vm = vm_init(prog);
 }
 
 WASM_EXPORT void wasm_frame(float dt) {

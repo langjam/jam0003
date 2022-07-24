@@ -234,7 +234,18 @@ bool emit_value(Parser *p, Token t) {
    return 0;
 }
 
-bool parse_call(Parser *p, Token name) {
+bool arg_count(Token t, int act, int exp) {
+  if (act > exp) {
+    tprintf("ERROR: {} Too many arguments (got {} expected {})\n", tok2li(t), act, exp);
+    CHECKOUT(1);
+  } else if (act < exp) {
+    tprintf("ERROR: {} Too few arguments (got {} expected {})\n", tok2li(t), act, exp);
+    CHECKOUT(1);
+  }
+  return 0;
+}
+
+bool parse_call(Parser *p, Token name, int argc) {
   if (name.type == TokenType_Newline) {
     return 0;
   }
@@ -246,6 +257,7 @@ bool parse_call(Parser *p, Token name) {
 
 
   if (span_equal({name.str, name.len}, {"INTO", 4})) {
+    CHECKOUT(arg_count(name, argc, 1));
     Token t;
     CHECKOUT(fetch_token(p, &t));
     Reg reg;
@@ -259,20 +271,36 @@ again:
     CHECKOUT(fetch_token(p, &t));
 
     if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
+      argc++;
       CHECKOUT(emit_value(p, t));
       goto again;
     }
 
     if (span_equal({name.str, name.len}, {"ADD", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Add}));
+
     } else if (span_equal({name.str, name.len}, {"SUB", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Sub}));
+
     } else if (span_equal({name.str, name.len}, {"MOD", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Mod}));
+
     } else if (span_equal({name.str, name.len}, {"MUL", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Mul}));
+
     } else if (span_equal({name.str, name.len}, {"DIV", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Div}));
+
     } else {
       tprintf("ERROR: {} Instruction doesn't exist\n", tok2li(name));
       CHECKOUT(1);
@@ -282,7 +310,7 @@ again:
   }
 
   if (p->going && name.type == TokenType_Instr) {
-    CHECKOUT(parse_call(p, name));
+    CHECKOUT(parse_call(p, name, 1));
   }
   return 0;
 }
@@ -290,15 +318,18 @@ again:
 bool parse_tape(Parser *p) {
   Token t;
   CHECKOUT(fetch_token(p, &t));
+  int argc = 0;
+
   if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
     CHECKOUT(emit_value(p, t));
     CHECKOUT(fetch_token(p, &t));
+    argc++;
   }
   if (t.type == TokenType_Null || t.type == TokenType_Newline) {
     return 0;
   }
 
-  CHECKOUT(parse_call(p, t));
+  CHECKOUT(parse_call(p, t, argc));
   return 0;
 }
 

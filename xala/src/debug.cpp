@@ -85,7 +85,7 @@ void putval(Program prog) {
     "MOD", "POP", "IMM", "LOAD", "STORE", "EXIT"
   };
   static const char *regs[] = {
-    "X", "Y", "RET", "OUT", "TIME"
+    "X", "Y", "RET", "OUT", "TIME", "BASE", "MEMORY"
   };
 
   tprintf("<pre>");
