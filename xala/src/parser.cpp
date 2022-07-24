@@ -8,6 +8,11 @@
 static Instr current_prog_instrs[CPINSTR_MAX];
 static Program current_prog;
 
+struct LineInfo {
+  uint line, col;
+  Span span;
+};
+
 struct Parser {
   const char *source;
   bool going;
@@ -27,6 +32,18 @@ struct Token {
   const char *str;
   uint len, line, col;
 };
+
+LineInfo tok2li(Token t) {
+  return LineInfo{t.line, t.col, {t.str, t.len}};
+}
+
+void putval(LineInfo li) {
+  if (li.span.l == 0 || *li.span.s == 0) {
+    tprintf("{}:{} ::", li.line+1, li.col+1);
+  } else {
+    tprintf("{}:{} Near `{}` ::", li.line+1, li.col+1, li.span);
+  }
+}
 
 u8 parser_get(Parser *p) {
   if (*p->source == '\0') {
@@ -107,7 +124,7 @@ static bool fetch_token(Parser *p, Token *output) {
       l++;
     }
     if (l <= 0) {
-      // TODO: Log error
+      tprintf("ERROR: {} Name can't be empty\n", tok2li(res));
       return true;
     }
   } else if (parser_is(p, '\n')) {
@@ -132,7 +149,8 @@ static bool fetch_token(Parser *p, Token *output) {
   } else if (p->going == false) {
 
   } else {
-    // TODO: Log error
+    res.len = 1;
+    tprintf("ERROR: {} Invalid character\n", tok2li(res));
     return true;
   }
 
@@ -145,7 +163,7 @@ static bool fetch_token(Parser *p, Token *output) {
 bool parser_put_instr(Parser *p, Instr instr) {
   (void)p;
   if (current_prog.instrs_len >= CPINSTR_MAX) {
-    // TODO: Log error
+    tprintf("ERROR: Too many instructions\n");
     return true;
   }
   current_prog.instrs[current_prog.instrs_len++] = instr;
@@ -171,7 +189,7 @@ float token_to_number(Token t) {
 
 bool token_to_register(Token t, Reg *reg_out) {
   if (t.type != TokenType_Register) {
-    // TODO: Log error;
+    tprintf("ERROR: {} Expected register\n", tok2li(t));
     CHECKOUT(1);
   }
 
@@ -191,8 +209,8 @@ bool token_to_register(Token t, Reg *reg_out) {
       return 0;
     }
   }
-  tprintf("Unknown register: {}\n", Span{t.str, t.len});
-  // TODO: Log error
+
+  tprintf("ERROR: {} Unknown register\n", tok2li(t));
   CHECKOUT(1);
 }
 
@@ -208,7 +226,7 @@ bool emit_value(Parser *p, Token t) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Load, reg}));
     } break;
     default: {
-      // TODO: Log error
+      tprintf("ERROR: {} Can not be used as a value\n", tok2li(t));
       CHECKOUT(1);
     } break;
   }
@@ -222,8 +240,7 @@ bool parse_call(Parser *p, Token name) {
   }
 
   if (name.type != TokenType_Instr) {
-    // TODO: Log error
-    tprintf("Error: `{}` Is not an instruction\n", Span{name.str, name.len});
+    tprintf("ERROR: {} Is not an instruction\n", tok2li(name));
     CHECKOUT(1);
   }
 
@@ -257,7 +274,7 @@ again:
     } else if (span_equal({name.str, name.len}, {"DIV", 3})) {
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Div}));
     } else {
-      // TODO: Log error
+      tprintf("ERROR: {} Instruction doesn't exist\n", tok2li(name));
       CHECKOUT(1);
     }
 
