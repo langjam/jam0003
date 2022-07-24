@@ -1,0 +1,4 @@
+{
+	"nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+	"rust-analyzer.server.extraEnv": {"RUSTUP_TOOLCHAIN": "nightly"}
+}
