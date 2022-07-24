@@ -15,3 +15,4 @@ The repo
 [Clinery1/jam0003-docs](https://github.com/Clinery1/jam0003-docs)
 is deployed
 [here](https://clinery1.github.io/jam0003-docs/)
+There is also a playground located [here](https://clinery1.github.io/jam0003-playground/)
