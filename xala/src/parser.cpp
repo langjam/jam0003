@@ -362,6 +362,16 @@ again:
       CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Div}));
 
+    } else if (span_equal({name.str, name.len}, {"SIN", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 1));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Sin}));
+
+    } else if (span_equal({name.str, name.len}, {"COS", 3})) {
+
+      CHECKOUT(arg_count(name, argc, 1));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Cos}));
+
     } else {
       uint ip;
       CHECKOUT(labels_get(&p->labels, name, &ip));

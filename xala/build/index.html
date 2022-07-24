@@ -69,7 +69,9 @@
       last ??= ts;
       const dt = ts - last;
       last = ts;
-      instance.exports.wasm_frame(dt/1000.0);
+      if (instance) {
+        instance.exports.wasm_frame(dt/1000.0);
+      }
 
       const arr = new Uint8ClampedArray(256*256*4);
       for (let i = 0; i < 256*256; i += 1) {
@@ -128,7 +130,10 @@
             } else {
               console.error("wasm_putchar: Unknown stream")
             }
-          }
+          },
+          sin: Math.sin,
+          cos: Math.cos,
+
         }});
         instance = result.instance;
         instance.exports.wasm_init()
