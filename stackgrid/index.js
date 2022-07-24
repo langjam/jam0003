@@ -244,12 +244,11 @@ class Value {
 }
 
 class Interpreter {
-  width = 1000;
   /**
    *
    * @param {Row[]} rows
    */
-  constructor(rows, readlineSync, write, collectDebug) {
+  constructor(rows, readlineSync, write, collectDebug, width = 0) {
     this.rows = rows;
     /**
      * @type {(Value | null)[][]}
@@ -262,8 +261,8 @@ class Interpreter {
     this.write = write;
     this.collectDebug = collectDebug;
 
-    const rowCount = this.rows.length;
-    const colCount = this.rows[0].cells.length;
+    const rowCount = width || this.rows.length;
+    const colCount = width || this.rows[0].cells.length;
     this.state = Array.from(new Array(rowCount), () => Array.from(new Array(colCount), () => null));
 
     for (let i = 0; i < this.rows.length; i++) {
@@ -298,7 +297,7 @@ class Interpreter {
 
       const [operator, ...operands] = next.value.split(' ');
 
-      if (this.safetyCount++ >= 100) {
+      if (this.safetyCount++ >= 1000000) {
         throw new Error('stopped for safety');
       }
 
@@ -734,7 +733,7 @@ function run(source, readlineSync, write) {
   const parser = new Parser(tokens);
   const statements = parser.parse();
 
-  const interpreter = new Interpreter(statements, readlineSync, write);
+  const interpreter = new Interpreter(statements, readlineSync, write, () => {}, 1000);
   interpreter.interpret();
 }
 

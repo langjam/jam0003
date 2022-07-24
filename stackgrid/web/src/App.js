@@ -11,6 +11,7 @@ const ip = [];
 function App() {
   const [input, setInput] = useState(ip);
   const [debugs, setDebugs] = useState([]);
+  const [logs, setLogs] = useState([]);
 
   useEffect(() => {
     onReset();
@@ -34,7 +35,7 @@ function App() {
 
   const collectDebug = (state) => {
     const deepCopy = state.map((row) => [...row.map((cell) => ({ ...cell }))]);
-    setDebugs((debugs) => [...debugs, deepCopy]);
+    setDebugs((debugs) => [...debugs, { type: 'state', state: deepCopy }]);
   };
 
   const onRun = () => {
@@ -51,7 +52,15 @@ function App() {
 
     setDebugs(() => []);
 
-    const interpreter = new Interpreter(rows, null, console.log, collectDebug);
+    const interpreter = new Interpreter(
+      rows,
+      null,
+      (input) => {
+        setLogs((logs) => [...logs, input]);
+        setDebugs((debugs) => [...debugs, { type: 'log', log: input }]);
+      },
+      collectDebug
+    );
     interpreter.interpret();
   };
 
@@ -62,7 +71,6 @@ function App() {
   };
 
   const onReplay = () => {
-    console.log(debugs[0]);
     let i = 0;
     const interval = setInterval(() => {
       if (i++ >= debugs.length - 1) {
@@ -70,10 +78,15 @@ function App() {
         return;
       }
 
-      setInput(() => {
-        const newInput = [...debugs[i].map((row) => row.map((cell) => cell.value))];
-        return newInput;
-      });
+      const debug = debugs[i];
+      if (debug.type === 'state') {
+        setInput(() => {
+          const newInput = [...debug.state.map((row) => row.map((cell) => cell.value))];
+          return newInput;
+        });
+      } else {
+        setLogs((logs) => [...logs, debug.log]);
+      }
     }, 500);
   };
 
@@ -100,6 +113,14 @@ function App() {
       <button onClick={onReset}>Reset</button>
       <button onClick={onDebug}>Debug</button>
       <button onClick={onReplay}>Replay</button>
+      <div>
+        <h2>stdout</h2>
+        <div>
+          {logs.map((log) => (
+            <span>{log}</span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

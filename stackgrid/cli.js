@@ -13,4 +13,4 @@ const { file } = program.opts();
 
 const source = readFileSync(file).toString();
 
-run(source, readlineSync, process.stdout);
+run(source, readlineSync, (message) => process.stdout.write(message));
