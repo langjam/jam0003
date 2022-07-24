@@ -1,0 +1,41 @@
+load("@com_github_google_cel-cpp//bazel:antlr.bzl", "antlr_cc_library")
+
+cc_library(
+    name = "hello_lib",
+    srcs = [
+        "hello_world.cc",
+    ],
+    hdrs = [
+        "hello_world.hh",
+    ],
+)
+
+cc_binary(
+    name = "hello_world",
+    srcs = [
+        "hello.cc",
+    ],
+    deps = [
+        ":hello_lib",
+        "@com_github_gabime_spdlog//:spdlog",
+    ],
+)
+
+antlr_cc_library(
+    name = "TestAntlr",
+    src = "Test.g4",
+    package = "example",
+)
+
+# cc_library(
+#     name = "llvm_test",
+#     hdrs = [
+#         "llvm_test.hh",
+#     ],
+#     srcs = [
+#         "llvm_test.cc",
+#     ],
+#     deps = [
+#         "//foreign:llvm",
+#     ],
+# )

@@ -1,0 +1,91 @@
+cc_test(
+    name = "hello_test",
+    srcs = [
+        "hello_test.cc",
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "nop_test",
+    srcs = [
+        "nop_test.cc",
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+        "//src/ast:ast",
+        "//src/ast:bytecode_emitter",
+        "//src/parser:parser",
+        "//src/bytecode:bytecode",
+    ],
+)
+
+cc_test(
+    name = "bytecode_unit_tests",
+    srcs = [
+        "bytecode_unit_tests.cc",
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+        "//src/ast:ast",
+        "//src/ast:bytecode_emitter",
+        "//src/bytecode:bytecode",
+    ]
+)
+
+cc_test(
+    name = "bytecode_test",
+    srcs = [
+        "bytecode/interpret_test.cc"
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+        "//src/bytecode:bytecode",
+    ]
+)
+
+cc_test(
+    name = "grammar_test",
+    srcs = [
+        "parser/grammar_test.cc",
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+        "//src/parser:parser",
+    ],
+    data = glob(["test_programs/**"]),
+)
+
+cc_test(
+    name = "parser_test",
+    srcs = [
+        "parser/parser_test.cc",
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+        "//src/parser:parser",
+    ],
+    data = glob(["test_programs/**"]),
+)
+
+cc_test(
+    name = "ast_test",
+    srcs = [
+        "ast/lower_ast_test.cc"
+    ],
+    deps = [
+        "@com_github_google_googletest//:gtest",
+        "@com_github_google_googletest//:gtest_main",
+        "//src/parser:parser",
+        "//src/ast:bytecode_emitter",
+    ],
+    data = glob(["test_programs/**"]),
+)

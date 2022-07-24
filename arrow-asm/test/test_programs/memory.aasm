@@ -1,0 +1,4 @@
+fn main {
+  load  l0, l1.sometype:a
+  store l0, l2
+}

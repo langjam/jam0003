@@ -1,0 +1,163 @@
+fn add(r1: num, r2: num) {
+    // r1 and r2 are "moved" into this function.
+    // Here, we add r1 and r2 and place it into r1, which would be our return.
+    // Our parameters are (implicitly) our returns.
+    addi r1, r2, r1
+}
+
+// What about returning something that isn't the same type as our parameters?
+fn ret(r1: float) {
+    addi r1, zero, 1
+}
+
+// What about returning something from a function with no params?
+// TOO BAD! You have to pass in at least as many parameters as you want returns
+
+
+
+
+fn create_a_thing(r1: HPointer) {
+    // Here, we now OWN r1, 100%.
+    // But what happens if we move something new into r1?
+    r1 <- make ...
+    // Well, the old value of r1 gets destroyed first, then we move in the new one
+    // And to return our new r1:
+    ret r1
+}
+
+fn add(r1: num, r2: num) {
+    add rr1, r1, r2
+}
+
+/*
+- register window is made up of outgoing, incoming, and local.
+-- shift in:
+--- OUR outgoing registers --> NEW CALL FRAME incoming registers
+--- OUR incoming registers --> save
+--- OUR local registers --> save
+--- push ra to sekrit stack
+-- shift out:
+--- OUR incoming registers --> OLD CALL FRAME outgoing registers (where our incoming registers CAME from)
+--- OUR outgoing registers --> Destroyed
+--- OUR local registers --> Destroyed
+--- pop ra from sekrit stack and jump to it
+*/
+
+// C: r1, r2 --> A
+// A: x0: r1, x1: r2
+// A: rr0: r1 + r2
+// C: r1: rr0(A)
+
+op0: 1
+op1: 2
+call A
+A: p0: 1, p1: 2
+A: add rr1, p0, p1
+A: ret
+
+A returns
+op0: 3 ??
+
+fn add(num, num) {
+    // add p0, p0, p1 would be fine HERE, this is a 'cheat' to avoid the rr0 warning
+    add rr0, p0, p1
+    // add rr1, p0, p1 THIS WOULD BE A WARNING! (We are using p0, which was overwritten by rr0)
+    ret
+}
+
+PREGS: 16
+LOCAL: 32
+RET: 16
+SR: 1
+
+primitive types:
+- long
+- double
+- ptr[code]
+- ptr[data] (data type is what matters)
+
+fn __start:
+    addi x1, zero, 3
+    addi x2, zero, 5
+    addi x3, zero, 9
+    sr <- make x1, x2, x3
+
+get_x:
+    ld rr0, 500[sr]
+
+ptr[data]: it points to some object that needs to be destroyed at some point
+(UNLESS IT'S STATIC <-- different argument perhaps)
+
+
+
+fn get_field(ptr) {
+    ld rr0, 8[ptr]
+}
+
+fn loop(r1: num) {
+    if/for/while/break/continue
+}
+
+
+fn test {
+    rr0 <- make 0
+}
+
+fn tester {
+    test;
+    l0 <- make op0
+    ld l1, l0.a
+}
+
+type MyType {
+    fn MyType {
+
+    }
+    fn ~MyType {
+        
+    }
+    // dtor?
+
+    a: long
+    b: long
+    c: double
+    e: ptr<int>
+}
+
+fn test {
+    // op0, op1, ... are the params for the MyType constructor
+    l0 <- make MyType
+    load l1, l0.a
+    load l2, l0.b
+    add l3, l1, l2
+
+    store l3, l0.a
+    // CANNOT store l3 to l0.c or l0.e
+
+    // Double to long
+    d2l l3, l3
+    // Long to double
+    l2d l3, l3
+
+    add lN, l0, anything // ILLEGAL (adding to a pointer)
+
+    store l3, l0.c
+
+    // Load from field e, add l3 to it, store it back to field e
+    l4 <- l0.e
+    load l5, l4
+    add l5, l5, l3
+    store l5, l4
+    l0.e <- l4
+
+    // 1. Moves from rhs to lhs
+    // 2. Destroys lhs (if necessary)
+    // 3. rhs is no longer able to be used safely
+
+
+}
+
+// Instructions: add, load, store, div, ...
+// Primitives ONLY (NO POINTERS ALLOWED PERIOD!)
+
+// <- POINTERS OK
