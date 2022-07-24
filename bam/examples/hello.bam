@@ -1,5 +1,5 @@
-
-machine main {
-    let hello = "hello"
-    hello{1} -> stdout
+machine Main {
+    let hello = "Hello, BAM!";
+    hello{1} -> Print
 }
+

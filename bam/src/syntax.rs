@@ -1,14 +1,14 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Program {
-    pub machines: Vec<MachineDef>,
+    pub machines: Vec<Definition>,
 }
-#[derive(Debug, Clone)]
-pub struct MachineDef {
+#[derive(Debug, Clone, PartialEq)]
+pub struct Definition {
     pub name: String,
     pub body: Vec<Statement>,
     pub result: Stream,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     Let(Vec<String>, Stream), // let x, y = s;
     Consume(Stream),          // s;
@@ -16,7 +16,7 @@ pub enum Statement {
 // Id = input
 // Five = 5
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Stream {
     // NOTE: just parse this as Var("input")
     // Input,                        // input
@@ -33,7 +33,7 @@ pub enum Stream {
     Unzip(Box<Stream>, usize), // let x, y = s
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Machine {
     Var(String),
     Builtin(Builtin),

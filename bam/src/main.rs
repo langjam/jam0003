@@ -11,24 +11,16 @@ mod util;
 
 pub use lexer::{LexerBuilder, Token, KEYWORD_MAP};
 
-use crate::{
+pub use crate::{
     parser::ParserBuilder,
-    syntax::{Machine, Stream, Value},
+    syntax::{Builtin, Definition, Machine, Program, Statement, Stream, Value},
 };
 
 pub type Span = std::ops::Range<usize>;
 pub type Spanned<T> = (T, Span);
 
-// lazy_static! {
-//     static ref PROGRAMS: HashMap<ProgramName, &'static str> = hashmap![];
-// }
-
-static HELLO_PROGRAM_PATH: &'static str = "../examples/hello.bam";
-
 fn main() {
     tracing_subscriber::fmt::init();
-
-    run_temp()
 }
 
 fn run(path: &str) {
@@ -62,23 +54,111 @@ fn run(path: &str) {
     info!("[RESULT]: {result:#?}");
 }
 
-fn run_temp() {
-    let decl_program = vec![
-        Token::Let,
-        Token::Ident("n".to_owned()),
-        Token::Equals,
-        Token::FloatLit("1.2".to_owned()),
-    ];
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let hello_program = vec![
-        Token::Machine,
-        Token::Ident("hello".to_owned()),
-        Token::StringLit("hello".to_owned()),
-        Token::Pipe,
-        Token::Ident("Print".to_owned()),
-    ];
+    #[test]
+    fn parse_hello_world_from_tokens() {
+        // machine Main {
+        //     let hello = "Hello, BAM!";
+        //     hello{1} -> Print
+        // };
+        let tokens = vec![
+            Token::Machine,
+            Token::Ident("Main".to_string()),
+            Token::Lbrace,
+            Token::Let,
+            Token::Ident("hello".to_string()),
+            Token::Equals,
+            Token::StringLit("Hello, BAM!".to_string()),
+            Token::Semicolon,
+            Token::Ident("hello".to_string()),
+            Token::Lbrace,
+            Token::IntLit("1".to_string()),
+            Token::Rbrace,
+            Token::Pipe,
+            Token::Ident("Print".to_string()),
+            Token::Rbrace,
+        ];
 
-    // let parser = parser::parser();
-    // info!("decl: {:#?}", parser.parse(decl_program).unwrap());
-    // info!("hello: {:#?}", parser.parse(hello_program).unwrap());
+        let result = ParserBuilder::build()
+            .parse(tokens)
+            .map_err(|errs| {
+                errs.iter().for_each(|e| eprintln!("Error: {:?}", e));
+                errs
+            })
+            .unwrap();
+
+        use Builtin::*;
+        use Statement::*;
+        use Stream::*;
+        use Value::*;
+        assert_eq!(
+            result,
+            Program {
+                machines: vec![Definition {
+                    name: "Main".to_string(),
+                    body: vec![Let(
+                        vec!["hello".to_string()],
+                        Const(Str("Hello, BAM!".to_string()))
+                    )],
+                    result: Pipe(
+                        Box::new(Limit(Box::new(Stream::Var("hello".to_string())), 1)),
+                        Box::new(Machine::Builtin(Print))
+                    )
+                }]
+            }
+        );
+    }
+
+    #[test]
+    fn parse_hello_world_from_source() {
+        let source = "machine Main {
+            let hello = \"Hello, BAM!\";
+            hello{1} -> Print
+        }";
+
+        let tokens = LexerBuilder::build()
+            .parse(source)
+            .map_err(|errs| {
+                errs.iter().for_each(|e| eprintln!("Error: {:?}", e));
+                errs
+            })
+            .unwrap()
+            .into_iter()
+            .map(|(token, _span)| token)
+            .collect::<Vec<_>>();
+
+        info!("[TOKENS]: {:#?}", &tokens);
+
+        let result = ParserBuilder::build()
+            .parse(tokens)
+            .map_err(|errs| {
+                errs.iter().for_each(|e| eprintln!("Error: {:?}", e));
+                errs
+            })
+            .unwrap();
+
+        use Builtin::*;
+        use Statement::*;
+        use Stream::*;
+        use Value::*;
+        assert_eq!(
+            result,
+            Program {
+                machines: vec![Definition {
+                    name: "Main".to_string(),
+                    body: vec![Let(
+                        vec!["hello".to_string()],
+                        Const(Str("Hello, BAM!".to_string()))
+                    )],
+                    result: Pipe(
+                        Box::new(Limit(Box::new(Stream::Var("hello".to_string())), 1)),
+                        Box::new(Machine::Builtin(Print))
+                    )
+                }]
+            }
+        );
+    }
 }

@@ -158,16 +158,5 @@ impl LexerBuilder {
                 _ => Token::Ident(ident),
             }
         })
-        // primitive::just("machine")
-        //     .to(Token::Machine)
-        //     .or(primitive::just("->")
-        //         .to(Token::Pipe)
-        //         .or(primitive::just("=").to(Token::Equals))
-        //         .or(
-        //             text::ident().map(|ident: String| match KEYWORD_MAP.get(&ident) {
-        //                 Some(token) => token.to_owned(),
-        //                 None => Token::Ident(ident),
-        //             }),
-        //         ))
     }
 }

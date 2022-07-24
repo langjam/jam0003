@@ -1,5 +1,5 @@
 use crate::{
-    syntax::{Builtin, Machine, MachineDef, Program, Statement, Stream, Value},
+    syntax::{Builtin, Machine, Definition, Program, Statement, Stream, Value},
     Token,
 };
 use chumsky::{prelude::*, primitive::FilterMap};
@@ -34,6 +34,7 @@ impl ParserBuilder {
             let stream_zip = stream_limit
                 .clone()
                 .separated_by(just(Token::Comma))
+                .at_least(1)
                 .map(|streams| {
                     if streams.len() == 1 {
                         streams[0].clone()
@@ -79,13 +80,14 @@ impl ParserBuilder {
         let machine_def = just(Token::Machine)
             .then(Self::ident())
             .then_ignore(just(Token::Lbrace))
-            .then_ignore(just(Token::Rbrace))
             .then(statement.then_ignore(just(Token::Semicolon)).repeated())
             .then(stream.clone())
-            .map(|(((_, name), body), result)| MachineDef { name, body, result });
+            .then_ignore(just(Token::Rbrace))
+            .map(|(((_, name), body), result)| Definition { name, body, result });
 
         machine_def
-            .separated_by(just(Token::Semicolon))
+            .repeated()
+            .then_ignore(end())
             .map(|machines| Program { machines })
     }
 

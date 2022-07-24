@@ -110,7 +110,7 @@ pub fn check(program: &Program) -> Result<(), TypeError> {
 
 fn check_machine_def(
     global_env: &mut GlobalTypeEnv,
-    machine: &MachineDef,
+    machine: &Definition,
 ) -> Result<(), TypeError> {
     let mut local_env = LocalTypeEnv {
         var_types: HashMap::new(),
