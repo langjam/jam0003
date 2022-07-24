@@ -6,7 +6,7 @@ def valid_syntax(x):
 
 def valid_digit(x):
   if x is None: return False
-  return bool(sum([i in digits for i in str(x)]))
+  return sum([i in digits for i in str(x)]) == len(str(x))
 
 def valid_string(x):
   if x is None: return False
@@ -96,7 +96,7 @@ while line < len(program):
       if valid_digit(d0):
         exit(d0)
       else: err_msg("expected exit-code on d0")
-    else: print(op);err_msg("unexpected operation number")
+    else: err_msg(f"unexpected operation number '{op}'")
     
     op,d0,d1,d2,d3 = None,None,None,None,None
   else:
