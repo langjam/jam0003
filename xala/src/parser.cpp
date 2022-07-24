@@ -294,6 +294,9 @@ bool parse_tape(Parser *p) {
     CHECKOUT(emit_value(p, t));
     CHECKOUT(fetch_token(p, &t));
   }
+  if (t.type == TokenType_Null || t.type == TokenType_Newline) {
+    return 0;
+  }
 
   CHECKOUT(parse_call(p, t));
   return 0;
