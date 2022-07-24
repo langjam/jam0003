@@ -1,9 +1,12 @@
+import { parse } from "./parser";
 import { tokenize } from "./tokenizer";
 
 function test1() {
   const program = "world hello";
   const tokens = tokenize(program);
-  console.log(tokens);
+  const world = parse(tokens);
+  // console.log(tokens);
+  console.log(world);
 }
 test1();
 
@@ -31,6 +34,8 @@ function test2() {
   rocks rock_lower 50%
   `;
   const tokens = tokenize(program);
-  console.log(tokens);
+  const world = parse(tokens);
+  // console.log(tokens);
+  console.log(JSON.stringify(world));
 }
 test2();

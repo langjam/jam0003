@@ -28,7 +28,7 @@ class ParseError {
 }
 
 // Either returns a valid world or an error as a string.
-export function parser(tokens: Token[][]): [World, ParseError | null] {
+export function parse(tokens: Token[][]): [World, ParseError | null] {
   const world: World = { regions: [], legends: [] };
 
   if (tokens.length == 0) {
