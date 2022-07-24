@@ -1,6 +1,6 @@
 # StackGrid
 
-StackGrid is a fun, new take on assembly language, stacks, and grids.
+StackGrid is a fun take on assembly language, stacks, and grids.
 
 ## Setup
 
