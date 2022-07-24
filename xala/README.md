@@ -20,7 +20,7 @@ cd build
 php -S localhost:8080
 ```
 
-Once the server is running, don't close the terminal window! Open your favourite browser and type `localhost:8080`in the addess bar and press enter. If all went well, you should see something like this appear on screen:
+Once the server is running, don't close the terminal window! Open your favourite browser and type `localhost:8080` in the addess bar and press enter. If all went well, you should see something like this appear on screen:
 
 ![](https://i.imgur.com/AQ68y2E.png)
 
