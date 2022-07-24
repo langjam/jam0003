@@ -34,7 +34,7 @@ Before starting, you should learn how to interact with the environment. Luckily,
 As with other assembly languages, Xala has registers, of which there are 7. Those are:
 
 * `%X`, floating point value of the X coordinate. The value range is between 0 and 1 inclusively.
-* `%Y`, floating point value of the Y coordinate. The value range is between 0 and 1 inclusively.
+* `%Y`, floating point value of the Y coordinate. The value range is between 0 and 1 inclusively. 0 is at the bottom of screen rather than the top.
 * `%RET`, a return value. It is not implemented yet. But may be implemented in a future version.
 * `%OUT` is the floating point value of the opacity of the colour on the screen. Since Xala only works in monochrome, this is achieved with dithering. The value range is between 0 and 1, with 1 being completely light and 0 being completely dark. Using the default colours, this would mean that 1 is completely white and 0 completely blue, with values in between being a mix of both colours.
 * `%TIME` is the number of seconds program has been running for.
