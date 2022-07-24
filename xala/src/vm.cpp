@@ -122,6 +122,9 @@ int vm_memory_store(VM *vm) {
 	return 0;
 }
 
+extern int mx, my;
+int x, y;
+
 int vm_run(VM *vm) {
 	uint base = 0;
 	uint it = 0;
@@ -261,10 +264,12 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Print:
-				tprintf("{} line: {} says: {}\n",
-				        vm->regs[Reg_Time],
-				        is.argument,
-				        vm_pop(vm));
+				if (mx == x && my == y) {
+					tprintf("<span style=color:gray;>Line {}, {}ms:</span> {}\n",
+					        is.argument,
+					        int(vm->regs[Reg_Time]*1000),
+					        vm_pop(vm));
+				}
 				break;
 
 			default:
@@ -288,11 +293,12 @@ int vm_run_scr(VM *vm, u8 screen[256][256]) {
 	int period = 3;
 	int s = parity%period;
 	int z = parity/period%period;
+
 	for (int x = z; x < 256; x += period) {
 		for (int y = s; y < 256; y += period) {
-
+			::x = x;
+			::y = y;
 			vm->ip = vm->prog.start;
-
 
 			vm->csk.calls_len = 0;
 			vm->sk.values_len = 3;

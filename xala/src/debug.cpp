@@ -80,12 +80,12 @@ void putval(Program prog) {
     0, 0, 0, 0, 0,
     1, 2, 3, 3, 0,
     1, 0, 1, 0, 0, 0, 1,
-    1, 1, 1, 1, 1
+    1, 1, 1, 1, 1, 1
   };
   static const char *names[] = {
     "ADD", "SUB", "MUL", "DIV", "MOD",
     "POP", "IMM", "LOAD", "STORE", "EXIT",
-		"CALL", "RET", "COPY", "SIN", "COS", "POW", "SETBASE", "BA", "BZ", "BNZ", "BP", "BN"
+		"CALL", "RET", "COPY", "SIN", "COS", "POW", "SETBASE", "BA", "BZ", "BNZ", "BP", "BN", "PRINT"
   };
 
   static const char *regs[] = {

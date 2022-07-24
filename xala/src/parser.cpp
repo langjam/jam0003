@@ -458,6 +458,8 @@ again:
       CHECKOUT(arg_count(name, argc, 1));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Print, name.line}));
 
+      *pop = false;
+      return 0;
     } else {
       uint ip;
       CHECKOUT(parser_put_instr(p, Instr{InstrType_SetBase, uint(argc)}));

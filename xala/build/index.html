@@ -95,7 +95,8 @@
       var img = new ImageData(arr, 256);
 
       ctx.putImageData(img, 0, 0, 0, 0, 512, 512);
-
+      var element = document.getElementById("stdout");
+      element.scrollTop = element.scrollHeight;
       window.requestAnimationFrame(render)
     }
 
@@ -112,9 +113,28 @@
       recompile = true;
     }
 
+
     window.addEventListener("load", () => {
       window.requestAnimationFrame(render)
       var canvas = document.getElementById("canvas");
+
+      canvas.addEventListener("mouseleave", (e) => {
+
+        instance.exports.wasm_setmouse(-1, -1);
+      });
+      canvas.addEventListener("mousemove", (e) => {
+        e.preventDefault()
+
+        const { width, height } = canvas.getBoundingClientRect();
+
+        var x = e.offsetX/width*256
+        var y = e.offsetY/height*256
+
+        instance.exports.wasm_setmouse(x, y);
+      })
+
+
+
       ctx = canvas.getContext("2d");
       var stdoutEl = document.getElementById("stdout");
 
@@ -125,8 +145,12 @@
           wasm_render: (buffer) => {
             renderData = new Uint8Array(instance.exports.memory.buffer, buffer, 256*256);
           },
+          wasm_getx: (buffer) => {
+
+          },
           wasm_putchar: (stream, ch) => {
             if (stdout.length > 10000) {
+              stdout = "";
               return;
             }
             if (ch == 1) {
