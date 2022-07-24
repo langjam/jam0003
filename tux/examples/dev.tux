@@ -1,17 +1,39 @@
-stbg 0, 255, 0 ; set background color to green
+; set background color to green
+    stbg    0, 255, 0
 
 ; draw rectangle at (10, 10) with dimensions (100, 100) and color red
-move 10, 10
-stcl 255, 0, 0
-rect 100, 100
+    move    10, 10
+    stcl    255, 0, 0
+    rect    100, 100
     
 ; draw rectangle at (300, 300) with dimensions (100, 100) and color blue
-stps 300, 300
-stcl 0, 0, 255
-rect 100, 100
+    stps    300, 300
+    stcl    0, 0, 255
+    rect    100, 100
 
 ; draw line at (110, 110) with dimensions (190, 190), radius 5 and color white
-stps 110, 110
-strd 5
-stcl 255, 255, 255
-line 190, 190
+    stps    110, 110
+    strd    5
+    stcl    255, 255, 255
+    line    190, 190
+
+; draw three rectangles with a loop
+    stcl    0, 0, 0
+    stps    350, 10
+    store   r0, 0
+loop:
+    rect    50, 50
+    move    0, 70
+    add     r0, r0, 1
+    cmp     r0, 3
+    jlt     loop
+
+; draw a magenta square if r0 != 5
+    cmp     r0, 5
+    jne     magenta
+    jmp     end
+magenta:
+    stps    450, 60
+    stcl    255, 0, 255
+    rect    20, 20
+end:

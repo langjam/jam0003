@@ -30,8 +30,8 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
             match op {
                 NoOp => return Err(Error::new(CodeLocation::new(0, 0), "NoOp encountered.")),
                 Move => {
-                    let x = extract_integer(&mut vm, &inst);
-                    let y = extract_integer(&mut vm, &inst);
+                    let x = extract_value(&mut vm, &inst);
+                    let y = extract_value(&mut vm, &inst);
 
                     vm.pen_position.x += x;
                     vm.pen_position.y += y;
@@ -40,7 +40,7 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
                     let reg = inst[vm.ip];
                     vm.ip += 1;
 
-                    let new_value = extract_integer(&mut vm, &inst);
+                    let new_value = extract_value(&mut vm, &inst);
 
                     vm.registers[reg as usize] = new_value;
                 }
@@ -48,31 +48,107 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
                     let reg = inst[vm.ip];
                     vm.ip += 1;
 
-                    let a = extract_integer(&mut vm, &inst);
-                    let b = extract_integer(&mut vm, &inst);
+                    let a = extract_value(&mut vm, &inst);
+                    let b = extract_value(&mut vm, &inst);
 
                     vm.registers[reg as usize] = a + b;
                 }
+                Subtract => {
+                    let reg = inst[vm.ip];
+                    vm.ip += 1;
+
+                    let a = extract_value(&mut vm, &inst);
+                    let b = extract_value(&mut vm, &inst);
+
+                    vm.registers[reg as usize] = a - b;
+                }
+                Multiply => {
+                    let reg = inst[vm.ip];
+                    vm.ip += 1;
+
+                    let a = extract_value(&mut vm, &inst);
+                    let b = extract_value(&mut vm, &inst);
+
+                    vm.registers[reg as usize] = a * b;
+                }
+                Divide => {
+                    let reg = inst[vm.ip];
+                    vm.ip += 1;
+
+                    let a = extract_value(&mut vm, &inst);
+                    let b = extract_value(&mut vm, &inst);
+
+                    vm.registers[reg as usize] = a / b;
+                }
                 Stbg => {
-                    vm.background_color[0] = extract_integer(&mut vm, &inst);
-                    vm.background_color[1] = extract_integer(&mut vm, &inst);
-                    vm.background_color[2] = extract_integer(&mut vm, &inst);
+                    vm.background_color[0] = extract_value(&mut vm, &inst);
+                    vm.background_color[1] = extract_value(&mut vm, &inst);
+                    vm.background_color[2] = extract_value(&mut vm, &inst);
                 }
                 Stps => {
-                    vm.pen_position.x = extract_integer(&mut vm, &inst);
-                    vm.pen_position.y = extract_integer(&mut vm, &inst);
+                    vm.pen_position.x = extract_value(&mut vm, &inst);
+                    vm.pen_position.y = extract_value(&mut vm, &inst);
                 }
                 Stcl => {
-                    vm.pen_color[0] = extract_integer(&mut vm, &inst);
-                    vm.pen_color[1] = extract_integer(&mut vm, &inst);
-                    vm.pen_color[2] = extract_integer(&mut vm, &inst);
+                    vm.pen_color[0] = extract_value(&mut vm, &inst);
+                    vm.pen_color[1] = extract_value(&mut vm, &inst);
+                    vm.pen_color[2] = extract_value(&mut vm, &inst);
                 }
                 Strd => {
-                    vm.pen_radius = extract_integer(&mut vm, &inst);
+                    vm.pen_radius = extract_value(&mut vm, &inst);
+                }
+                Cmp => {
+                    let a = extract_value(&mut vm, &inst);
+                    let b = extract_value(&mut vm, &inst);
+                    vm.rc = match a.cmp(&b) {
+                        std::cmp::Ordering::Less => -1,
+                        std::cmp::Ordering::Equal => 0,
+                        std::cmp::Ordering::Greater => 1,
+                    };
+                }
+                Jmp => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                }
+                Jeq => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    if vm.rc == 0 {
+                        vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                    }
+                }
+                Jne => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    if vm.rc != 0 {
+                        vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                    }
+                }
+                Jlt => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    if vm.rc == -1 {
+                        vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                    }
+                }
+                Jgt => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    if vm.rc == 1 {
+                        vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                    }
+                }
+                Jle => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    if vm.rc <= 0 {
+                        vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                    }
+                }
+                Jge => {
+                    let jump = extract_integer(&mut vm, &inst);
+                    if vm.rc >= 0 {
+                        vm.ip = vm.ip.wrapping_add((jump - 2) as usize); // -2 because the operand take 2 bytes
+                    }
                 }
                 Rect => {
-                    let w = extract_integer(&mut vm, &inst);
-                    let h = extract_integer(&mut vm, &inst);
+                    let w = extract_value(&mut vm, &inst);
+                    let h = extract_value(&mut vm, &inst);
 
                     let rect = TuxShape {
                         kind: ShapeKind::Rect,
@@ -85,8 +161,8 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
                     vm.shapes.push(rect);
                 }
                 Line => {
-                    let w = extract_integer(&mut vm, &inst);
-                    let h = extract_integer(&mut vm, &inst);
+                    let w = extract_value(&mut vm, &inst);
+                    let h = extract_value(&mut vm, &inst);
 
                     let line = TuxShape {
                         kind: ShapeKind::Line,
@@ -103,7 +179,6 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
 
         let shapes = vm.shapes.iter();
 
-        // 2. draw the stuff
         window.draw_2d(&e, move |ctx, g, _| {
             clear(
                 [
@@ -158,18 +233,21 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
 }
 
 fn extract_integer(vm: &mut VM, inst: &compiler::Instructions) -> i16 {
+    let byte1 = inst[vm.ip];
+    vm.ip += 1;
+    let byte2 = inst[vm.ip];
+    vm.ip += 1;
+
+    let mut value = byte1 as i16;
+    value |= ((byte2 as u16) << 8) as i16;
+
+    value
+}
+
+fn extract_value(vm: &mut VM, inst: &compiler::Instructions) -> i16 {
     if inst[vm.ip] == 0 {
         vm.ip += 1;
-
-        let byte1 = inst[vm.ip];
-        vm.ip += 1;
-        let byte2 = inst[vm.ip];
-        vm.ip += 1;
-
-        let mut value = byte1 as i16;
-        value |= ((byte2 as u16) << 8) as i16;
-
-        value
+        extract_integer(vm, inst)
     } else {
         vm.ip += 1;
 
@@ -207,6 +285,7 @@ struct VM {
     // Evaluation
     ip: usize,
     registers: [i16; NUM_REGISTERS],
+    rc: i8,
 
     // Drawing
     pen_position: Position,
@@ -221,6 +300,7 @@ impl VM {
         Self {
             ip: Default::default(),
             registers: Default::default(),
+            rc: Default::default(),
             pen_position: Default::default(),
             pen_color: Default::default(),
             pen_radius: Default::default(),

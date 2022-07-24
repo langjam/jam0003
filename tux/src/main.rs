@@ -27,12 +27,6 @@ fn main() -> Result<(), String> {
             .into_boxed_str(),
     );
 
-    for line in source.lines() {
-        println!("{}", line);
-    }
-
-    println!("------------");
-
     let ir = match parser::parse(source) {
         Ok(ir) => ir,
         Err(err) => {
@@ -51,9 +45,6 @@ fn main() -> Result<(), String> {
             return Ok(());
         }
     };
-    println!("{:?}", ir);
-
-    println!("------------");
 
     let inst = match compiler::compile(ir) {
         Ok(inst) => inst,
@@ -73,9 +64,6 @@ fn main() -> Result<(), String> {
             return Ok(());
         }
     };
-    println!("{:#?}", inst);
-
-    println!("------------");
 
     if let Err(err) = evaluator::evaluate(
         file_path

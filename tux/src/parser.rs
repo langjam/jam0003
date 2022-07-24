@@ -25,10 +25,21 @@ enum TokenData {
     Move,
     Store,
     Add,
+    Subtract,
+    Multiply,
+    Divide,
     Stbg,
     Stps,
     Stcl,
     Strd,
+    Cmp,
+    Jmp,
+    Jeq,
+    Jne,
+    Jlt,
+    Jgt,
+    Jle,
+    Jge,
     Rect,
     Line,
 }
@@ -186,10 +197,21 @@ impl Tokenizer {
                 "move" => TokenData::Move,
                 "store" => TokenData::Store,
                 "add" => TokenData::Add,
+                "sub" => TokenData::Subtract,
+                "mul" => TokenData::Multiply,
+                "div" => TokenData::Divide,
                 "stbg" => TokenData::Stbg,
                 "stps" => TokenData::Stps,
                 "stcl" => TokenData::Stcl,
                 "strd" => TokenData::Strd,
+                "cmp" => TokenData::Cmp,
+                "jmp" => TokenData::Jmp,
+                "jeq" => TokenData::Jeq,
+                "jne" => TokenData::Jne,
+                "jlt" => TokenData::Jlt,
+                "jgt" => TokenData::Jgt,
+                "jle" => TokenData::Jle,
+                "jge" => TokenData::Jge,
                 "rect" => TokenData::Rect,
                 "line" => TokenData::Line,
                 _ => TokenData::Label(word),
@@ -215,10 +237,21 @@ pub enum IR {
     Move(Value, Value),
     Store(u8, Value),
     Add(u8, Value, Value),
+    Subtract(u8, Value, Value),
+    Multiply(u8, Value, Value),
+    Divide(u8, Value, Value),
     Stbg(Value, Value, Value),
     Stps(Value, Value),
     Stcl(Value, Value, Value),
     Strd(Value),
+    Cmp(Value, Value),
+    Jmp(String),
+    Jeq(String),
+    Jne(String),
+    Jlt(String),
+    Jgt(String),
+    Jle(String),
+    Jge(String),
     Rect(Value, Value),
     Line(Value, Value),
 }
@@ -284,6 +317,39 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 ir.push(IR::Add(reg, a, b));
             }
+            Subtract => {
+                let reg = parse_register_name(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let a = parse_value(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let b = parse_value(&mut t)?;
+
+                ir.push(IR::Subtract(reg, a, b));
+            }
+            Multiply => {
+                let reg = parse_register_name(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let a = parse_value(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let b = parse_value(&mut t)?;
+
+                ir.push(IR::Multiply(reg, a, b));
+            }
+            Divide => {
+                let reg = parse_register_name(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let a = parse_value(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let b = parse_value(&mut t)?;
+
+                ir.push(IR::Divide(reg, a, b));
+            }
             Stbg => {
                 let r = parse_value(&mut t)?;
                 eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
@@ -317,6 +383,42 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
             Strd => {
                 let r = parse_value(&mut t)?;
                 ir.push(IR::Strd(r));
+            }
+            Cmp => {
+                let a = parse_value(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let b = parse_value(&mut t)?;
+
+                ir.push(IR::Cmp(a, b));
+            }
+            Jmp => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jmp(dst));
+            }
+            Jeq => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jeq(dst));
+            }
+            Jne => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jne(dst));
+            }
+            Jlt => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jlt(dst));
+            }
+            Jgt => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jgt(dst));
+            }
+            Jle => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jle(dst));
+            }
+            Jge => {
+                let dst = parse_label_name(&mut t)?;
+                ir.push(IR::Jge(dst));
             }
             Rect => {
                 let w = parse_value(&mut t)?;
@@ -401,4 +503,21 @@ fn parse_value(t: &mut Tokenizer) -> Result<Value> {
         ))?;
 
     Ok(value)
+}
+
+fn parse_label_name(t: &mut Tokenizer) -> Result<String> {
+    let opt_token = t.next()?;
+    let (data, location) = opt_token
+        .map(|t| (Some(t.data), t.location))
+        .unwrap_or((None, CodeLocation::new(t.line, t.col)));
+
+    let label = data
+        .map(|d| match d {
+            TokenData::Label(l) => Some(l),
+            _ => None,
+        })
+        .flatten()
+        .ok_or(Error::new(location, "Expected a label name."))?;
+
+    Ok(label)
 }

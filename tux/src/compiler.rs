@@ -1,3 +1,5 @@
+#![allow(overflowing_literals)]
+
 use std::collections::HashMap;
 
 use crate::parser::{Value, IR};
@@ -10,12 +12,23 @@ pub enum Op {
     Move = 1,
     Store = 2,
     Add = 3,
-    Stbg = 4,
-    Stps = 5,
-    Stcl = 6,
-    Strd = 7,
-    Rect = 8,
-    Line = 9,
+    Subtract = 4,
+    Multiply = 5,
+    Divide = 6,
+    Stbg = 7,
+    Stps = 8,
+    Stcl = 9,
+    Strd = 10,
+    Cmp = 11,
+    Jmp = 12,
+    Jeq = 13,
+    Jne = 14,
+    Jlt = 15,
+    Jgt = 16,
+    Jle = 17,
+    Jge = 18,
+    Rect = 19,
+    Line = 20,
 }
 
 impl TryFrom<u8> for Op {
@@ -28,12 +41,23 @@ impl TryFrom<u8> for Op {
             1 => Move,
             2 => Store,
             3 => Add,
-            4 => Stbg,
-            5 => Stps,
-            6 => Stcl,
-            7 => Strd,
-            8 => Rect,
-            9 => Line,
+            4 => Subtract,
+            5 => Multiply,
+            6 => Divide,
+            7 => Stbg,
+            8 => Stps,
+            9 => Stcl,
+            10 => Strd,
+            11 => Cmp,
+            12 => Jmp,
+            13 => Jeq,
+            14 => Jne,
+            15 => Jlt,
+            16 => Jgt,
+            17 => Jle,
+            18 => Jge,
+            19 => Rect,
+            20 => Line,
             _ => return Err(format!("Invalid Op: {}", value)),
         };
 
@@ -48,10 +72,26 @@ pub fn compile(ir: Vec<IR>) -> Result<Instructions> {
         use IR::*;
         match i {
             DefineLabel(label) => {
-                if c.labels
-                    .insert(label.clone(), c.instructions.len())
-                    .is_some()
+                let label_dst = c.instructions.len();
+
                 {
+                    let mut i = 0;
+                    while i < c.unresolved_jumps.len() {
+                        let uj = &c.unresolved_jumps[i];
+                        if uj.label == label {
+                            let jump = (label_dst - uj.instructions_index) as i16;
+                            c.instructions[uj.instructions_index] = (jump & 0x00FF) as u8;
+                            c.instructions[uj.instructions_index + 1] =
+                                ((jump & 0xFF00) >> 8) as u8;
+
+                            c.unresolved_jumps.remove(i);
+                        } else {
+                            i += 1;
+                        }
+                    }
+                }
+
+                if c.labels.insert(label.clone(), label_dst).is_some() {
                     return Err(Error::new(
                         CodeLocation::new(0, 0),
                         format!("Redeclaration of label `{}`.", label),
@@ -70,6 +110,24 @@ pub fn compile(ir: Vec<IR>) -> Result<Instructions> {
             }
             Add(reg, a, b) => {
                 c.emit_op(Op::Add);
+                c.emit_byte(reg);
+                c.emit_value(a);
+                c.emit_value(b);
+            }
+            Subtract(reg, a, b) => {
+                c.emit_op(Op::Subtract);
+                c.emit_byte(reg);
+                c.emit_value(a);
+                c.emit_value(b);
+            }
+            Multiply(reg, a, b) => {
+                c.emit_op(Op::Multiply);
+                c.emit_byte(reg);
+                c.emit_value(a);
+                c.emit_value(b);
+            }
+            Divide(reg, a, b) => {
+                c.emit_op(Op::Divide);
                 c.emit_byte(reg);
                 c.emit_value(a);
                 c.emit_value(b);
@@ -94,6 +152,32 @@ pub fn compile(ir: Vec<IR>) -> Result<Instructions> {
             Strd(radius) => {
                 c.emit_op(Op::Strd);
                 c.emit_value(radius);
+            }
+            Cmp(a, b) => {
+                c.emit_op(Op::Cmp);
+                c.emit_value(a);
+                c.emit_value(b);
+            }
+            Jmp(label) => {
+                c.emit_jump(Op::Jmp, label);
+            }
+            Jeq(label) => {
+                c.emit_jump(Op::Jeq, label);
+            }
+            Jne(label) => {
+                c.emit_jump(Op::Jne, label);
+            }
+            Jlt(label) => {
+                c.emit_jump(Op::Jlt, label);
+            }
+            Jgt(label) => {
+                c.emit_jump(Op::Jgt, label);
+            }
+            Jle(label) => {
+                c.emit_jump(Op::Jle, label);
+            }
+            Jge(label) => {
+                c.emit_jump(Op::Jge, label);
             }
             Rect(w, h) => {
                 c.emit_op(Op::Rect);
@@ -151,6 +235,22 @@ impl Compiler {
         } else {
             self.emit_byte(0);
             self.emit_int(value.value);
+        }
+    }
+
+    fn emit_jump(&mut self, jump_op: Op, label: String) {
+        self.emit_op(jump_op);
+        if let Some(&dst) = self.labels.get(&label) {
+            let jump = (dst.wrapping_sub(self.instructions.len())) as i16;
+            self.emit_int(jump)
+        } else {
+            let jmp_dst_idx = self.instructions.len();
+            let unresolved = UnresolvedJump {
+                label,
+                instructions_index: jmp_dst_idx,
+            };
+            self.unresolved_jumps.push(unresolved);
+            self.emit_int(0xBAAD);
         }
     }
 }
