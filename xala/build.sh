@@ -6,9 +6,9 @@ do
   clang++ \
     -Ofast \
     -fdebug-compilation-dir=.. \
-    -target wasm32 \
-    -flto \
+    -target wasm32-freestanding \
     -nostdlib \
+    -flto \
     -Wl,--no-entry \
     -Wl,--export-all \
     -Wl,--lto-O3 \
