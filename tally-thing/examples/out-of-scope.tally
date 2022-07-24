@@ -1,0 +1,31 @@
+;; Sum types and pattern matching:
+;; ===============================
+;; I nevertheless have ideas about syntax...
+
+some-list (
+  | cons _ -> "A non-empty list"
+	| nil    -> "An empty list"
+)
+
+dfn sum-list = (
+  | cons _ -> (.hd + .tl sum-list)
+	| nil    -> 0
+)
+
+dfn head-or-bust = (
+  | cons {hd = _, ...} -> _        ;; might be possible, but why bother? ans: nesting?
+	| nil                -> ???
+)
+
+;; there should be shortcuts for matching values within records and bags
+
+{a = 1, b = 2, c = 3} {
+  | a = .val -> a = (.val + 5)
+  | .key = 3 -> e = 4
+	| ...
+}
+
+;; String interpolation:
+;; =====================
+
+{max = 50, min = -12, avg = 10} "The values ranged from {.min} to {.max}"

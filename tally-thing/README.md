@@ -5,8 +5,16 @@ Tally Thing
 
 By Daniel Sherlock.
 
+Example Code:
+
 ```
-TODO: Provide example.
+;; a prelude goes here - it still need to be copy-pasted in
+
+.ballots by(constituency)  ;; takes a the ballots from the json
+                           ;; and sorts them into bunches of like constituency
+
+  ;; sadly, I didn't get any futher than that
+	;; (I mean, it can do a no-op too (just use `_`)
 ```
 
 Background
@@ -48,7 +56,54 @@ with carefully chosen syntax and useful built-in functions
 that act as "tallying primitives" to build your system to fit the
 much more complex structures of real-life legislatures.
 
-Build & Run
------------
+Technical PL Details and Identity Crisis
+----------------------------------------
 
-TODO: Documentation.
+This is my first time writing something like this from scratch, so it's been
+slow going - not helped by having to remember how to use python all the time.
+I also didn't look at `resources.md` until halfway through...
+
+I'm calling it a DSL because of its narrow scope,
+but also because given the time and (lack of) expertise I have
+I'm giving it very limited functionality:
+
+  + Definitions at the top level only
+	+ No sum types
+	+ Only good for processing data handed to in in JSON form
+
+It's inspired syntactically by
+[_Lawvere_](https://github.com/jameshaydon/lawvere), but skips the nice type
+system, and the sum types (which are lovely in _Lawvere_, but didn't seem
+immediately useful for this appliction). The product types are backed by JSON
+objects to try and take some work off my hands. Finally, since the application
+is ballot-counting, I added a heavily built-in bag/multiset datatype, ideal for
+storing all the ballots or various intermediate values. These are backed by
+JSON arrays.
+
+Unfortunately (and I can't believe I only realised this with 8 hours left to go)
+this makes it effectively an incomplete, highly buggy implementation of
+[_jq_](https://stedolan.github.io/jq/) (or rather: `jq -f`) with a subtly
+different syntax (different declarations, way fewer `|`, a few fewer `.`,
+a less flexible mapping syntax, ...). Oh well.
+
+The upshot of this is that I know what I'll be doing on Monday:
+I'll be installing _jq_ and seeing how easy it is to port my draft example
+programs to _jq_ scripts. If it works nicely then I'll just have to put up with
+all the extra `|` symbols in the syntax, and see if I can write a few
+election-specific functions.
+
+**Update:** As of the end of the jam, I have at least got data flowing through
+the script, and can modify it in two very siple ways and one trivial way. The
+parser is slightly more capable than the runner.
+
+Running the Interpreter
+-----------------------
+
+Written in python, uses the [`pyparsing`](https://pypi.org/project/pyparsing/)
+library. If you have it installed then:
+
+```
+...\tally-thing> python3 interpreter examples\test.tally examples\test.json
+```
+
+(adjust depending on OS, or how you prefer to run things in python environments)
