@@ -87,7 +87,10 @@ WASM_EXPORT void wasm_accept(u8 c) {
   source[source_len] = 0; 
 }
 
+VM vm;
+
 WASM_EXPORT void wasm_run() {
+  source_len = 0;
   Program prog;
   if (parser_parse(&prog, (const char *)source)) {
     tprintf("Error!");
@@ -96,15 +99,20 @@ WASM_EXPORT void wasm_run() {
     tprintf("{}", prog);
   }
 
-  VM vm = vm_init(prog);
+  vm = vm_init(prog);
+}
 
+WASM_EXPORT void wasm_frame(float dt) {
   for (int i = 0; i < 256; ++i) {
     for (int j = 0; j < 256; ++j) {
+      //bytes[i][j] = int(i + j + vm.regs[Reg_Time]*256)%256;
       if (vm_run_for_pixel(&vm, bytes, i, j)) {
         return;
       }
     }
   }
+
   dither();
   wasm_render((u8*)bytes);
+  vm.regs[Reg_Time] += dt;
 }

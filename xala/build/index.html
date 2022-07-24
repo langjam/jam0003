@@ -33,7 +33,14 @@
       margin: 0;
     }
     canvas {
+      width: 512px;
+      height: 512px;
       border: 1px solid black;
+      -ms-interpolation-mode: nearest-neighbor;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Chromium + Safari */
+      image-rendering: pixelated;
     }
     .runbtn {
       position: absolute;
@@ -43,12 +50,12 @@
 <body>
   <div class="row">
     <div class="cont">
-      <textarea id="input">%X ADD %Y MOD 0.5 INTO %OUT ; adds x and y outputs into the screen</textarea>
+      <textarea id="input">%X ADD %X SUB %X ADD %X SUB %X ADD %Y ADD %TIME MOD 0.5 INTO %OUT ; adds x and y outputs into the screen</textarea>
       <button class="runbtn" onclick="run()">Run</button>
     </div>
     <div class="cont">
       <div>
-        <canvas id="canvas" width="512" height="512"></canvas>
+        <canvas id="canvas" width="256" height="256"></canvas>
       </div>
       <div id="stdout"></div>
     </div>
@@ -56,26 +63,26 @@
   <script>
     let stdout = ""
     let renderData = new Uint8Array(256*256), ctx, instance;
-/*
-    function render() {
 
-      for (i in renderData) {
-        ctx.fillStyle = `rgb(${renderData[i]},${renderData[i]},${renderData[i]})`;
-        ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
+    let last;
+    function render(ts) {
+      last ??= ts;
+      const dt = ts - last;
+      last = ts;
+      instance.exports.wasm_frame(dt/1000.0);
+
+      const arr = new Uint8ClampedArray(256*256*4);
+      for (let i = 0; i < 256*256; i += 1) {
+        arr[i*4+0] = renderData[i]+51;
+        arr[i*4+1] = renderData[i]+122;
+        arr[i*4+2] = renderData[i]+166;
+        arr[i*4+3] = 255;
       }
-    }
-    */
+      var img = new ImageData(arr, 256);
 
-    function render() {
-      ctx.fillStyle = "rgb(51,122,166)";
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.fillStyle = "rgb(255,255,255)";
+      ctx.putImageData(img, 0, 0, 0, 0, 512, 512);
 
-      for (i in renderData) {
-        if (renderData[i]) {
-          ctx.fillRect((i%256)*2, (~~(i/256))*2, 2, 2)
-        }
-      }
+      window.requestAnimationFrame(render)
     }
 
     function run(e) {
@@ -89,7 +96,7 @@
         instance.exports.wasm_accept(v);
       }
       instance.exports.wasm_run();
-      render();
+      window.requestAnimationFrame(render)
     }
 
     window.addEventListener("load", () => {

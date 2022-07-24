@@ -31,6 +31,7 @@ WASM_IMPORT void wasm_putchar(Wasm_StreamId stream, int ch);
 WASM_IMPORT void wasm_render(u8 *bytes);
 WASM_EXPORT void wasm_accept(u8 c);
 WASM_EXPORT void wasm_init();
+WASM_EXPORT void wasm_frame(float dt);
 WASM_EXPORT void wasm_run();
 
 

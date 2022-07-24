@@ -8,6 +8,7 @@ enum Reg {
   Reg_Y,
   Reg_Ret, // Return value
   Reg_Out, // Output pixel
+  Reg_Time, // Time in seconds
 
 	REG_COUNT
 };
