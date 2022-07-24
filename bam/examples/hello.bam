@@ -1,0 +1,5 @@
+machine Main {
+    let hello = "Hello, BAM!";
+    hello{1} -> Print
+}
+

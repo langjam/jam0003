@@ -1,0 +1,104 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Ubuntu Mono", monospace;
+	margin: 0;
+	background-color: white;
+}
+
+pre,
+code,
+select,
+input,
+button {
+	font-family: "Ubuntu Mono", monospace;
+}
+
+button {
+	background-color: black;
+	outline: none;
+	border: 2px solid white;
+	border-radius: 6px;
+	padding: 8px;
+	color: white;
+	min-width: 64px;
+}
+
+.App {
+	display: grid;
+	grid-template-columns: 1fr 516px;
+	gap: 24px;
+}
+
+.instructions {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 32px;
+	padding-bottom: 128px;
+}
+
+.instructions-bar {
+	position: fixed;
+	background-color: black;
+	margin: 8px;
+	padding: 12px;
+	border-radius: 8px;
+	bottom: 0;
+	width: calc(100vw - 16px);
+	box-shadow: 0 0 12px #0003;
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+}
+
+.section-header {
+	text-transform: uppercase;
+	color: #aaa;
+	font-size: 14px;
+	text-align: center;
+	margin: 12px;
+}
+
+.machine-panel {
+	position: sticky;
+	top: 0;
+	box-shadow: 0 0 24px #0004;
+	height: 100vh;
+	max-height: 100vh;
+	padding: 32px;
+	padding-bottom: 64px;
+}
+
+.machine {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.machine code {
+	background-color: #343434;
+	border-radius: 8px;
+	padding: 16px;
+	padding-right: 20px;
+	color: white;
+}
+
+code.rd {
+	text-align: right;
+	width: 72px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	background-color: black;
+	margin-left: -24px;
+	padding-right: 16px;
+}
+
+.machine-output {
+	background-color: #fafafa;
+	border-radius: 8px;
+	padding: 16px;
+}

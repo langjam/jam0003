@@ -1,0 +1,43 @@
+# startup
+ADDR # s
+DUP # s c
+DUP # s c c
+RND #
+ADD # s c t
+RND  
+ADD # s c t
+SWAP # s t c
+# start copy loop
+ADDR # s t c l
+SWAP # s t l c
+ROT # s l c t
+DUP2
+ADD # s l c t c+t
+ROT # s l t c+t c
+DUP # s l t c+t c c
+READ # s l t c+t c inst
+ROT # s l t c inst c+t
+SWAP # s l t c c+t inst
+WRITE # s l t c
+N1
+ADD # s l t c+1
+ROT # s t c+1 l
+SWAP # s t l c+1
+DUP # s t l c+1 c+1
+ADDR
+N8
+N8
+N4
+ADD
+ADD # add to get end of replicator
+ADD # s t l c+1 c+1 end
+LT # s t l c+1 b
+ROT # s t c+1 b l
+SWAP # s t c+1 l b
+JMPIF # s t c+1
+# copy complete, start a new processor on copy
+DROP # s t
+OVER # s t s
+ADD # s s+t
+START # s
+JMP # jump to first addr

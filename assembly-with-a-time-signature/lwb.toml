@@ -1,0 +1,8 @@
+[syntax]
+definition = "src/parser/asm.syntax"
+destination = "src/parser/ast"
+serde = false
+
+[language]
+name = "asm"
+extensions = ["asm"]

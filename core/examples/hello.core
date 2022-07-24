@@ -1,0 +1,18 @@
+// print("hello world")
+// exit(0)
+
+// store "hello world" to memory 0
+op 0
+d0 0
+d1 "hello, world!\n"
+call
+
+// print "hello world" from memory 0
+op 1
+d0 0
+call
+
+// exit with 0 code
+op 9
+d0 0
+call
