@@ -2,7 +2,7 @@
 ## Introduction
 Welcome to Xala (pronounced shala, from SHader Assembly LAnguage), an assembly language designed to make beautiful monochrome animations.
 
-XALA was developed by [skejeton](https://github.com/skejeton) and [mrms](https://github.com/marekmaskarinec) with some miscellaneous assistance from [Doigt](https://github.com/RealDoigt).
+XALA was developed by [skejeton](https://github.com/skejeton) and [Marek Maskarinec](https://github.com/marekmaskarinec) with some miscellaneous assistance from [Doigt](https://github.com/RealDoigt).
 
 Instead of installing and running scripts locally, you can try the language at the online playground here: https://mrms.cz/xala/playground
 
