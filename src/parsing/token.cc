@@ -5,7 +5,7 @@
 
 std::string Token::to_string() {
     assert(type() == Identifier || type() == Number);
-    return m_stream.substr(index(), index() + size());
+    return m_stream.substr(index(), size());
 }
 
 int Token::to_number() {
