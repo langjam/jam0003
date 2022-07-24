@@ -138,6 +138,25 @@ int vm_run(VM *vm) {
 					vm->regs[is.argument] = vm_pop(vm);
 				break;
 
+			case InstrType_Call:
+				CHECKOUT(is.argument < 0 || is.argument >= vm->prog.instrs_len);
+				CHECKOUT(vm->csk.calls_len >= STACK_MAX - 1);
+
+				vm->csk.calls[vm->csk.calls_len++] = (Call){
+					.ret = vm->ip + 1,
+					.base = vm->sk.values_len
+				};
+				vm->ip = is.argument;
+
+				break;
+
+			case InstrType_Ret:
+				CHECKOUT(vm->csk.calls_len);
+
+				vm->ip = vm->csk.calls[vm->csk.calls_len--].ret;
+
+				break;
+
 			case InstrType_Exit:
 				return 0;
 				break;
@@ -159,7 +178,7 @@ int vm_run_scr(VM *vm, u8 screen[256][256]) {
 	for (int x = 0; x < 256; ++x) {
 		for (int y = 0; y < 256; ++y) {
 			vm->ip = 0;
-			vm->csk.return_addrs_len = 0;
+			vm->csk.calls_len = 0;
 			vm->sk.values_len = 3;
 			vm->regs[Reg_X] = x/255.0;
 			vm->regs[Reg_Y] = (255-y)/255.0;

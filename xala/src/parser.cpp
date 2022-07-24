@@ -334,7 +334,10 @@ again:
       goto again;
     }
 
-    if (span_equal({name.str, name.len}, {"ADD", 3})) {
+    if (span_equal({name.str, name.len}, {"RET", 3})) {
+      CHECKOUT(arg_count(name, argc, 0));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Ret}));
+    } else if (span_equal({name.str, name.len}, {"ADD", 3})) {
 
       CHECKOUT(arg_count(name, argc, 2));
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Add}));
