@@ -1,6 +1,7 @@
 use crate::{hashmap, syntax::*};
 use lazy_static::lazy_static;
-use std::{collections::HashMap, fmt::Display};
+use tracing::{info, debug};
+use std::{collections::{HashMap, HashSet}, fmt::Display};
 use thiserror::Error;
 
 // TODO: Check that variables are only used once
@@ -111,8 +112,8 @@ impl Display for Type {
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
-            Self::TyVar(value) => format!("Type Var: {value}"),
-            Self::UnifVar(value) => format!("Uniform Var: {value}"),
+            Self::TyVar(value) => format!("${value}"), // type variable
+            Self::UnifVar(value) => format!("#{value}"), // unification variable
         };
 
         write!(f, "{message}")
@@ -130,6 +131,12 @@ pub struct MachineType {
     var_count: usize,
     input: Type,
     output: Type,
+}
+
+impl Display for MachineType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "∀{}. {} -> {}", self.var_count, self.input, self.output)
+    }
 }
 
 pub struct GlobalTypeEnv {
@@ -194,9 +201,14 @@ pub fn check_machine_def(
     let subst = unify(&local_env)?;
 
     let generalized_machine_type = generalize(&subst, machine_type);
+    
+    info!("Machine type for machine {}: {}", machine.name, generalized_machine_type);
+
     global_env
         .machine_types
         .insert(machine.name.clone(), generalized_machine_type);
+
+
 
     Ok(())
 }
@@ -366,14 +378,17 @@ fn replace_ty_var(ty: Type, var: usize, to_replace: &Type) -> Type {
     }
 }
 
-fn replace_unif_var(ty: Type, var: usize, to_replace: &Type) -> Type {
+fn replace_unif_var(subst: &HashMap<usize, Type>, ty: Type, var: usize, to_replace: &Type) -> Type {
     match ty {
         Type::Num | Type::Bool | Type::String | Type::TyVar(_) => ty,
         Type::UnifVar(other) => {
             if other == var {
                 to_replace.clone()
             } else {
-                ty
+                match subst.get(&other) {
+                    None => ty,
+                    Some(ty) => replace_unif_var(subst, ty.clone(), var, to_replace)
+                }
             }
         }
         Type::Tuple(tys) => Type::Tuple(
@@ -386,8 +401,9 @@ fn replace_unif_var(ty: Type, var: usize, to_replace: &Type) -> Type {
 
 fn unify(local_env: &LocalTypeEnv) -> Result<HashMap<usize, Type>, TypeError> {
     let mut subst: HashMap<usize, Type> = HashMap::new();
-
+    
     for (ty1, ty2) in &local_env.unification_constraints {
+        info!("Unifying {ty1} and {ty2}");
         unify_types(&mut subst, ty1, ty2)?
     }
 
@@ -402,6 +418,9 @@ fn unify_types(subst: &mut HashMap<usize, Type>, ty1: &Type, ty2: &Type) -> Resu
             for (ty1, ty2) in tys1.iter().zip(tys2.iter()) {
                 unify_types(subst, ty1, ty2)?
             }
+            Ok(())
+        }
+        (Type::UnifVar(a), Type::UnifVar(b)) if a == b => {
             Ok(())
         }
         (Type::UnifVar(a), ty2) => {
@@ -425,10 +444,12 @@ fn unify_types(subst: &mut HashMap<usize, Type>, ty1: &Type, ty2: &Type) -> Resu
     }
 }
 
-fn free_unif_vars(subst: &HashMap<usize, Type>, result: &mut Vec<usize>, ty: &Type) {
+fn free_unif_vars(subst: &HashMap<usize, Type>, result: &mut HashSet<usize>, ty: &Type) {
     match ty {
         Type::UnifVar(a) => match subst.get(a) {
-            None => result.push(*a),
+            None => {
+                result.insert(*a);
+            },
             Some(ty) => free_unif_vars(subst, result, ty),
         },
         Type::Bool | Type::Num | Type::String | Type::TyVar(_) => (),
@@ -441,21 +462,25 @@ fn free_unif_vars(subst: &HashMap<usize, Type>, result: &mut Vec<usize>, ty: &Ty
 }
 
 fn generalize(subst: &HashMap<usize, Type>, machine_ty: MachineType) -> MachineType {
-    let mut free_vars = Vec::new();
+    let mut free_vars = HashSet::new();
     free_unif_vars(subst, &mut free_vars, &machine_ty.input);
     free_unif_vars(subst, &mut free_vars, &machine_ty.output);
+
+    let free_vars = free_vars
+        .into_iter()
+        .collect::<Vec<_>>();
 
     let input = free_vars
         .iter()
         .enumerate()
         .rfold(machine_ty.input, |ty, (i, var)| {
-            replace_unif_var(ty, *var, &Type::TyVar(i))
+            replace_unif_var(subst, ty, *var, &Type::TyVar(i))
         });
     let output = free_vars
         .iter()
         .enumerate()
         .rfold(machine_ty.output, |ty, (i, var)| {
-            replace_unif_var(ty, *var, &Type::TyVar(i))
+            replace_unif_var(subst, ty, *var, &Type::TyVar(i))
         });
 
     MachineType {
