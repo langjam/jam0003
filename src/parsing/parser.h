@@ -38,6 +38,7 @@ class Parser final {
     ErrorOr<AstInstruction*> parse_instruction();
 
     ErrorOr<AstExpr*> parse_number();
+    ErrorOr<AstExpr*> parse_keyword();
     ErrorOr<AstExpr*> parse_paren();
     ErrorOr<AstExpr*> parse_variable();
     ErrorOr<AstExpr*> parse_single();

@@ -4,6 +4,7 @@
 #include <ast/exprs/mulexpr.h>
 #include <ast/exprs/numberexpr.h>
 #include <ast/exprs/variableexpr.h>
+#include <ast/exprs/keywordexpr.h>
 #include <ast/instructions/assigninstruction.h>
 #include <ast/instructions/generateinstruction.h>
 #include <ast/instructions/instruction.h>
@@ -172,8 +173,23 @@ ErrorOr<AstExpr*> Parser::parse_variable() {
     return new AstVariableExpr(token().to_string());
 }
 
+ErrorOr<AstExpr*> Parser::parse_keyword() {
+    auto maybe_matched = match_token(Token::Type::LeftArrow).value()
+        || match_token(Token::Type::RightArrow).value()
+        || match_token(Token::Type::Caret).value()
+        || match_token(Token::Type::Comma).value();
+    if (!maybe_matched) {
+        set_error("unexpected token, expected keyword");
+        return {};
+    }
+    return new AstKeywordExpr(token().type());
+}
+
 ErrorOr<AstExpr*> Parser::parse_single() {
-    auto maybe_parsed = parse_number();
+    auto maybe_parsed = parse_keyword();
+    if (maybe_parsed.value()) return maybe_parsed.value();
+
+    maybe_parsed = parse_number();
     if (maybe_parsed.is_error()) return {};
     if (maybe_parsed.value()) return maybe_parsed.value();
 
