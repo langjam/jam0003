@@ -11,8 +11,9 @@ class AstAssignInstruction : public AstInstruction {
     AstAssignInstruction(std::string varname, AstExpr::Ptr expr)
         : m_varname(varname), m_value_expr(expr) {}
 
-    void run(State* state) {
-        state->set_variable(m_varname, *m_value_expr);
+    void run(State& state) override {
+        auto value = m_value_expr->eval(state);
+        state.set_variable(m_varname, value);
     }
 
    private:

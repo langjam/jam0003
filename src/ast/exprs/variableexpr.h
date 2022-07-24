@@ -8,8 +8,8 @@ class AstVariableExpr : public AstExpr {
    public:
     AstVariableExpr(std::string name) : AstExpr(), m_name(name) {}
 
+    Value::Ptr eval(State& state) override;
+
    private:
     std::string m_name;
-
-    std::string name() { return m_name; }
 };

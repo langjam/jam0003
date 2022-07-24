@@ -7,10 +7,18 @@ set(SOURCES
     src/parsing/token.cc
     src/parsing/lexer.cc
     src/parsing/parser.cc
-    src/runtime/drawer.cc
-    src/runtime/terminal_drawer.cc
-    src/runtime/grid.cc
-    src/runtime/value.cc
+    # src/runtime/drawer.cc
+    # src/runtime/terminal_drawer.cc
+    # src/runtime/grid.cc
+    src/ast/exprs/addexpr.cc
+    src/ast/exprs/mulexpr.cc
+    src/ast/exprs/numberexpr.cc
+    src/ast/exprs/specialexpr.cc
+    src/ast/exprs/variableexpr.cc
+    src/runtime/values/value.cc
+    src/runtime/values/numbervalue.cc
+    src/runtime/values/repeatvalue.cc
+    src/runtime/values/combinationvalue.cc
     src/runtime/interpreter.cc
 )
 

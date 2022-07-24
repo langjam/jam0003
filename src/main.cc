@@ -1,5 +1,6 @@
 #include <parsing/lexer.h>
 #include <parsing/parser.h>
+#include <runtime/interpreter.h>
 
 #include <fstream>
 #include <iostream>
@@ -31,5 +32,7 @@ auto main(int argc, char* argv[]) -> int {
         parser.show_error();
         return 1;
     }
+    Interpreter interpreter(parser.instructions());
+    interpreter.run();
     return 0;
 }

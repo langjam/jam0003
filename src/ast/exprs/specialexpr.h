@@ -13,6 +13,8 @@ class AstSpecialExpr : public AstExpr {
 
     AstSpecialExpr(Type type) : AstExpr(), m_type(type) {}
 
+    Value::Ptr eval(State& state) override;
+
    private:
     Type m_type;
 };

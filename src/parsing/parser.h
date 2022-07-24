@@ -14,6 +14,7 @@ class Parser final {
 
     ErrorOr<void> parse_all();
     void show_error();
+    std::vector<AstInstruction::Ptr> instructions() { return m_instructions; }
 
    private:
     Lexer& m_lexer;
@@ -21,8 +22,8 @@ class Parser final {
     std::string m_error_message{};
     std::vector<AstInstruction::Ptr> m_instructions;
 
-    ErrorOr<bool> lex() { return m_lexer.lex(); }
     bool has_error() { return m_has_error; }
+    ErrorOr<bool> lex() { return m_lexer.lex(); }
     bool is_eof() { return m_lexer.is_eof(); }
     Token& token() { return m_lexer.token(); }
     StreamPos position() { return m_lexer.position(); }

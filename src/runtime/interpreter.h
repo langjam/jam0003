@@ -1,13 +1,18 @@
 #pragma once
 
+#include <ast/exprs/expr.h>
+#include <ast/instructions/instruction.h>
+#include <runtime/state.h>
+
 #include <vector>
 
-#include "ast/exprs/expr.h"
-#include "ast/instructions/instruction.h"
-
 class Interpreter {
-   private:
-    State m_state;
    public:
-    void run(std::vector<AstInstruction*> instructions);
+    Interpreter(std::vector<AstInstruction::Ptr> instructions)
+        : m_instructions(instructions) {}
+    void run();
+
+   private:
+    State m_state { };
+    std::vector<AstInstruction::Ptr> m_instructions;
 };

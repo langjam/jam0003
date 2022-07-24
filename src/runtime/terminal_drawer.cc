@@ -2,7 +2,7 @@
 
 #include <runtime/drawer.h>
 #include <runtime/grid.h>
-#include <runtime/value.h>
+#include <runtime/values/value.h>
 
 void TerminalDrawer::draw(Grid* grid) {
     for (size_t y = grid->height(); y > 0; y--) {

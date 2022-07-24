@@ -1,22 +1,26 @@
 #pragma once
 
-#include <string>
+#include <iostream>
 #include <map>
+#include <string>
 #include <vector>
 
-#include "runtime/grid.h"
-#include "ast/exprs/expr.h"
-#include "ast/instructions/instruction.h"
+// #include <runtime/grid.h>
+#include <ast/exprs/expr.h>
+#include <ast/instructions/instruction.h>
 
 class State {
-   private:
-    std::map<std::string, AstExpr> m_variables;
-
-    Grid grid;
    public:
-    State();
+    State() {}
+    ~State() = default;
 
-    void set_variable(std::string name, AstExpr expr) { m_variables.insert(std::make_pair(name, expr)); }
+    Value::Ptr get_variable(std::string name) { return m_variables.at(name); };
+    void set_variable(std::string name, Value::Ptr expr) {
+        m_variables.insert(std::make_pair(name, expr));
+    }
+    // Grid& grid() { return m_grid; }
 
-    AstExpr get_variable(std::string name) { return m_variables.at(name); };
+   private:
+    std::map<std::string, Value::Ptr> m_variables;
+    // Grid m_grid;
 };
