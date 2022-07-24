@@ -77,10 +77,10 @@ ErrorOr<void> Parser::expect_newline(bool do_error) {
     return false;
 }
 
-ErrorOr<AstInstruction*> Parser::parse_assignment() {
+ErrorOr<AstInstruction::Ptr> Parser::parse_assignment() {
     auto maybe_matched = match_token(Token::Type::Identifier);
     if (maybe_matched.is_error()) return {};
-    if (!maybe_matched.value()) return nullptr;
+    if (!maybe_matched.value()) return AstInstruction::Ptr(nullptr);
 
     auto varname = token().to_string();
 
@@ -101,13 +101,13 @@ ErrorOr<AstInstruction*> Parser::parse_assignment() {
         return {};
     }
 
-    return new AstAssignInstruction(varname, expr);
+    return (AstInstruction::Ptr)std::make_shared<AstAssignInstruction>(varname, expr);
 }
 
-ErrorOr<AstInstruction*> Parser::parse_generate() {
+ErrorOr<AstInstruction::Ptr> Parser::parse_generate() {
     auto maybe_matched = match_token(Token::Type::Generate);
     if (maybe_matched.is_error()) return {};
-    if (!maybe_matched.value()) return nullptr;
+    if (!maybe_matched.value()) return AstInstruction::Ptr(nullptr);
 
     auto maybe_expr = parse_expr();
     if (maybe_expr.is_error()) return {};
@@ -118,10 +118,11 @@ ErrorOr<AstInstruction*> Parser::parse_generate() {
         return {};
     }
 
-    return new AstGenerateInstruction(expr);
+
+    return (AstInstruction::Ptr)std::make_shared<AstGenerateInstruction>(expr);
 }
 
-ErrorOr<AstInstruction*> Parser::parse_instruction() {
+ErrorOr<AstInstruction::Ptr> Parser::parse_instruction() {
     auto maybe_parsed = parse_assignment();
     if (maybe_parsed.is_error()) return {};
     if (maybe_parsed.value()) return maybe_parsed.value();
@@ -130,22 +131,22 @@ ErrorOr<AstInstruction*> Parser::parse_instruction() {
     if (maybe_parsed.is_error()) return {};
     if (maybe_parsed.value()) return maybe_parsed.value();
 
-    return nullptr;
+    return AstInstruction::Ptr(nullptr);
 }
 
-ErrorOr<AstExpr*> Parser::parse_number() {
+ErrorOr<AstExpr::Ptr> Parser::parse_number() {
     auto maybe_matched = match_token(Token::Type::Number);
     if (maybe_matched.is_error()) return {};
     // If failed to match
-    if (!maybe_matched.value()) return nullptr;
-    return new AstNumberExpr(token().to_number());
+    if (!maybe_matched.value()) return AstExpr::Ptr(nullptr);
+    return (AstExpr::Ptr)std::make_shared<AstNumberExpr>(token().to_number());
 }
 
-ErrorOr<AstExpr*> Parser::parse_paren() {
+ErrorOr<AstExpr::Ptr> Parser::parse_paren() {
     auto maybe_matched = match_token(Token::Type::LeftParen);
     if (maybe_matched.is_error()) return {};
     // If failed to match
-    if (!maybe_matched.value()) return nullptr;
+    if (!maybe_matched.value()) return AstExpr::Ptr(nullptr);
 
     auto maybe_expr = parse_expr();
     if (maybe_expr.is_error()) return {};
@@ -166,14 +167,14 @@ ErrorOr<AstExpr*> Parser::parse_paren() {
     return expr;
 }
 
-ErrorOr<AstExpr*> Parser::parse_variable() {
+ErrorOr<AstExpr::Ptr> Parser::parse_variable() {
     auto maybe_matched = match_token(Token::Type::Identifier);
     if (maybe_matched.is_error()) return {};
-    if (!maybe_matched.value()) return nullptr;
-    return new AstVariableExpr(token().to_string());
+    if (!maybe_matched.value()) return AstExpr::Ptr(nullptr);
+    return (AstExpr::Ptr)std::make_shared<AstVariableExpr>(token().to_string());
 }
 
-ErrorOr<AstExpr*> Parser::parse_single() {
+ErrorOr<AstExpr::Ptr> Parser::parse_single() {
     auto maybe_parsed = parse_number();
     if (maybe_parsed.is_error()) return {};
     if (maybe_parsed.value()) return maybe_parsed.value();
@@ -184,12 +185,12 @@ ErrorOr<AstExpr*> Parser::parse_single() {
 
     maybe_parsed = parse_variable();
     if (maybe_parsed.is_error()) return {};
-    if (!maybe_parsed.value()) return nullptr;
+    if (maybe_parsed.value()) return maybe_parsed.value();
 
-    return nullptr;
+    return AstExpr::Ptr(nullptr);
 }
 
-ErrorOr<AstExpr*> Parser::parse_product() {
+ErrorOr<AstExpr::Ptr> Parser::parse_product() {
     auto maybe_parsed = parse_single();
     if (maybe_parsed.is_error()) return {};
     auto expr = maybe_parsed.value();
@@ -197,13 +198,12 @@ ErrorOr<AstExpr*> Parser::parse_product() {
     for (;;) {
         auto backtrack = index();
         auto maybe_lex = lex();
-        if (maybe_lex.is_error()) return nullptr;
+        if (maybe_lex.is_error()) return AstExpr::Ptr(nullptr);
         // If not lexed, break
         if (!maybe_lex.value()) break;
         if (token().type() != Token::Type::Asterisk) {
             set_index(backtrack);
-            set_error("unexpected token");
-            return {};
+            break;
         }
         auto maybe_rhs = parse_single();
         if (maybe_rhs.is_error()) return {};
@@ -211,15 +211,15 @@ ErrorOr<AstExpr*> Parser::parse_product() {
         if (!rhs) {
             set_index(backtrack);
             set_error("unexpected expr after operator");
-            return nullptr;
+            return AstExpr::Ptr(nullptr);
         }
-        expr = new AstMulExpr(expr, rhs);
+        expr = std::make_shared<AstMulExpr>(expr, rhs);
     }
 
     return expr;
 }
 
-ErrorOr<AstExpr*> Parser::parse_sum() {
+ErrorOr<AstExpr::Ptr> Parser::parse_sum() {
     auto maybe_parsed = parse_product();
     if (maybe_parsed.is_error()) return {};
     auto expr = maybe_parsed.value();
@@ -227,13 +227,12 @@ ErrorOr<AstExpr*> Parser::parse_sum() {
     for (;;) {
         auto backtrack = index();
         auto maybe_lex = lex();
-        if (maybe_lex.is_error()) return nullptr;
+        if (maybe_lex.is_error()) return AstExpr::Ptr(nullptr);
         // If not lexed, break
         if (!maybe_lex.value()) break;
         if (token().type() != Token::Type::Plus) {
             set_index(backtrack);
-            set_error("unexpected token");
-            return {};
+            break;
         }
         auto maybe_rhs = parse_product();
         if (maybe_rhs.is_error()) return {};
@@ -241,9 +240,9 @@ ErrorOr<AstExpr*> Parser::parse_sum() {
         if (!rhs) {
             set_index(backtrack);
             set_error("unexpected expr after operator");
-            return nullptr;
+            return AstExpr::Ptr(nullptr);
         }
-        expr = new AstAddExpr(expr, rhs);
+        expr = std::make_shared<AstAddExpr>(expr, rhs);
     }
 
     return expr;

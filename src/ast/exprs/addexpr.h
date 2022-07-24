@@ -5,5 +5,5 @@
 
 class AstAddExpr : public BinExpr {
    public:
-    AstAddExpr(AstExpr* lhs, AstExpr* rhs) : BinExpr(lhs, rhs) {}
+    AstAddExpr(AstExpr::Ptr lhs, AstExpr::Ptr rhs) : BinExpr(lhs, rhs) {}
 };

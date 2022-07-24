@@ -7,10 +7,10 @@
 
 class AstAssignInstruction : public AstInstruction {
    public:
-    AstAssignInstruction(std::string varname, AstExpr* expr)
+    AstAssignInstruction(std::string varname, AstExpr::Ptr expr)
         : m_varname(varname), m_value_expr(expr) {}
 
    private:
     std::string m_varname;
-    AstExpr* m_value_expr;
+    AstExpr::Ptr m_value_expr;
 };

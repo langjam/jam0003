@@ -21,7 +21,7 @@ char Lexer::get_char(size_t idx) {
 
 void Lexer::advance(size_t amount) {
     auto new_index = index() + amount;
-    assert(new_index < m_stream.length());
+    assert(new_index <= m_stream.length());
     m_index = new_index;
 }
 
@@ -144,7 +144,7 @@ bool Lexer::lex_keyword(std::string value, Token::Type token_type) {
     }
     if (remaining() > value.length()) {
         // A keyword cannot end with a digit, character or any similar character
-        if (is_identifier_char(get_char(value.length() + 1))) return false;
+        if (is_identifier_char(get_char(value.length()))) return false;
     }
     advance(value.length());
     token().set_type(token_type);
