@@ -29,9 +29,9 @@ cargo run repl
 FUNC PC         INSTRUCTION             DATA STACK
 #_   000        |"helo world!"|       8 "helo world!"
 #_   000        |#print       |       7 "helo world!",  #print (Print)
-helo world! ;printed while ! is being evaluated..
+helo world! ; printed while ! is being evaluated..
 #_   000        |!|                  20
-            ;it's done being evaluated, now the data stack is empty
+            ; it's done being evaluated, now the data stack is empty
 ```
 
 ## tafr is small
@@ -52,16 +52,14 @@ taf is feasible to implement using hardware.
 
 ### builtin functions
 
-(TODO fill out outputs)
-
-| ptr      | input       | effect                   | output   |
-| :------- | :---------- | :----------------------- | :------- |
-| `#print` | $(x)$       | print x                  |          |
-| `#+`     | $(x y)$     | $y = y + x$              |          |
-| `#-`     | $(x y)$     | $y = y - x$              |          |
-| `#dupn`  | $(x n)$     | duplicate $x$ $n$ times  | $(...x)$ |
-| `#.`     | $(.TODO..)$ | swap $x$ with $data_i$   |          |
-| `#>`     | $(x y)$     | if $x>y$ skip two `Tok`s | $()$     |
+| ptr      | input              | effect                   | output           |
+|:---------|:-------------------|:-------------------------|:-----------------|
+| `#print` | $(x)$              | print x                  | $()$             |
+| `#+`     | $(x,y)$            | $y = y + x$              | $(y)$            |
+| `#-`     | $(x,y)$            | $y = y - x$              | $(y)$            |
+| `#dupn`  | $(x,n)$            | duplicate $x$ $n$ times  | $(... x)$        |
+| `#.`     | $(data_i ... x,i)$ | swap $x$ with $data_i$   | $(x ... data_i)$ |
+| `#>`     | $(x,y)$            | if $x>y$ skip two `Tok`s | $()$             |
 
 ## (future, if any)
 
