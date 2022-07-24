@@ -181,6 +181,8 @@ bool token_to_register(Token t, Reg *reg_out) {
   registers[Reg_Ret] = Span{"RET", 3};
   registers[Reg_Out] = Span{"OUT", 3};
   registers[Reg_Time] = Span{"TIME", 4};
+  registers[Reg_Base] = Span{"BASE", 4};
+  registers[Reg_Memory] = Span{"MEMORY", 6};
   t.str += 1; // skip %
   t.len -= 1; //
   for (uint i = 0; i < REG_COUNT; ++i) {

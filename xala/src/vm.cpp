@@ -85,8 +85,7 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Pop:
-				for (int i=0; i < is.argument; i++)
-					vm_pop(vm);
+				vm->sk.values_len -= is.argument;
 				break;
 
 			case InstrType_Imm:
@@ -141,8 +140,8 @@ int vm_run_scr(VM *vm, u8 screen[256][256]) {
 
 VM vm_init(Program prog) {
 	VM vm = VM{};
-	
-	
+
+
 	vm.prog = prog;
 
 	return vm;

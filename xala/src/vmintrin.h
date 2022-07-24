@@ -9,6 +9,8 @@ enum Reg {
   Reg_Ret, // Return value
   Reg_Out, // Output pixel
   Reg_Time, // Time in seconds
+  Reg_Base, // Memory address base
+  Reg_Memory, // Memory dereferenced
 
 	REG_COUNT
 };
