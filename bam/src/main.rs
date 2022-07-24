@@ -62,13 +62,7 @@ fn main() -> Result<()> {
         tracing_subscriber::fmt().with_max_level(Level::INFO).init();
     }
 
-    match args.source {
-        None => run_repl(),
-        Some(source) => {
-            run(&source);
-            Ok(())
-        }
-    }
+    run_repl(args.source)
 }
 
 /// REPL mode.
@@ -84,16 +78,53 @@ enum Mode {
     Streaming(Statement),
 }
 
-fn run_repl() -> Result<()> {
+fn run_repl(filename: Option<String>) -> Result<()> {
     println!("{}", Colour::Purple.bold().paint(BAM));
     println!("{}", Colour::White.bold().paint(HELP));
 
     let mut rl = Editor::<()>::new().unwrap();
 
+    let mut type_env = GlobalTypeEnv::new();
+
     let lexer = LexerBuilder::build();
     let (program_parser, statement_parser) = ParserBuilder::build();
 
     let factory = Factory::new(Program { machines: vec![] });
+
+    let mut load = |source: String| {
+        let tokens = lexer.parse(source).unwrap();
+        match program_parser.parse(tokens) {
+            Err(errors) => {
+                let errors = errors
+                    .into_iter()
+                    .map(|err| err.to_string())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                eprintln!(
+                    "{}",
+                    Colour::Red.bold().paint(format!("ParseErrors: {}", errors))
+                );
+            }
+            Ok(program) => {
+                // This should really be a single machine
+                for machine in program.machines {
+                    match types::check_machine_def(&mut type_env, &machine) {
+                        Err(err) => {
+                            eprintln!("{}", Colour::Red.bold().paint(format!("TypeError: {err}")))
+                        }
+                        Ok(()) => factory.bind_definition(machine.name.clone(), machine),
+                    }
+                }
+            }
+        }
+    };
+
+    if let Some(filename) = filename {
+        let source = std::fs::read_to_string(&filename)
+            .with_context(|| format!("Could not load file `{}`", filename))?;
+        load(source);
+    }
 
     let mut mode = Mode::Statement;
     let mut definition_buf = String::new();
@@ -108,7 +139,6 @@ fn run_repl() -> Result<()> {
     };
 
     rl.load_history(".history");
-    let mut type_env = GlobalTypeEnv::new();
     loop {
         let current = rl.readline(&prompt(&mut mode));
         info!("[REPL] handling line: {:?}", &current);
@@ -159,33 +189,7 @@ fn run_repl() -> Result<()> {
             Err(ReadlineError::Eof) if matches!(mode, Mode::Definiton(_)) => {
                 let lines = definition_buf.drain(..).collect::<String>();
                 rl.add_history_entry(lines.as_str());
-
-                let tokens = lexer.parse(lines).unwrap();
-                match program_parser.parse(tokens) {
-                    Err(errors) => eprintln!(
-                        "{}\n{}",
-                        Colour::Red.bold().paint("ParseError:"),
-                        errors
-                            .into_iter()
-                            .map(|err| { err.to_string() })
-                            .collect::<Vec<_>>()
-                            .join("\n")
-                    ),
-                    Ok(program) => {
-                        // This should really be a single machine
-                        for machine in program.machines {
-                            types::check_machine_def(&mut type_env, &machine)
-                                .with_context(|| {
-                                    format!("Type error while checking machine definition")
-                                })
-                                .map_err(|err| {
-                                    eprintln!("{}", Colour::Red.bold().paint(format!("{err}")),)
-                                });
-
-                            factory.bind_definition(machine.name.clone(), machine)
-                        }
-                    }
-                }
+                load(lines);
                 mode = Mode::Statement
             }
             Err(ReadlineError::Interrupted) => {
