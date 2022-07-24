@@ -97,13 +97,13 @@ WASM_EXPORT void wasm_accept(u8 c) {
 
 WASM_EXPORT void wasm_run() {
   source_len = 0;
-  Program prog;
+  Program prog = {};
   tprintf("\n");
   if (parser_parse(&prog, (const char *)source)) {
-    tprintf("Error!");
+    tprintf("Error!\n");
   } else {
-    //tprintf("{}\n", prog.start);
-    //tprintf("{}", prog);
+    tprintf("{}\n", prog.start);
+    tprintf("{}", prog);
     vm = vm_init(prog);
     running = true;
   }

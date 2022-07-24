@@ -23,14 +23,6 @@ struct LabelInfo {
   uint labels_len;
 };
 
-struct Parser {
-  bool putlab;
-  LabelInfo labels;
-  const char *source;
-  bool going;
-  uint line, col;
-};
-
 enum TokenType {
   TokenType_Null,
   TokenType_Immediate, // number
@@ -45,6 +37,16 @@ struct Token {
   const char *str;
   uint len, line, col;
 };
+
+struct Parser {
+  Token last_token;
+  bool putlab;
+  LabelInfo labels;
+  const char *source;
+  bool going;
+  uint line, col;
+};
+
 
 LineInfo tok2li(Token t) {
   return LineInfo{t.line, t.col, {t.str, t.len}};
@@ -229,9 +231,11 @@ static bool fetch_token(Parser *p, Token *output) {
     return true;
   }
 
+
   res.len = p->source-res.str;
   *output = res;
 
+  p->last_token = res;
   return false;
 }
 
@@ -343,11 +347,7 @@ bool put_branch(Parser *p, InstrType branchtype, Token namelabel) {
   return 0;
 }
 
-bool parse_call(Parser *p, Token name, int argc) {
-  if (name.type == TokenType_Newline) {
-    return 0;
-  }
-
+bool parse_call(Parser *p, Token name, int argc, bool *pop) {
   if (name.type != TokenType_Instr) {
     tprintf("ERROR: {} Is not an instruction\n", tok2li(name));
     CHECKOUT(1);
@@ -358,30 +358,35 @@ bool parse_call(Parser *p, Token name, int argc) {
     CHECKOUT(fetch_token(p, &t));
     CHECKOUT(put_branch(p, InstrType_Ba, t));
     CHECKOUT(arg_count(name, argc+1, 1));
+    *pop = false;
     return 0;
   } else if (span_equal({name.str, name.len}, {"BP", 2})) {
     Token t;
     CHECKOUT(fetch_token(p, &t));
     CHECKOUT(put_branch(p, InstrType_Bp, t));
     CHECKOUT(arg_count(name, argc+1, 2));
+    *pop = false;
     return 0;
   } else if (span_equal({name.str, name.len}, {"BN", 2})) {
     Token t;
     CHECKOUT(fetch_token(p, &t));
     CHECKOUT(put_branch(p, InstrType_Bn, t));
     CHECKOUT(arg_count(name, argc+1, 2));
+    *pop = false;
     return 0;
   } else if (span_equal({name.str, name.len}, {"BZ", 2})) {
     Token t;
     CHECKOUT(fetch_token(p, &t));
     CHECKOUT(put_branch(p, InstrType_Bz, t));
     CHECKOUT(arg_count(name, argc+1, 2));
+    *pop = false;
     return 0;
   } else if (span_equal({name.str, name.len}, {"BNZ", 3})) {
     Token t;
     CHECKOUT(fetch_token(p, &t));
     CHECKOUT(put_branch(p, InstrType_Bnz, t));
     CHECKOUT(arg_count(name, argc+1, 2));
+    *pop = false;
     return 0;
   } else if (span_equal({name.str, name.len}, {"INTO", 4})) {
     Token t;
@@ -391,6 +396,8 @@ bool parse_call(Parser *p, Token name, int argc) {
     CHECKOUT(parser_put_instr(p, Instr{InstrType_Store, reg}));
     CHECKOUT(fetch_token(p, &name));
     CHECKOUT(arg_count(name, argc+1, 2));
+    *pop = false;
+    return 0;
   } else {
     // TODO: Handle too many/few params
 again:
@@ -457,7 +464,7 @@ again:
   }
 
   if (p->going && name.type == TokenType_Instr) {
-    CHECKOUT(parse_call(p, name, 1));
+    CHECKOUT(parse_call(p, name, 1, pop));
   }
   return 0;
 }
@@ -470,24 +477,31 @@ bool parse_tape(Parser *p) {
     CHECKOUT(labels_put(p, &p->labels, t));
     return 0;
   }
+  bool pop = false;
   if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
     CHECKOUT(emit_value(p, t));
     CHECKOUT(fetch_token(p, &t));
+    pop = true;
     argc++;
   }
-  if (t.type == TokenType_Null || t.type == TokenType_Newline) {
-    return 0;
+  if (!(t.type == TokenType_Null || t.type == TokenType_Newline)) {
+    CHECKOUT(parse_call(p, t, argc, &pop));
+    if (!(p->last_token.type == TokenType_Null || p->last_token.type == TokenType_Newline)) {
+      tprintf("ERROR: {} Expected newline or end of file\n", tok2li(p->last_token));
+      return 1;
+    }
   }
 
-  CHECKOUT(parse_call(p, t, argc));
+  if (pop) {
+    parser_put_instr(p, Instr{InstrType_Pop, 1});
+  }
+
   return 0;
 }
 
 bool parse(Parser *p, Program *output, const char *source) {
   current_prog.instrs = current_prog_instrs;
   current_prog.instrs_len = 0;
-
-
   while (p->going) {
     if (parse_tape(p)) {
       // prevent bad program
@@ -503,17 +517,19 @@ bool parse(Parser *p, Program *output, const char *source) {
 
 bool parser_parse(Program *output, const char *source) {
   Parser p = {};
+  current_prog = {};
   p.putlab = true;
   p.source = source;
   p.going = *source;
 
   CHECKOUT(parse(&p, output, source));
 
+  p.line = 0;
+  p.col = 0;
   p.source = source;
   p.going = *source;
   p.putlab = false;
   CHECKOUT(parse(&p, output, source));
-
 
   return 0;
 }

@@ -71,9 +71,13 @@
   <script>
     let stdout = ""
     let renderData = new Uint8Array(256*256), ctx, instance;
-
+    let recompile = false;
     let last;
     function render(ts) {
+      if (recompile) {
+        instance.exports.wasm_run();
+        recompile = false;
+      }
       last ??= ts;
       const dt = ts - last;
       last = ts;
@@ -105,7 +109,7 @@
       for (let v of buf) {
         instance.exports.wasm_accept(v);
       }
-      instance.exports.wasm_run();
+      recompile = true;
     }
 
     window.addEventListener("load", () => {

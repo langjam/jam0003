@@ -252,7 +252,7 @@ int vm_run(VM *vm) {
 					vm->ip++;
 
 
-				
+
 			  continue;
 				break;
 
@@ -266,7 +266,7 @@ int vm_run(VM *vm) {
 		}
 		vm->ip += 1;
 		if (vm->sk.values_len < 3) {
-			tprintf("VM: STACK UNDEFLOW\n");
+			tprintf("VM: STACK UNDEFLOW {} {}\n", vm->sk.values_len, vm->ip);
 			return 1;
 		}
 	}
@@ -306,7 +306,7 @@ int vm_run_scr(VM *vm, u8 screen[256][256]) {
 VM vm_init(Program prog) {
 	VM vm = VM{};
 
-
+	vm.sk.values_len = 3;
 	vm.prog = prog;
 
 	return vm;
