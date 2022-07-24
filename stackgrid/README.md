@@ -68,4 +68,10 @@ The following programs both implement a simple `cat` (read from stdin into a sta
 
 ### Theme
 
-StackGrid plays to the theme of LangJam (Assembly) with its assembly-like syntax and cells that work like registers. Watching the interpreter state change as the program runs also feels like watching the program and data get assembled.
+StackGrid plays to the theme of LangJam (Assembly) with its assembly-like syntax and cells that are reminiscent of CPU registers.
+
+But also, with the `JUMP` and `FLIP` instructions, it's possible to write a program with instructions and data laid out in different locations across the grid. A little like the [Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), where different cells grow, assemble together, and die out, one might imagine a StackGrid program passing control across the grid, building up stacks, horizontal and vertical, growing and then shrinking.
+
+Such a program would be quite difficult to write (not to mention, debug), but these were my inspirations for StackGrid. I made a very little grid editor and a very little demo of what it might look like. Below shows the "Hello, World" program popping its stack to print the message:
+
+![stack-grid](examples/stackgrid.gif)
