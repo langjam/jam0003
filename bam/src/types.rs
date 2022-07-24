@@ -21,6 +21,48 @@ lazy_static! {
                 output: Type::Num
             }
         },
+        Builtin::Mod => {   // (Num, Num) -> Num
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num, Type::Num]),
+                output: Type::Num
+            }
+        },
+        Builtin::Pow => {   // (Num, Num) -> Num
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num, Type::Num]),
+                output: Type::Num
+            }
+        },
+        Builtin::Sqrt => {   // Num -> Num
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num]),
+                output: Type::Num
+            }
+        },
+        Builtin::Gte => {   // (Num, Num) -> Bool
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num, Type::Num]),
+                output: Type::Bool
+            }
+        },
+        Builtin::Lt => {   // (Num, Num) -> Bool
+            MachineType {
+                var_count: 0,
+                input: Type::Tuple(vec![Type::Num, Type::Num]),
+                output: Type::Bool
+            }
+        },
+        Builtin::Eq => {   // forall a. (a, a) -> Bool
+            MachineType {
+                var_count: 1,
+                input: Type::Tuple(vec![Type::TyVar(0), Type::TyVar(0)]),
+                output: Type::Bool
+            }
+        },
         Builtin::Dup2 => {  // forall a. a -> (a, a)
             MachineType {
                 var_count: 1,
