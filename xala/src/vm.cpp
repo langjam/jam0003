@@ -64,6 +64,16 @@ void vm_instr_mod(VM *vm) {
 }
 
 static inline
+void vm_instr_sin(VM *vm) {
+	vm_push(vm, __builtin_sin(vm_pop(vm)));
+}
+
+static inline
+void vm_instr_cos(VM *vm) {
+	vm_push(vm, __builtin_cos(vm_pop(vm)));
+}
+
+static inline
 int vm_check_address(VM *vm, int addr) {
 	if (addr < 0 || addr >= MEMORY_SIZE) {
 		tprintf("SEGFAULT\n");
@@ -155,6 +165,14 @@ int vm_run(VM *vm) {
 
 				vm->ip = vm->csk.calls[vm->csk.calls_len--].ret;
 
+				break;
+
+			case InstrType_Sin:
+				vm_instr_sin(vm);
+				break;
+
+			case InstrType_Cos:
+				vm_instr_cos(vm);
 				break;
 
 			case InstrType_Exit:

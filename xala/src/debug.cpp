@@ -82,7 +82,8 @@ void putval(Program prog) {
   };
   static const char *names[] = {
     "ADD", "SUB", "MUL", "DIV",
-    "MOD", "POP", "IMM", "LOAD", "STORE", "EXIT"
+    "MOD", "POP", "IMM", "LOAD", "STORE", "EXIT",
+		"CALL", "RET", "SIN", "COS"
   };
   static const char *regs[] = {
     "X", "Y", "RET", "OUT", "TIME", "BASE", "MEMORY"

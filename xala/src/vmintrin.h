@@ -32,6 +32,9 @@ enum InstrType {
 	InstrType_Call, // (ADDRESS) pushes IP to the call stack and jumps to ADDRESS
 	InstrType_Ret, // Pops from the call stack and jumps to the popped value
 
+	InstrType_Sin,
+	InstrType_Cos,
+
   INSTRTYPE_COUNT
 };
 
