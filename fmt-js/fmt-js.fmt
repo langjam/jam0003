@@ -1,0 +1,22 @@
+top [@rule ws] = [[const semObject = {
+${rule}${ws},
+{}
+};
+]]
+rule [lhs ws1 keq ws2 rws] = [[${lhs}${rws}
+_ruleExit ("${getRuleName ()}");
+}
+]]
+RuleLHS [name lb @Params rb] = [[${name}: function () {\n_ruleEnter ("${name}");${setRuleName (name)}${Params},
+]]
+rewriteString [sb @cs se] = [[return \`${cs}\`;]]
+stringBegin [c] = [[]]
+stringEnd [c] = [[]]
+char_eval [lb name rb] = [[\$\{${name}\}]]
+char_raw [c] = [[${c}]]
+name [c @cs] = [[${c}${cs}]]
+nameRest [c] = [[${c}]]
+Param_plus [name k] = [[\nvar ${name} = _${name}._glue ().join ('');]]
+Param_star [name k] = [[\nvar ${name} = _${name}._glue ().join ('');]]
+Param_opt [name k] = [\nvar ${name} = _${name}._glue ().join ('');]]
+Param_flat [name] = [[\nvar ${name} = _${name}._glue ();]]

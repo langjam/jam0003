@@ -1,0 +1,20 @@
+FMT {
+top = rule+ spaces
+rule = applySyntactic<RuleLHS> spaces "=" spaces rewriteString
+RuleLHS = name "[" Param+ "]"
+rewriteString =
+  | stringBegin char* stringEnd
+stringBegin = "‛" | "[["
+stringEnd = "’" | "]]"
+char =
+  | "«" name "»" -- eval
+  | "$" name     -- evalShorthand
+  | ~"’" ~"]]" any     -- raw
+name = letter nameRest*
+nameRest = "_" | alnum
+Param =
+  | name "+" -- plus
+  | name "*" -- star
+  | name "?" -- opt
+  | name     -- flat
+}
