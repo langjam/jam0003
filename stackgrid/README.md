@@ -75,3 +75,7 @@ But also, with the `JUMP` and `FLIP` instructions, it's possible to write a prog
 Such a program would be quite difficult to write (not to mention, debug), but these were my inspirations for StackGrid. I made a very little grid editor and a very little demo of what it might look like. Below shows the "Hello, World" program popping its stack to print a message:
 
 ![stack-grid](images/stackgrid.gif)
+
+## Playground
+
+<https://chidiwilliams.github.io/stackgrid/>
