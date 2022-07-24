@@ -46,6 +46,14 @@ rocks rock_lower 50%
   ngOnInit() {
   }
 
+  convertColor(color: string) {
+    const r = color.substring(0, 2);
+    const g = color.substring(2, 4);
+    const b = color.substring(4, 6);
+    // parse hex to int
+    return [parseInt(r, 16), parseInt(g, 16), parseInt(b, 16)];
+  }
+
   ngAfterViewInit() {
     const canvas = this.canvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -61,12 +69,12 @@ rocks rock_lower 50%
       console.log("Error go brr", error);
     }
 
+    console.log(world);
     this.generate(world);
   }
 
   compile(program: string) {
     const tokens = this.compiler.tokenize(program);
-    console.log(tokens);
     const world = this.compiler.parse(tokens);
     return world;
   }
@@ -78,15 +86,66 @@ rocks rock_lower 50%
     const image = ctx.createImageData(canvas.width, canvas.height);
     let data = image.data;
 
+    let regionPerc = 0;
+    const regions = world.regions.map(region => {
+      regionPerc += region.percent / 100;
+      return regionPerc;
+    });
+    regions.unshift(0);
+    console.log(regions);
+    // 0.5, 1
+
+    const subregions = world.regions.map(region => {
+      let subregionPerc = 0;
+      const subregions = region.subRegions.map(subregion => {
+        subregionPerc += subregion.percent / 100;
+        return subregionPerc;
+      });
+      subregions.unshift(0);
+      console.log(subregions);
+      return subregions;
+    });
+
     for (let i = 0; i < canvas.width; i++) {
       for (let j = 0; j < canvas.height; j++) {
+        const selection = Math.random();
+
+        let regionIndex = 0;
+        for (; regionIndex < regions.length; ++regionIndex) {
+          if (regions[regionIndex] > selection) {
+            break;
+          }
+        }
+        regionIndex--;
+
+        console.log("selection", selection);
+        console.log("regionIndex", regionIndex);
+
+        const region = world.regions[regionIndex];
+        const subregions_ = subregions[regionIndex];
+
         const x = (i / canvas.width) * 4;
         const y = (j / canvas.height) * 4;
         const noise = (this.noise.gen(x, y) + 1) / 2;
+
+        let subregionIndex = 0;
+        for (; subregionIndex < subregions_.length; ++subregionIndex) {
+          if (subregions_[subregionIndex] > noise) {
+            break;
+          }
+        }
+        subregionIndex--;
+
+        console.log("noise", noise);
+        console.log("subregionindex", subregionIndex);
+
+        const subregion = region.subRegions[subregionIndex];
+
+        const [r, g, b] = this.convertColor(subregion.color);
         const index = (j * canvas.width + i) * 4;
-        data[index] = noise * 255;
-        data[index + 1] = noise * 255;
-        data[index + 2] = noise * 255;
+        data[index] = r * 255;
+        data[index + 1] = g * 255;
+        data[index + 2] = b * 255;
         data[index + 3] = 255;
       }
     }
