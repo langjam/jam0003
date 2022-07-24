@@ -3,8 +3,6 @@ use crate::direction::Direction;
 use rand::rngs::SmallRng;
 use rand::Rng;
 
-const EAT_AMOUNT: u64 = 100;
-
 pub struct Location {
     pub resources: u64,
     pub computer: Option<Computer>,
@@ -13,13 +11,14 @@ pub struct Location {
 pub struct World {
     width: usize,
     height: usize,
+    eat_amount: u64,
     pub rows: Vec<Vec<Location>>,
 }
 
 type Coords = (usize, usize);
 
 impl World {
-    pub fn new(width: usize, height: usize, resources: u64) -> World {
+    pub fn new(width: usize, height: usize, eat_amount: u64, resources: u64) -> World {
         let mut rows: Vec<Vec<Location>> = Vec::new();
         for _ in 0..height {
             let mut column_vec: Vec<Location> = Vec::new();
@@ -30,6 +29,7 @@ impl World {
         }
         World {
             width,
+            eat_amount,
             height,
             rows,
         }
@@ -158,10 +158,11 @@ impl World {
     }
 
     fn eat(&mut self, coords: Coords) {
+        let eat_amount = self.eat_amount;
         let location = self.get_mut(coords);
         if let Some(computer) = &mut location.computer {
-            let amount = if location.resources >= EAT_AMOUNT {
-                EAT_AMOUNT
+            let amount = if location.resources >= eat_amount {
+                eat_amount
             } else {
                 location.resources
             };
@@ -227,7 +228,7 @@ mod tests {
 
     #[test]
     fn test_neighbor_out_of_bounds() {
-        let world = World::new(5, 5, 5);
+        let world = World::new(5, 5, 10, 5);
         assert_eq!(world.neighbor_coords((2, 2), Direction::North), (2, 1));
         assert_eq!(world.neighbor_coords((2, 2), Direction::South), (2, 3));
         assert_eq!(world.neighbor_coords((2, 2), Direction::West), (1, 2));

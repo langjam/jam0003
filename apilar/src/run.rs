@@ -17,6 +17,7 @@ pub fn run(
     redraw_frequency: u64,
     memory_mutation_amount: u64,
     processor_stack_mutation_amount: u64,
+    eat_amount: u64,
     words: Vec<&str>,
 ) {
     let assembler = Assembler::new();
@@ -25,7 +26,7 @@ pub fn run(
     assembler.assemble_words(words, &mut computer.memory, 0);
     computer.add_processor(0);
 
-    let mut world = World::new(width, height, world_resources);
+    let mut world = World::new(width, height, eat_amount, world_resources);
     world.set((width / 2, height / 2), computer);
 
     let mut small_rng = SmallRng::from_entropy();

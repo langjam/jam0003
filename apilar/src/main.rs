@@ -62,6 +62,9 @@ struct Cli {
 
     #[clap(long, value_parser)]
     processor_stack_mutation_amount: Option<u64>,
+
+    #[clap(long, value_parser)]
+    eat_amount: Option<u64>,
 }
 
 fn main() -> std::io::Result<()> {
@@ -89,6 +92,7 @@ fn main() -> std::io::Result<()> {
         cli.redraw_frequency.unwrap_or(100000),
         cli.memory_mutation_amount.unwrap_or(5),
         cli.processor_stack_mutation_amount.unwrap_or(0),
+        cli.eat_amount.unwrap_or(100),
         words,
     );
     Ok(())
