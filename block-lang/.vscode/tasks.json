@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cargo run --features bevy/dynamic",
+      "type": "process",
+      "command": "cargo",
+      "args": ["run", "--features", "bevy/dynamic"]
+    },
+    {
+      "label": "cargo-watch -x run --features bevy/dynamic",
+      "type": "process",
+      "command": "cargo-watch",
+      "args": ["-x", "run", "--features", "bevy/dynamic"]
+    },
+  ]
+}

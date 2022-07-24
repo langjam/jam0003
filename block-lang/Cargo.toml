@@ -1,0 +1,73 @@
+[package]
+name = "tmp-lang"
+version = "0.1.0"
+edition = "2021"
+default-run = "tmp-lang"
+
+[[bin]]
+name = "cli"
+path = "src/cli.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+# Parser stuff
+hashdb = { git = "https://github.com/libdither/disp" }
+chumsky = "0.8.0"
+ariadne = "0.1.5"
+# Bevy
+bevy = "0.7.0"
+anyhow = "1.0.58"
+bytecheck = "0.6.8"
+rkyv = { version = "0.7.39", features = ["validation"] }
+thiserror = "1.0.31"
+bevy_pancam = { version = "*" }
+bevy_mouse_tracking_plugin = { version = "*" }
+iyes_loopless = "0.6.1"
+rustyline = "10.0.0"
+bevy_prototype_lyon = "0.5.0"
+
+[patch.crates-io]
+bevy_mouse_tracking_plugin = { path = "vendor/bevy-mouse-tracking" }
+bevy_pancam = { path = "vendor/bevy_pancam" }
+
+# Stuff for Zyansheep, I use NixOS btw :)
+[package.metadata.nix]
+build = true
+app = true
+[workspace.metadata.nix]
+cCompiler = "gcc12"
+nativeBuildInputs = [
+	"cargo-edit",
+	"cargo-watch",
+	"pkgconfig",
+	"cmake",
+	"mold",
+]
+buildInputs = [
+	# Window and Input
+	"libxkbcommon",
+	"xorg.libX11",
+	"xorg.libXcursor",
+	"xorg.libXrandr",
+	"xorg.libXi",
+
+	# Vulkan
+	"vulkan-tools",
+	"vulkan-headers",
+	"vulkan-loader",
+	"vulkan-validation-layers",
+	"alsaLib", # Sound support
+	# lld # fast linker
+]
+runtimeLibs = []
+toolchain = "nightly"
+devshell = {name = "rust-shell" }
