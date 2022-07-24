@@ -1,5 +1,17 @@
-entry:
-    stbg    0, 128, 0
-    stps    10, 10
-    stcl    255, 0, 0
-    rect    100, 100
+stbg 0, 255, 0 ; set background color to green
+
+; draw rectangle at (10, 10) with dimensions (100, 100) and color red
+move 10, 10
+stcl 255, 0, 0
+rect 100, 100
+    
+; draw rectangle at (300, 300) with dimensions (100, 100) and color blue
+stps 300, 300
+stcl 0, 0, 255
+rect 100, 100
+
+; draw line at (110, 110) with dimensions (190, 190), radius 5 and color white
+stps 110, 110
+strd 5
+stcl 255, 255, 255
+line 190, 190
