@@ -1,4 +1,3 @@
-,FizzBuzz,,,,
 JEQ E2 F2 A37,Exit if acc reaches limit,3,32,0,100
 INC E2,Increment acc,,122,,
 DUP E2,Duplicate acc for incoming mod,,122,,
@@ -35,3 +34,4 @@ DUP E2,Duplicate acc for printing,,,,
 PRINT E2,Print acc,,,,
 JUMP A2,Back to top,,,,
 EXIT,Exit program,,,,
+FizzBuzz,,,,,

@@ -1,4 +1,3 @@
-,Prints the first 20 Fibonacci numbers,,
 JEQ C2 D2 A9,0,0,20
 DUP B2,1,,
 PRINT B2,,,
@@ -8,3 +7,4 @@ CYCLE B2,,,
 ADD B2,,,
 JUMP A2,,,
 EXIT,,,
+,Prints the first 20 Fibonacci numbers,,
