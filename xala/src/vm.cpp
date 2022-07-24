@@ -160,11 +160,10 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Store: {
-			  float v = vm_pop(vm);
 				if (is.argument == Reg_Memory)
 					CHECKOUT(vm_memory_store(vm));
 				else
-					vm->regs[is.argument] = v;
+					vm->regs[is.argument] = vm_pop(vm);
 			} break;
 
 			case InstrType_SetBase:

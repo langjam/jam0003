@@ -11,6 +11,7 @@ enum Reg {
   Reg_Time, // Time in seconds
   Reg_Base, // Memory address base
   Reg_Memory, // Memory dereferenced
+  Reg_A, // Accumulator
 
 	REG_COUNT
 };

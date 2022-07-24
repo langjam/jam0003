@@ -192,7 +192,10 @@ static bool fetch_token(Parser *p, Token *output) {
   } else if (parser_is(p, '\n')) {
     res.type = TokenType_Newline;
     parser_next(p);
-  } else if (isnum(parser_get(p))) {
+  } else if (parser_is(p, '-') || isnum(parser_get(p))) {
+    if (parser_is(p, '-')) {
+      parser_next(p);
+    }
     res.type = TokenType_Immediate;
     while (isnum(parser_get(p))) {
       parser_next(p);
@@ -234,6 +237,12 @@ float token_to_number(Token t) {
   float res = 0;
   float frac = 0;
   float div = 10;
+  float sign = 1;
+  if (*t.str == '-') {
+    sign = -1;
+    t.str++;
+  }
+
   while (isnum(*t.str)) {
     res = res * 10 + (*t.str++ - '0');
   }
@@ -245,7 +254,7 @@ float token_to_number(Token t) {
     }
   }
 
-  return res + frac;
+  return (res + frac) * sign;
 }
 
 bool token_to_register(Token t, Reg *reg_out) {
@@ -262,6 +271,7 @@ bool token_to_register(Token t, Reg *reg_out) {
   registers[Reg_Time] = Span{"TIME", 4};
   registers[Reg_Base] = Span{"BASE", 4};
   registers[Reg_Memory] = Span{"MEMORY", 6};
+  registers[Reg_A] = Span{"A", 1};
   t.str += 1; // skip %
   t.len -= 1; //
   for (uint i = 0; i < REG_COUNT; ++i) {
