@@ -260,6 +260,13 @@ int vm_run(VM *vm) {
 				return 0;
 				break;
 
+			case InstrType_Print:
+				tprintf("{} line: {} says: {}\n",
+				        vm->regs[Reg_Time],
+				        is.argument,
+				        vm_pop(vm));
+				break;
+
 			default:
 				tprintf("VM {}: unknown instruction\n", vm->ip);
 				return 1;

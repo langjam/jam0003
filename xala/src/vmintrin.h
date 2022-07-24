@@ -45,6 +45,8 @@ enum InstrType {
   InstrType_Bp,
   InstrType_Bn,
 
+	InstrType_Print,
+
   INSTRTYPE_COUNT
 };
 
