@@ -8,6 +8,18 @@
 // | IN GENERAL, THIS FILE SHOULD NOT BE MODIFIED IN ANY WAY. |
 // |==========================================================|
 use super::prelude::*;
+impl<M: AstInfo> AstNode<M> for Note<M> {
+    fn ast_info(&self) -> &M {
+        let Self(meta, ..) = self;
+        meta
+    }
+    fn constructor(&self) -> &'static str {
+        "note"
+    }
+    fn sort(&self) -> &'static str {
+        "note"
+    }
+}
 impl<M: AstInfo> AstNode<M> for LabelOrInstr<M> {
     fn ast_info(&self) -> &M {
         match self {
@@ -31,164 +43,6 @@ impl<M: AstInfo> AstNode<M> for LabelOrInstr<M> {
     }
     fn sort(&self) -> &'static str {
         "label-or-instr"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Label<M> {
-    fn ast_info(&self) -> &M {
-        match self {
-            Self::Global(meta, ..) => meta,
-            Self::Local(meta, ..) => meta,
-            _ => unreachable!(),
-        }
-    }
-    fn constructor(&self) -> &'static str {
-        match self {
-            Self::Global(..) => "global",
-            Self::Local(..) => "local",
-            _ => unreachable!(),
-        }
-    }
-    fn sort(&self) -> &'static str {
-        "label"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Instruction<M> {
-    fn ast_info(&self) -> &M {
-        match self {
-            Self::Call(meta, ..) => meta,
-            Self::CallAsync(meta, ..) => meta,
-            Self::Ret(meta, ..) => meta,
-            Self::RetAsync(meta, ..) => meta,
-            Self::Jmp(meta, ..) => meta,
-            Self::Bpm(meta, ..) => meta,
-            Self::Time(meta, ..) => meta,
-            Self::Beat(meta, ..) => meta,
-            Self::Wait(meta, ..) => meta,
-            Self::PlayOne(meta, ..) => meta,
-            Self::Play(meta, ..) => meta,
-            Self::Flat(meta, ..) => meta,
-            Self::Sharp(meta, ..) => meta,
-            Self::Push(meta, ..) => meta,
-            Self::Pop(meta, ..) => meta,
-            Self::Add(meta, ..) => meta,
-            Self::Sub(meta, ..) => meta,
-            Self::Inc(meta, ..) => meta,
-            Self::Dec(meta, ..) => meta,
-            Self::Jg(meta, ..) => meta,
-            Self::Jl(meta, ..) => meta,
-            Self::Jge(meta, ..) => meta,
-            Self::Jle(meta, ..) => meta,
-            Self::Jeq(meta, ..) => meta,
-            Self::Je(meta, ..) => meta,
-            Self::Jne(meta, ..) => meta,
-            Self::Mov(meta, ..) => meta,
-            Self::St(meta, ..) => meta,
-            Self::Ld(meta, ..) => meta,
-            Self::Define(meta, ..) => meta,
-            Self::Lir(meta, ..) => meta,
-            Self::Stop(meta, ..) => meta,
-            _ => unreachable!(),
-        }
-    }
-    fn constructor(&self) -> &'static str {
-        match self {
-            Self::Call(..) => "call",
-            Self::CallAsync(..) => "call_async",
-            Self::Ret(..) => "ret",
-            Self::RetAsync(..) => "ret_async",
-            Self::Jmp(..) => "jmp",
-            Self::Bpm(..) => "bpm",
-            Self::Time(..) => "time",
-            Self::Beat(..) => "beat",
-            Self::Wait(..) => "wait",
-            Self::PlayOne(..) => "play_one",
-            Self::Play(..) => "play",
-            Self::Flat(..) => "flat",
-            Self::Sharp(..) => "sharp",
-            Self::Push(..) => "push",
-            Self::Pop(..) => "pop",
-            Self::Add(..) => "add",
-            Self::Sub(..) => "sub",
-            Self::Inc(..) => "inc",
-            Self::Dec(..) => "dec",
-            Self::Jg(..) => "jg",
-            Self::Jl(..) => "jl",
-            Self::Jge(..) => "jge",
-            Self::Jle(..) => "jle",
-            Self::Jeq(..) => "jeq",
-            Self::Je(..) => "je",
-            Self::Jne(..) => "jne",
-            Self::Mov(..) => "mov",
-            Self::St(..) => "st",
-            Self::Ld(..) => "ld",
-            Self::Define(..) => "define",
-            Self::Lir(..) => "lir",
-            Self::Stop(..) => "stop",
-            _ => unreachable!(),
-        }
-    }
-    fn sort(&self) -> &'static str {
-        "instruction"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Section<M> {
-    fn ast_info(&self) -> &M {
-        let Self(meta, ..) = self;
-        meta
-    }
-    fn constructor(&self) -> &'static str {
-        "section"
-    }
-    fn sort(&self) -> &'static str {
-        "section"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Int<M> {
-    fn ast_info(&self) -> &M {
-        let Self(meta, ..) = self;
-        meta
-    }
-    fn constructor(&self) -> &'static str {
-        "int"
-    }
-    fn sort(&self) -> &'static str {
-        "int"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Register<M> {
-    fn ast_info(&self) -> &M {
-        let Self(meta, ..) = self;
-        meta
-    }
-    fn constructor(&self) -> &'static str {
-        "register"
-    }
-    fn sort(&self) -> &'static str {
-        "register"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Note<M> {
-    fn ast_info(&self) -> &M {
-        let Self(meta, ..) = self;
-        meta
-    }
-    fn constructor(&self) -> &'static str {
-        "note"
-    }
-    fn sort(&self) -> &'static str {
-        "note"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Identifier<M> {
-    fn ast_info(&self) -> &M {
-        let Self(meta, ..) = self;
-        meta
-    }
-    fn constructor(&self) -> &'static str {
-        "identifier"
-    }
-    fn sort(&self) -> &'static str {
-        "identifier"
     }
 }
 impl<M: AstInfo> AstNode<M> for RegisterName<M> {
@@ -222,6 +76,127 @@ impl<M: AstInfo> AstNode<M> for RegisterName<M> {
     }
     fn sort(&self) -> &'static str {
         "register-name"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Label<M> {
+    fn ast_info(&self) -> &M {
+        match self {
+            Self::Global(meta, ..) => meta,
+            Self::Local(meta, ..) => meta,
+            _ => unreachable!(),
+        }
+    }
+    fn constructor(&self) -> &'static str {
+        match self {
+            Self::Global(..) => "global",
+            Self::Local(..) => "local",
+            _ => unreachable!(),
+        }
+    }
+    fn sort(&self) -> &'static str {
+        "label"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Operand<M> {
+    fn ast_info(&self) -> &M {
+        match self {
+            Self::LabelRef(meta, ..) => meta,
+            Self::Int(meta, ..) => meta,
+            Self::Note(meta, ..) => meta,
+            Self::Register(meta, ..) => meta,
+            _ => unreachable!(),
+        }
+    }
+    fn constructor(&self) -> &'static str {
+        match self {
+            Self::LabelRef(..) => "label-ref",
+            Self::Int(..) => "int",
+            Self::Note(..) => "note",
+            Self::Register(..) => "register",
+            _ => unreachable!(),
+        }
+    }
+    fn sort(&self) -> &'static str {
+        "operand"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Layout<M> {
+    fn ast_info(&self) -> &M {
+        match self {
+            Self::Simple(meta, ..) => meta,
+            Self::Comment(meta, ..) => meta,
+            _ => unreachable!(),
+        }
+    }
+    fn constructor(&self) -> &'static str {
+        match self {
+            Self::Simple(..) => "simple",
+            Self::Comment(..) => "comment",
+            _ => unreachable!(),
+        }
+    }
+    fn sort(&self) -> &'static str {
+        "layout"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Register<M> {
+    fn ast_info(&self) -> &M {
+        let Self(meta, ..) = self;
+        meta
+    }
+    fn constructor(&self) -> &'static str {
+        "register"
+    }
+    fn sort(&self) -> &'static str {
+        "register"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Identifier<M> {
+    fn ast_info(&self) -> &M {
+        let Self(meta, ..) = self;
+        meta
+    }
+    fn constructor(&self) -> &'static str {
+        "identifier"
+    }
+    fn sort(&self) -> &'static str {
+        "identifier"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Section<M> {
+    fn ast_info(&self) -> &M {
+        let Self(meta, ..) = self;
+        meta
+    }
+    fn constructor(&self) -> &'static str {
+        "section"
+    }
+    fn sort(&self) -> &'static str {
+        "section"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Program<M> {
+    fn ast_info(&self) -> &M {
+        let Self(meta, ..) = self;
+        meta
+    }
+    fn constructor(&self) -> &'static str {
+        "program"
+    }
+    fn sort(&self) -> &'static str {
+        "program"
+    }
+}
+impl<M: AstInfo> AstNode<M> for Int<M> {
+    fn ast_info(&self) -> &M {
+        let Self(meta, ..) = self;
+        meta
+    }
+    fn constructor(&self) -> &'static str {
+        "int"
+    }
+    fn sort(&self) -> &'static str {
+        "int"
     }
 }
 impl<M: AstInfo> AstNode<M> for Instrument<M> {
@@ -331,57 +306,82 @@ impl<M: AstInfo> AstNode<M> for Instrument<M> {
         "instrument"
     }
 }
-impl<M: AstInfo> AstNode<M> for Operand<M> {
+impl<M: AstInfo> AstNode<M> for Instruction<M> {
     fn ast_info(&self) -> &M {
         match self {
-            Self::LabelRef(meta, ..) => meta,
-            Self::Int(meta, ..) => meta,
-            Self::Note(meta, ..) => meta,
-            Self::Register(meta, ..) => meta,
+            Self::Call(meta, ..) => meta,
+            Self::CallAsync(meta, ..) => meta,
+            Self::Ret(meta, ..) => meta,
+            Self::RetAsync(meta, ..) => meta,
+            Self::Jmp(meta, ..) => meta,
+            Self::Bpm(meta, ..) => meta,
+            Self::Time(meta, ..) => meta,
+            Self::Beat(meta, ..) => meta,
+            Self::Wait(meta, ..) => meta,
+            Self::PlayOne(meta, ..) => meta,
+            Self::Play(meta, ..) => meta,
+            Self::Flat(meta, ..) => meta,
+            Self::Sharp(meta, ..) => meta,
+            Self::Push(meta, ..) => meta,
+            Self::Pop(meta, ..) => meta,
+            Self::Add(meta, ..) => meta,
+            Self::Sub(meta, ..) => meta,
+            Self::Inc(meta, ..) => meta,
+            Self::Dec(meta, ..) => meta,
+            Self::Jg(meta, ..) => meta,
+            Self::Jl(meta, ..) => meta,
+            Self::Jge(meta, ..) => meta,
+            Self::Jle(meta, ..) => meta,
+            Self::Jeq(meta, ..) => meta,
+            Self::Je(meta, ..) => meta,
+            Self::Jne(meta, ..) => meta,
+            Self::Mov(meta, ..) => meta,
+            Self::St(meta, ..) => meta,
+            Self::Ld(meta, ..) => meta,
+            Self::Define(meta, ..) => meta,
+            Self::Lir(meta, ..) => meta,
+            Self::Stop(meta, ..) => meta,
             _ => unreachable!(),
         }
     }
     fn constructor(&self) -> &'static str {
         match self {
-            Self::LabelRef(..) => "label-ref",
-            Self::Int(..) => "int",
-            Self::Note(..) => "note",
-            Self::Register(..) => "register",
+            Self::Call(..) => "call",
+            Self::CallAsync(..) => "call_async",
+            Self::Ret(..) => "ret",
+            Self::RetAsync(..) => "ret_async",
+            Self::Jmp(..) => "jmp",
+            Self::Bpm(..) => "bpm",
+            Self::Time(..) => "time",
+            Self::Beat(..) => "beat",
+            Self::Wait(..) => "wait",
+            Self::PlayOne(..) => "play_one",
+            Self::Play(..) => "play",
+            Self::Flat(..) => "flat",
+            Self::Sharp(..) => "sharp",
+            Self::Push(..) => "push",
+            Self::Pop(..) => "pop",
+            Self::Add(..) => "add",
+            Self::Sub(..) => "sub",
+            Self::Inc(..) => "inc",
+            Self::Dec(..) => "dec",
+            Self::Jg(..) => "jg",
+            Self::Jl(..) => "jl",
+            Self::Jge(..) => "jge",
+            Self::Jle(..) => "jle",
+            Self::Jeq(..) => "jeq",
+            Self::Je(..) => "je",
+            Self::Jne(..) => "jne",
+            Self::Mov(..) => "mov",
+            Self::St(..) => "st",
+            Self::Ld(..) => "ld",
+            Self::Define(..) => "define",
+            Self::Lir(..) => "lir",
+            Self::Stop(..) => "stop",
             _ => unreachable!(),
         }
     }
     fn sort(&self) -> &'static str {
-        "operand"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Program<M> {
-    fn ast_info(&self) -> &M {
-        let Self(meta, ..) = self;
-        meta
-    }
-    fn constructor(&self) -> &'static str {
-        "program"
-    }
-    fn sort(&self) -> &'static str {
-        "program"
-    }
-}
-impl<M: AstInfo> AstNode<M> for Layout<M> {
-    fn ast_info(&self) -> &M {
-        match self {
-            Self::Simple(meta, ..) => meta,
-            Self::Comment(meta, ..) => meta,
-            _ => unreachable!(),
-        }
-    }
-    fn constructor(&self) -> &'static str {
-        match self {
-            Self::Simple(..) => "simple",
-            Self::Comment(..) => "comment",
-            _ => unreachable!(),
-        }
-    }
-    fn sort(&self) -> &'static str {
-        "layout"
+        "instruction"
     }
 }
