@@ -1,0 +1,16 @@
+ > ***
+-->*2*
+ > ***
+; ^ LOAD 2, adds 2 onto the stack
+ > ***
+-->*2*
+ > ***
+; ^ LOAD 2, adds another 2 onto the stack
+* *
+ * 
+* *
+; ^ MUL, multiplies both values in the stack, clears it, and puts the result on the stack
+*->
+*->
+*->
+; ^ PUT, prints the last value on the stack to stdout
