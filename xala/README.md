@@ -35,7 +35,7 @@ As with other assembly languages, Xala has registers, of which there are 7. Thos
 
 * `%X`, floating point value of the X coordinate. The value range is between 0 and 1 inclusively.
 * `%Y`, floating point value of the Y coordinate. The value range is between 0 and 1 inclusively. 0 is at the bottom of screen rather than the top.
-* `%RET`, a return value. It is not implemented yet. But may be implemented in a future version.
+* `%RET`, the return value of a function.
 * `%OUT` is the floating point value of the opacity of the colour on the screen. Since Xala only works in monochrome, this is achieved with dithering. The value range is between 0 and 1, with 1 being completely light and 0 being completely dark. Using the default colours, this would mean that 1 is completely white and 0 completely blue, with values in between being a mix of both colours.
 * `%TIME` is the number of seconds program has been running for.
 * `%MEMORY ` is a special register which holds more than one value at a time. But only one may be accessed at once. It returns the value stored at the memory address that `%BASE` points to.
@@ -58,11 +58,77 @@ These operators require two parameters and can be used in two ways; using either
 ```
 You must use the `INTO` keyword to store the result in a register. If you store the result in the `%OUT` register, this will update the appearance of the screen.
 
+#### Functions
+Now time to spice things up with some functions. You can declare a function by first typing out its name, however, it must be prefixed with an `@`. If you're using functions, you should have a `@MAIN` function so that the interpreter may know where to start.
+
+Parameters are called like registers in a numbered fashion starting at 0.
+
+A function ends with the RET keyword and is called in another function by typing out its name without the `@`. The `RET` keyword shouldn't be confused with the `%RET` keyword. the former is what ends the function and the latter is the register where the return value is stored. It's important not to mix them up!
+
+Heres a few examples of functions:
+```asm
+@SQRT
+  %0 POW 0.5 INTO %RET
+  RET
+
+@MAIN
+  SQRT %X INTO %OUT
+```
+```asm
+@SQUARED
+  %0 MUL %0 INTO %RET
+  RET
+
+@MAIN
+  %X SQUARED INTO %OUT
+```
+
 ### Code Samples
 Here are some animations that have already been written for your enjoyment:
+```asm
+%X ADD %Y ADD %TIME MOD 0.5 INTO %OUT ; adds x and y outputs into the screen
+```
 ```asm
 0 INTO %BASE
 %TIME INTO %MEMORY
 %MEMORY MUL %MEMORY INTO %MEMORY
 %MEMORY ADD %X MOD 1.0 INTO %OUT
 ```
+```
+@V2MAK
+  %0 INTO %BASE
+  %1 INTO %MEMORY
+  %BASE ADD 1 INTO %BASE
+  %2 INTO %MEMORY
+  %0 INTO %RET
+  RET
+
+@V2ADD
+  %1 INTO %BASE
+  %MEMORY INTO %A
+  %0 INTO %BASE
+  %A ADD %MEMORY INTO %MEMORY
+
+  %1 ADD 1 INTO %BASE
+  %MEMORY INTO %A
+  %0 ADD 1 INTO %BASE
+  %A ADD %MEMORY INTO %MEMORY
+
+  %0 INTO %RET
+  RET
+
+@V2MAG
+  %0 INTO %BASE
+  %MEMORY MUL %MEMORY INTO %A
+  %0 ADD 1 INTO %BASE
+  %MEMORY MUL %MEMORY INTO %MEMORY
+  %A ADD %MEMORY INTO %RET
+  RET
+
+@MAIN
+  SIN %TIME INTO %A
+  COS %TIME INTO %MEMORY
+  V2MAK 4 %A %MEMORY INTO %A
+  V2MAK 2 %X %Y INTO %A
+  V2MAK 0 -0.5 -0.5 V2ADD 2 V2ADD 4 V2MAG INTO %OUT
+  ```
