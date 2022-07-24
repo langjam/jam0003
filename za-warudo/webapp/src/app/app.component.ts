@@ -85,24 +85,38 @@ rocks rock_lower 50%
     console.log(regions);
     // 0, 0.5
 
-    const subregions = world.regions.map((region) => {
+    const subregions = world.regions.map((region, index) => {
+      const start = regions[index];
+      let end = regions[index + 1];
+      if (index == regions.length - 1) {
+        end = 1;
+      }
+      const diff = end - start;
+
       let subregionPerc = 0;
-      const subregions = region.subRegions.map(subregion => {
+      let subregions = region.subRegions.map(subregion => {
         const previousSubregionPerc = subregionPerc;
         subregionPerc += subregion.percent / 100;
         return previousSubregionPerc;
       });
+
+      subregions = subregions.map(subregion => {
+        return subregion * diff + start;
+      });
+
       console.log(subregions);
       return subregions;
     });
 
     for (let i = 0; i < canvas.width; i++) {
       for (let j = 0; j < canvas.height; j++) {
-        const selection = Math.random();
+        const x = (i / canvas.width) * 4;
+        const y = (j / canvas.height) * 4;
+        const noise = (this.noise.gen(x, y) + 1) / 2;
 
         let regionIndex = 0;
         for (; regionIndex < regions.length; ++regionIndex) {
-          if (regions[regionIndex] > selection) {
+          if (regions[regionIndex] > noise) {
             break;
           }
         }
@@ -113,10 +127,6 @@ rocks rock_lower 50%
 
         const region = world.regions[regionIndex];
         const subregions_ = subregions[regionIndex];
-
-        const x = (i / canvas.width) * 4;
-        const y = (j / canvas.height) * 4;
-        const noise = (this.noise.gen(x, y) + 1) / 2;
 
         let subregionIndex = 0;
         for (; subregionIndex < subregions_.length; ++subregionIndex) {
