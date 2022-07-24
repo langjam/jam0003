@@ -4,7 +4,7 @@ cd build
 while true
 do
   clang++ \
-    -O3 \
+    -Ofast \
     -fdebug-compilation-dir=.. \
     -target wasm32 \
     -flto \

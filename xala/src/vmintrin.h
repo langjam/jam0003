@@ -25,6 +25,8 @@ enum InstrType {
   InstrType_Load, // (REGISTER) Push register value onto stack
   InstrType_Store, // (REGISTER) Pop stack value into register
 
+  InstrType_Exit, // () Exit program
+
   INSTRTYPE_COUNT
 };
 

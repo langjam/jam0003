@@ -117,18 +117,17 @@
             }
             if (ch == 1) {
               stdoutEl.innerText = "";
-              stdoutEl.innerHtml = stdout;
+              stdoutEl.innerHTML = stdout;
               return;
             }
 
             if (stream == 0) { // stdout
               stdout += String.fromCharCode(ch);
             } else if (stream == 1) { // stderr
-              stdoutEl.innerHtml += "[TODO: STDERR]"
+              stdoutEl.innerHTML += "[TODO: STDERR]"
             } else {
               console.error("wasm_putchar: Unknown stream")
             }
-            stdoutEl.innerHTML = stdout
           }
         }});
         instance = result.instance;

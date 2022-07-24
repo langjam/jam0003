@@ -4,7 +4,7 @@
 
 void putval(char c) {
   if (c == '\n') {
-    putval("<br/>");
+    putval("<br/>\1");
   } else {
     wasm_putchar(WASM_STDOUT, c);
   }
@@ -78,14 +78,14 @@ void putval(Program prog) {
   // 3 = reg arg
   int classes[] = {
     0, 0, 0, 0,
-    0, 1, 2, 3, 3
+    0, 1, 2, 3, 3, 0
   };
   static const char *names[] = {
     "ADD", "SUB", "MUL", "DIV",
-    "MOD", "POP", "IMM", "LOAD", "STORE"
+    "MOD", "POP", "IMM", "LOAD", "STORE", "EXIT"
   };
   static const char *regs[] = {
-    "X", "Y", "RET", "OUT"
+    "X", "Y", "RET", "OUT", "TIME"
   };
 
   tprintf("<pre>");

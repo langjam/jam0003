@@ -78,7 +78,11 @@ void dither() {
   }
 }
 
+VM vm;
 WASM_EXPORT void wasm_init() {
+  Program prog;
+  parser_parse(&prog, "");
+  vm = vm_init(prog);
   make_bayer();
 }
 
@@ -87,7 +91,6 @@ WASM_EXPORT void wasm_accept(u8 c) {
   source[source_len] = 0; 
 }
 
-VM vm;
 
 WASM_EXPORT void wasm_run() {
   source_len = 0;
@@ -103,16 +106,9 @@ WASM_EXPORT void wasm_run() {
 }
 
 WASM_EXPORT void wasm_frame(float dt) {
-  for (int i = 0; i < 256; ++i) {
-    for (int j = 0; j < 256; ++j) {
-      //bytes[i][j] = int(i + j + vm.regs[Reg_Time]*256)%256;
-      if (vm_run_for_pixel(&vm, bytes, i, j)) {
-        return;
-      }
-    }
-  }
-
+  vm_run_scr(&vm, bytes);
   dither();
+
   wasm_render((u8*)bytes);
   vm.regs[Reg_Time] += dt;
 }

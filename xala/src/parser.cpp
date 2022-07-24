@@ -286,10 +286,11 @@ bool parser_parse(Program *output, const char *source) {
 
   Parser p;
   p.source = source;
-  p.going = true;
+  p.going = *source;
   while (p.going) {
     CHECKOUT(parse_tape(&p));
   }
+  parser_put_instr(&p, Instr{InstrType_Exit});
   *output = current_prog;
   return false;
 }
