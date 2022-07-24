@@ -1,5 +1,21 @@
 # StackGrid
 
+## Setup
+
+```shell
+npm install
+```
+
+## Usage
+
+```shell
+node index.js --file <path>
+```
+
+See the [examples directory](./examples/).
+
+## Notes
+
 - Stacks are grid columns. The first is actually where you write the instructions and every other column is a possible stack.
 
 - Stacks default to B, making one line programs in the A column
@@ -35,4 +51,4 @@ TODO:
 
 ## Inspirations
 
-- https://esolangs.org/wiki/Super_Stack! Super Stack!
+- <https://esolangs.org/wiki/Super_Stack>! Super Stack!
