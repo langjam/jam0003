@@ -1,0 +1,7 @@
+name "BASIS"
+description "Beginner's Assembly Instruction Set"
+authors "doigt"
+license "MIT"
+dependency "raylib-d" version="~>4.0.1"
+libs "raylib"
+lflags "-L./lib"
