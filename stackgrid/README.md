@@ -51,4 +51,4 @@ TODO:
 
 ## Inspirations
 
-- <https://esolangs.org/wiki/Super_Stack>! Super Stack!
+- [Super Stack!](https://esolangs.org/wiki/Super_Stack)
