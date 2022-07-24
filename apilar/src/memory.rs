@@ -1,4 +1,6 @@
-#[derive(Clone)]
+use serde_derive::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Memory {
     pub values: Vec<u8>,
 }

@@ -1,12 +1,13 @@
 use rand::rngs::SmallRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
+use serde_derive::{Deserialize, Serialize};
 
 use crate::direction::Direction;
 use crate::memory::Memory;
 use crate::processor::Processor;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Computer {
     max_processors: usize,
     pub resources: u64,

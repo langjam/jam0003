@@ -2,24 +2,26 @@ use crate::computer::Computer;
 use crate::direction::Direction;
 use rand::rngs::SmallRng;
 use rand::Rng;
+use serde_derive::{Deserialize, Serialize};
 
-const EAT_AMOUNT: u64 = 100;
-
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Location {
     pub resources: u64,
     pub computer: Option<Computer>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct World {
     width: usize,
     height: usize,
+    eat_amount: u64,
     pub rows: Vec<Vec<Location>>,
 }
 
 type Coords = (usize, usize);
 
 impl World {
-    pub fn new(width: usize, height: usize, resources: u64) -> World {
+    pub fn new(width: usize, height: usize, eat_amount: u64, resources: u64) -> World {
         let mut rows: Vec<Vec<Location>> = Vec::new();
         for _ in 0..height {
             let mut column_vec: Vec<Location> = Vec::new();
@@ -30,6 +32,7 @@ impl World {
         }
         World {
             width,
+            eat_amount,
             height,
             rows,
         }
@@ -37,13 +40,17 @@ impl World {
 
     fn neighbor_coords(&self, coords: Coords, direction: Direction) -> Coords {
         let (x, y) = coords;
-        let (nx, ny): (usize, usize) = match direction {
-            Direction::North => (x, y - 1),
-            Direction::East => (x + 1, y),
-            Direction::South => (x, y + 1),
-            Direction::West => (x - 1, y),
+        let ix = x as i32;
+        let iy = y as i32;
+        let (nx, ny): (i32, i32) = match direction {
+            Direction::North => (ix, iy - 1),
+            Direction::East => (ix + 1, iy),
+            Direction::South => (ix, iy + 1),
+            Direction::West => (ix - 1, iy),
         };
-        return (nx % self.width, ny % self.height);
+        let rx = nx.rem_euclid(self.width as i32);
+        let ry = ny.rem_euclid(self.height as i32);
+        return (rx as usize, ry as usize);
     }
 
     pub fn set(&mut self, (x, y): Coords, computer: Computer) {
@@ -154,10 +161,11 @@ impl World {
     }
 
     fn eat(&mut self, coords: Coords) {
+        let eat_amount = self.eat_amount;
         let location = self.get_mut(coords);
         if let Some(computer) = &mut location.computer {
-            let amount = if location.resources >= EAT_AMOUNT {
-                EAT_AMOUNT
+            let amount = if location.resources >= eat_amount {
+                eat_amount
             } else {
                 location.resources
             };
@@ -214,5 +222,24 @@ impl Location {
         if eliminate_computer {
             self.computer = None;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_neighbor_out_of_bounds() {
+        let world = World::new(5, 5, 10, 5);
+        assert_eq!(world.neighbor_coords((2, 2), Direction::North), (2, 1));
+        assert_eq!(world.neighbor_coords((2, 2), Direction::South), (2, 3));
+        assert_eq!(world.neighbor_coords((2, 2), Direction::West), (1, 2));
+        assert_eq!(world.neighbor_coords((2, 2), Direction::East), (3, 2));
+
+        assert_eq!(world.neighbor_coords((1, 0), Direction::North), (1, 4));
+        assert_eq!(world.neighbor_coords((1, 4), Direction::South), (1, 0));
+        assert_eq!(world.neighbor_coords((0, 2), Direction::West), (4, 2));
+        assert_eq!(world.neighbor_coords((4, 2), Direction::East), (0, 2));
     }
 }

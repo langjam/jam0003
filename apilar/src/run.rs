@@ -1,106 +1,66 @@
-use crate::assembler::{text_to_words, Assembler};
+use crate::assembler::Assembler;
 use crate::computer::Computer;
 use crate::render::{render_start, render_update};
 use crate::world::World;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
+use std::error::Error;
+use std::fs::File;
 
-const PROGRAM_TEXT: &str = "
-# startup
-NOOP
-NOOP
-NOOP
-NOOP
-NOOP
-NOOP  # delay so we take the right address after SPLIT
-ADDR  # s
-N6
-SUB   # adjust s for delay
-DUP   # s c
-DUP   # s c c
-N8
-N8
-MUL
-ADD   # s c t target is 64 positions below start
-SWAP  # s t c
-# start copy loop
-ADDR  # s t c l
-EAT   # do some eating and growing while we can
-GROW
-SWAP  # s t l c
-ROT   # s l c t
-DUP2
-ADD   # s l c t c+t
-ROT   # s l t c+t c
-DUP   # s l t c+t c c
-READ  # s l t c+t c inst
-ROT   # s l t c inst c+t
-SWAP  # s l t c c+t inst
-WRITE # s l t c
-N1
-ADD   # s l t c+1
-ROT   # s t c+1 l
-SWAP  # s t l c+1
-DUP   # s t l c+1 c+1
-ADDR  # end
-N7
-N3
-MUL   # 21
-ADD   # s t l c+1 c+1 end
-LT    # s t l c+1 b
-ROT   # s t c+1 b l
-SWAP  # s t c+1 l b
-JMPIF # s t c+1
-DROP  # s t
-OVER  # s t s
-ADD   # s s+t
-DUP   # s s+t s+t
-START # s s+t spawn processor into copy
-N2    
-SUB   # s s+t-2 split_addr
-RND   # random direction
-SPLIT # split from s+t-2
-JMP   # jump to first addr";
-
-pub fn run() {
+pub fn run(
+    width: usize,
+    height: usize,
+    starting_memory_size: usize,
+    starting_resources: u64,
+    max_processors: usize,
+    world_resources: u64,
+    instructions_per_update: usize,
+    mutation_frequency: u64,
+    redraw_frequency: u64,
+    save_frequency: u64,
+    memory_mutation_amount: u64,
+    processor_stack_mutation_amount: u64,
+    eat_amount: u64,
+    dump: bool,
+    words: Vec<&str>,
+) -> Result<(), Box<dyn Error>> {
     let assembler = Assembler::new();
-    let words = text_to_words(PROGRAM_TEXT);
 
-    let mut computer = Computer::new(300, 10, 500);
+    let mut computer = Computer::new(starting_memory_size, max_processors, starting_resources);
     assembler.assemble_words(words, &mut computer.memory, 0);
     computer.add_processor(0);
 
-    let mut world = World::new(70, 40, 400);
-    world.set((30, 20), computer);
+    let mut world = World::new(width, height, eat_amount, world_resources);
+    world.set((width / 2, height / 2), computer);
 
     let mut small_rng = SmallRng::from_entropy();
 
     render_start();
-    let mut i = 0;
-    loop {
-        let redraw = i % 100000 == 0;
-        let mutate = i % 100000 == 0;
+    let mut i: u64 = 0;
+    let mut save_nr = 0;
 
-        world.update(&mut small_rng, 10);
+    loop {
+        let redraw = i % redraw_frequency == 0;
+        let mutate = i % mutation_frequency == 0;
+        let save = i % save_frequency == 0;
+
+        world.update(&mut small_rng, instructions_per_update);
         if mutate {
-            world.mutate(&mut small_rng, 5, 0);
+            world.mutate(
+                &mut small_rng,
+                memory_mutation_amount,
+                processor_stack_mutation_amount,
+            );
         }
         if redraw {
-            // for row in &world.rows {
-            //     for location in row {
-            //         if let Some(computer) = &location.computer {
-            //             println!(
-            //                 "Computer {} {}",
-            //                 computer.processors.len(),
-            //                 computer.resources
-            //             );
-            //             println!("{}", assembler.line_disassemble(&computer.memory.values))
-            //         }
-            //     }
-            // }
             render_update();
             println!("{}", world);
         }
-        i += 1;
+        if save && dump {
+            let file = File::create(format!("apilar-dump{}.cbor", save_nr))?;
+            serde_cbor::to_writer(file, &world)?;
+            save_nr += 1;
+        }
+        i = i.wrapping_add(1);
     }
 }
