@@ -4,7 +4,7 @@
 
 - Install Node.js which includes Node Package Manager.
 - We recommend using `nvm` to do the same.
-- This codebase uses node version =<16.
+- This codebase uses node version >=16.
 - Install node 16 - `nvm install 16`
 - Install yarn - `npm install -g yarn`
 
