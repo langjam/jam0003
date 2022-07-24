@@ -83,6 +83,10 @@ the `reset` command helps.
 What is going on in these worlds? It's a bit of a mystery without more careful
 analysis.
 
+## sample code
+
+You can find a few sample programs in the `sample_code` directory.
+
 ## langjam 3 documentation link
 
 More documentation may appear here in the next few days:
