@@ -173,7 +173,7 @@ pub enum TypeError {
     #[error("Unbound variable '{0}'")]
     UnboundVariable(String),
 
-    #[error("cannot machine '{0}'")]
+    #[error("Unbound machine '{0}'")]
     UnboundMachine(String),
 }
 
