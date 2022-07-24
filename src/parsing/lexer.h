@@ -1,6 +1,7 @@
 #pragma once
 
 #include <parsing/token.h>
+#include <parsing/streampos.h>
 #include <utils/erroror.h>
 
 #include <string>
@@ -24,18 +25,18 @@ class Lexer {
     Token m_token;
     std::string& m_stream;
     std::string m_filename;
-    size_t m_index{0};
+    StreamPos m_position { };
 
     bool has_error() { return m_has_error; }
     Token& token() { return m_token; }
-    size_t index() { return m_index; }
-    size_t remaining() { return m_stream.length() - index(); }
+    StreamPos position() { return m_position; }
+    size_t remaining() { return m_stream.length() - m_position.index; }
     size_t is_eof() { return remaining() == 0; }
     void set_error(std::string error_message);
     void show_error();
     char get_char(size_t idx = 0);
     void advance(size_t amount = 1);
-    void set_index(size_t index) { m_index = index; }
+    void set_position(StreamPos position) { m_position = position; }
 
     void clear_whitespace();
     bool lex_keyword(std::string value, Token::Type token_type);

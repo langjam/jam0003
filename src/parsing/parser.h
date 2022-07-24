@@ -20,15 +20,13 @@ class Parser final {
     bool m_has_error{false};
     std::string m_error_message{};
     std::vector<AstInstruction::Ptr> m_instructions;
-    size_t new_lines = 1;
-    size_t newline_index = 0;
 
     ErrorOr<bool> lex() { return m_lexer.lex(); }
     bool has_error() { return m_has_error; }
     bool is_eof() { return m_lexer.is_eof(); }
     Token& token() { return m_lexer.token(); }
-    size_t index() { return m_lexer.index(); }
-    void set_index(size_t index) { m_lexer.set_index(index); }
+    StreamPos position() { return m_lexer.position(); }
+    void set_position(StreamPos position) { m_lexer.set_position(position); }
     void set_error(std::string error_message);
     ErrorOr<bool> match_token(Token::Type type);
     ErrorOr<void> expect_newline(bool do_error = true);

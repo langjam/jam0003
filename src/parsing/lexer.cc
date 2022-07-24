@@ -10,19 +10,28 @@ void Lexer::set_error(std::string error_message) {
 
 void Lexer::show_error() {
     assert(m_has_error);
-    std::cerr << "LexerError: " << m_error_message << std::endl;
+    auto pos = position();
+    std::cerr << "ParserError at " << filename() << "(l" << pos.line << ", c" << pos.column << "): " << m_error_message << std::endl;
 }
 
 char Lexer::get_char(size_t idx) {
-    auto actual_index = index() + idx;
+    auto actual_index = m_position.index + idx;
     assert(actual_index < m_stream.length());
     return m_stream[actual_index];
 }
 
 void Lexer::advance(size_t amount) {
-    auto new_index = index() + amount;
+    auto new_index = m_position.index + amount;
     assert(new_index <= m_stream.length());
-    m_index = new_index;
+    for (auto i = m_position.index; i < new_index; ++i) {
+        if (m_stream[i] == '\n') {
+            ++m_position.line;
+            m_position.column = 1;
+        } else {
+            ++m_position.column;
+        }
+    }
+    m_position.index = new_index;
 }
 
 void Lexer::clear_whitespace() {
@@ -43,7 +52,7 @@ void Lexer::clear_whitespace() {
 }
 
 bool Lexer::lex_newline() {
-    auto start_index = index();
+    auto start_position = position();
     if (get_char() != '\n') return false;
     size_t size = 0;
     do {
@@ -52,27 +61,27 @@ bool Lexer::lex_newline() {
         clear_whitespace();
     } while (!is_eof() && get_char() == '\n');
     token().set_type(Token::Type::Newline);
-    token().set_index(start_index);
+    token().set_position(start_position);
     token().set_size(size);
     return true;
 }
 
 bool Lexer::lex_number() {
     if (!isdigit(get_char())) return false;
-    auto start_index = index();
+    auto start_position = position();
     size_t length = 0;
     do {
         advance();
         ++length;
     } while (!is_eof() && isdigit(get_char()));
     token().set_type(Token::Type::Number);
-    token().set_index(start_index);
+    token().set_position(start_position);
     token().set_size(length);
     return true;
 }
 
 bool Lexer::lex_single_character() {
-    auto start_index = index();
+    auto start_position = position();
     Token::Type token_type;
     switch (get_char()) {
         case '<':
@@ -105,7 +114,7 @@ bool Lexer::lex_single_character() {
 
     advance();
     token().set_type(token_type);
-    token().set_index(start_index);
+    token().set_position(start_position);
     token().set_size(1);
     return true;
 }
@@ -113,14 +122,14 @@ bool Lexer::lex_single_character() {
 ErrorOr<bool> Lexer::lex_identifier() {
     if (get_char() != '$') return false;
     advance();
-    auto start_index = index();
+    auto start_position = position();
     if (is_eof()) {
-        set_index(start_index);
+        set_position(start_position);
         set_error("expected character");
         return {};
     }
     if (!is_identifier_start_char(get_char())) {
-        set_index(start_index);
+        set_position(start_position);
         set_error("unexpected value");
         return {};
     }
@@ -131,14 +140,14 @@ ErrorOr<bool> Lexer::lex_identifier() {
         ++identifier_length;
     }
     token().set_type(Token::Type::Identifier);
-    token().set_index(start_index);
+    token().set_position(start_position);
     token().set_size(identifier_length);
     return true;
 }
 
 bool Lexer::lex_keyword(std::string value, Token::Type token_type) {
     if (remaining() < value.length()) return false;
-    auto start_index = index();
+    auto start_position = position();
     for (size_t i = 0; i < value.length(); ++i) {
         if (tolower(get_char(i)) != tolower(value[i])) return false;
     }
@@ -148,7 +157,7 @@ bool Lexer::lex_keyword(std::string value, Token::Type token_type) {
     }
     advance(value.length());
     token().set_type(token_type);
-    token().set_index(start_index);
+    token().set_position(start_position);
     token().set_size(value.length());
     return true;
 }
