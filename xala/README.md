@@ -8,11 +8,11 @@ XALA was developed by [skejeton](https://github.com/skejeton) and [mrms](https:/
 
 Instead of installing and running scripts locally, you can try the language at the online playground here
 
-https://skejeton.github.io/xala/playground
+https://mrms.cz/xala/playground
 
 You can find more documentation here
 
-https://skejeton.github.io/xala/docs
+https://mrms.cz/xala
 
 ## Installing
 Clone this repository then type this in the terminal:
