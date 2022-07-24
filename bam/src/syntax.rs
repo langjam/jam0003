@@ -55,6 +55,9 @@ pub enum Builtin {
     Gt,
     Lt,
     Eq,
+    And,
+    Or,
+    Not,
     Dup2,
     Dup3,
     Print,
@@ -119,6 +122,14 @@ impl Value {
         match self {
             Value::Num(f) => f,
             other => panic!("Fatal: expected Num in Value, found {other}"),
+        }
+    }
+
+    /// Try to transform into a boolean.
+    pub fn to_bool(self) -> bool {
+        match self {
+            Value::Bool(b) => b,
+            other => panic!("Fatal: expected Bool in Value, found {other}"),
         }
     }
 }

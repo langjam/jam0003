@@ -94,6 +94,21 @@ impl Factory {
                 let (lhs, rhs) = value.to_pair();
                 Ok(Value::Bool(lhs == rhs))
             }
+            Builtin::And => {
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_bool();
+                let rhs = rhs.to_bool();
+                Ok(Value::Bool(lhs && rhs))
+            }
+            Builtin::Or => {
+                let (lhs, rhs) = value.to_pair();
+                let lhs = lhs.to_bool();
+                let rhs = rhs.to_bool();
+                Ok(Value::Bool(lhs || rhs))
+            }
+            Builtin::Not => {
+                Ok(Value::Bool(!value.to_bool()))
+            }
             Builtin::Dup2 => Ok(Value::Tuple(vec![value.clone(), value])),
             Builtin::Dup3 => Ok(Value::Tuple(vec![value.clone(), value.clone(), value])),
             Builtin::Print => {
