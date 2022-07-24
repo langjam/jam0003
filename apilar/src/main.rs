@@ -56,6 +56,12 @@ struct Cli {
 
     #[clap(long, value_parser)]
     redraw_frequency: Option<u64>,
+
+    #[clap(long, value_parser)]
+    memory_mutation_amount: Option<u64>,
+
+    #[clap(long, value_parser)]
+    processor_stack_mutation_amount: Option<u64>,
 }
 
 fn main() -> std::io::Result<()> {
@@ -81,6 +87,8 @@ fn main() -> std::io::Result<()> {
         cli.instructions_per_update.unwrap_or(10),
         cli.mutation_frequency.unwrap_or(100000),
         cli.redraw_frequency.unwrap_or(100000),
+        cli.memory_mutation_amount.unwrap_or(5),
+        cli.processor_stack_mutation_amount.unwrap_or(0),
         words,
     );
     Ok(())

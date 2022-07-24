@@ -15,6 +15,8 @@ pub fn run(
     instructions_per_update: usize,
     mutation_frequency: u64,
     redraw_frequency: u64,
+    memory_mutation_amount: u64,
+    processor_stack_mutation_amount: u64,
     words: Vec<&str>,
 ) {
     let assembler = Assembler::new();
@@ -36,7 +38,11 @@ pub fn run(
 
         world.update(&mut small_rng, instructions_per_update);
         if mutate {
-            world.mutate(&mut small_rng, 5, 0);
+            world.mutate(
+                &mut small_rng,
+                memory_mutation_amount,
+                processor_stack_mutation_amount,
+            );
         }
         if redraw {
             render_update();
