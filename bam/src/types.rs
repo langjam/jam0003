@@ -125,8 +125,14 @@ impl Display for Type {
 
 #[derive(Debug, Clone, Error)]
 pub enum TypeError {
-    #[error("cannot unify {0} with {1}")]
+    #[error("Cannot unify {0} with {1}")]
     CannotUnify(Type, Type),
+
+    #[error("Unbound variable '{0}'")]
+    UnboundVariable(String),
+
+    #[error("cannot machine '{0}'")]
+    UnboundMachine(String),
 }
 
 #[derive(Debug, Clone)]
@@ -198,7 +204,7 @@ pub fn check_machine_def(
         check_statement(global_env, &mut local_env, statement);
     }
 
-    let real_output_type = infer_stream(global_env, &mut local_env, &machine.result);
+    let real_output_type = infer_stream(global_env, &mut local_env, &machine.result)?;
     local_env
         .unification_constraints
         .push((machine_type_output, real_output_type));
@@ -223,18 +229,20 @@ fn check_statement(
     global_env: &mut GlobalTypeEnv,
     local_env: &mut LocalTypeEnv,
     statement: &Statement,
-) {
+) -> Result<(), TypeError> {
     match statement {
         Statement::Consume(stream) => {
-            let _ = infer_stream(global_env, local_env, stream);
+            let _ = infer_stream(global_env, local_env, stream)?;
+            Ok(())
         }
         Statement::Let(vars, stream) => {
-            let stream_ty = infer_stream(global_env, local_env, stream);
+            let stream_ty = infer_stream(global_env, local_env, stream)?;
 
             if vars.len() == 1 {
                 // If we only bind a single variable, there is no destructuring involved
                 // so we don't need to check against anything
                 local_env.var_types.insert(vars[0].clone(), stream_ty);
+                Ok(())
             } else {
                 // Type checking detructuring is achieved by generating a Tuple type made up of
                 // unification variables and checking that against the inferred stream type.
@@ -249,7 +257,9 @@ fn check_statement(
                     Type::Tuple(tuple_tys.into_iter().map(|(_, ty)| ty).collect());
                 local_env
                     .unification_constraints
-                    .push((variable_tuple_ty, stream_ty))
+                    .push((variable_tuple_ty, stream_ty));
+
+                Ok(())
             }
         }
     }
@@ -259,67 +269,61 @@ fn infer_stream(
     global_env: &mut GlobalTypeEnv,
     local_env: &mut LocalTypeEnv,
     stream: &Stream,
-) -> Type {
+) -> Result<Type, TypeError> {
     match stream {
         Stream::Var(name) => match local_env.var_types.get(name) {
-            Some(ty) => ty.clone(),
-            None => panic!(
-                "infer_stream: Unbound variable found during type checking: '{}'",
-                name
-            ),
+            Some(ty) => Ok(ty.clone()),
+            None => Err(TypeError::UnboundVariable(name.clone()))
         },
         Stream::Const(Value::Null) => {
             // 'null' can have any type, so we treat it like 'forall a. a'
-            new_unif_var(local_env)
+            Ok(new_unif_var(local_env))
         }
-        Stream::Const(Value::Num(_)) => Type::Num,
-        Stream::Const(Value::Str(_)) => Type::String,
-        Stream::Const(Value::Bool(_)) => Type::Bool,
+        Stream::Const(Value::Num(_)) => Ok(Type::Num),
+        Stream::Const(Value::Str(_)) => Ok(Type::String),
+        Stream::Const(Value::Bool(_)) => Ok(Type::Bool),
         Stream::Const(Value::Tuple(_)) => {
             panic!("infer_stream: Tuple constants should not be able to appear in source files")
         }
 
         Stream::Pipe(stream, machine) => {
-            let stream_ty = infer_stream(global_env, local_env, stream);
+            let stream_ty = infer_stream(global_env, local_env, stream)?;
 
             let machine_ty = match &**machine {
                 Machine::Var(machine_name) => match global_env.machine_types.get(machine_name) {
-                    Some(ty) => ty.clone(),
-                    None => panic!(
-                        "infer_stream: Unbound machine found during type checking: '{}'",
-                        machine_name
-                    ),
+                    Some(ty) => Ok(ty.clone()),
+                    None => Err(TypeError::UnboundMachine(machine_name.clone())),
                 },
-                Machine::Builtin(builtin) => get_builtin_ty(builtin)
-                    .unwrap_or_else(|| panic!("{builtin:#?} not found in BUILTIN_MAP")),
+                Machine::Builtin(builtin) => Ok(get_builtin_ty(builtin)
+                    .unwrap_or_else(|| panic!("{builtin:#?} not found in BUILTIN_MAP"))),
                 Machine::Defined(_, _) => panic!(
                     "infer_stream: Machine::Defined should not be able to appear in source files"
                 ),
-            };
+            }?;
             let machine_ty = instantiate(local_env, machine_ty);
 
             local_env
                 .unification_constraints
                 .push((machine_ty.input.clone(), stream_ty));
-            machine_ty.output
+            Ok(machine_ty.output)
         }
 
         Stream::Zip(streams) => {
             let stream_tys = streams
                 .iter()
                 .map(|stream| infer_stream(global_env, local_env, stream))
-                .collect();
-            Type::Tuple(stream_tys)
+                .collect::<Result<Vec<_>,_>>()?;
+            Ok(Type::Tuple(stream_tys))
         }
 
         Stream::Cond(condition, then, else_) => {
-            let condition_ty = infer_stream(global_env, local_env, condition);
+            let condition_ty = infer_stream(global_env, local_env, condition)?;
             local_env
                 .unification_constraints
                 .push((condition_ty, Type::Bool));
 
-            let then_ty = infer_stream(global_env, local_env, then);
-            let else_ty = infer_stream(global_env, local_env, else_);
+            let then_ty = infer_stream(global_env, local_env, then)?;
+            let else_ty = infer_stream(global_env, local_env, else_)?;
 
             local_env
                 .unification_constraints
@@ -327,7 +331,7 @@ fn infer_stream(
 
             // Since we made sure the types of the 'then' and 'else' expressions are
             // equivalent, it doesn't matter which one we return here. We arbitrarily pick the 'then' branch.
-            then_ty
+            Ok(then_ty)
         }
         Stream::Limit(stream, _) => infer_stream(global_env, local_env, stream),
 
