@@ -1,0 +1,17 @@
+cc_library(
+    name = "ast",
+    hdrs = ["ast.hh"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "bytecode_emitter",
+    hdrs = ["bytecode_emitter.hh"],
+    srcs = ["bytecode_emitter.cc"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_gabime_spdlog//:spdlog",
+        "//src/ast:ast",
+        "//src/bytecode:bytecode",
+    ],
+)

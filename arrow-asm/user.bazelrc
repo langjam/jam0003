@@ -1,0 +1,2 @@
+build --host_platform=@com_grail_bazel_toolchain//platforms:darwin-x86_64
+

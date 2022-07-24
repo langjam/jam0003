@@ -1,0 +1,12 @@
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "llvm",
+    actual = select({
+        "//tools/platforms:darwin-x86_64": "@llvm-darwin-x86_64",
+        "//tools/platforms:darwin-aarch64": "@llvm-darwin-x86_64",
+        "//tools/platforms:linux-x86_64": "@llvm-linux-x86_64",
+        "//tools/platforms:linux-aarch64": "@llvm-linux-aarch64",
+        "//conditions:default": "@platforms//:incompatible",
+    }),
+)

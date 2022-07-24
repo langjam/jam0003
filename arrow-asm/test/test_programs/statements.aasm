@@ -1,0 +1,9 @@
+fn main {
+  call sub_print
+}
+fn sub_print {
+  print 0
+}
+fn sub_add(long) {
+  add rr0, p0, p0
+}

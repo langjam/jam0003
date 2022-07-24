@@ -1,0 +1,15 @@
+fn main {
+  add l1, 0, 1
+  
+  add l2, 0, 1
+  while l2 {
+    add l1, l0, l1
+    print l1
+    add l0, l0, l1
+    print l0
+
+    sub l2, l0, 144
+  }
+    
+  exit l0
+}

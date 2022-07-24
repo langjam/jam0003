@@ -1,0 +1,15 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "driver",
+    srcs = ["main.cc"],
+    deps = [
+        "//src/ast:ast",
+        "//src/ast:bytecode_emitter",
+        "//src/parser:parser",
+        "//src/bytecode:bytecode",
+    ],
+    data = [
+        "//test/test_programs",
+    ],
+)

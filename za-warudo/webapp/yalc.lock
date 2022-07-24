@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "za-warudo-core": {
+      "signature": "c32275758529be17efa8bf053b8ec55e",
+      "file": true
+    }
+  }
+}
