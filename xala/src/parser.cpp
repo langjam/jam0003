@@ -13,7 +13,18 @@ struct LineInfo {
   Span span;
 };
 
+struct Label {
+  Span name;
+  uint ip;
+};
+#define LABEL_COUNT 128
+struct LabelInfo {
+  Label labels[128];
+  uint labels_len;
+};
+
 struct Parser {
+  LabelInfo labels;
   const char *source;
   bool going;
   uint line, col;
@@ -25,6 +36,7 @@ enum TokenType {
   TokenType_Register, 
   TokenType_Newline,
   TokenType_Instr, 
+  TokenType_Label
 };
 
 struct Token {
@@ -43,6 +55,45 @@ void putval(LineInfo li) {
   } else {
     tprintf("{}:{} Near `{}` ::", li.line+1, li.col+1, li.span);
   }
+}
+
+bool labels_put(Parser *p, LabelInfo *li, Token t) {
+  (void)p;
+  if (t.type != TokenType_Label) {
+    tprintf("ERROR: {} Is not a label\n", tok2li(t));
+    CHECKOUT(1);
+  }
+
+  for (int i = 0; i < li->labels_len; ++i) {
+    if (span_equal(li->labels[i].name, Span{t.str, t.len})) {
+      tprintf("ERROR: {} Label redefined\n", tok2li(t));
+      CHECKOUT(1);
+    }
+  }
+
+  if (li->labels_len >= 128) {
+    tprintf("ERROR: {} Too many labels\n", tok2li(t));
+    CHECKOUT(1);
+  }
+  li->labels[li->labels_len++] = Label{Span{t.str, t.len}, current_prog.instrs_len};
+  return 0;
+}
+
+bool labels_get(LabelInfo *li, Token t, uint *out_ip) {
+  if (t.type != TokenType_Label) {
+    tprintf("ERROR: {} Is not a label\n", tok2li(t));
+    CHECKOUT(1);
+  }
+
+  for (int i = 0; i < li->labels_len; ++i) {
+    if (span_equal(li->labels[i].name, Span{t.str, t.len})) {
+      *out_ip = li->labels[i].ip;
+      CHECKOUT(1);
+    }
+  }
+
+  tprintf("ERROR: {} Label redefined\n", tok2li(t));
+  CHECKOUT(1);
 }
 
 u8 parser_get(Parser *p) {
@@ -104,6 +155,19 @@ static bool isalnum(u8 c) {
   return isnum(c) || isalpha(c);
 }
 
+static bool fetch_name(Parser *p, Token res) {
+  int l = 0;
+  while (isalnum(parser_get(p))) {
+    parser_next(p);
+    l++;
+  }
+  if (l <= 0) {
+    tprintf("ERROR: {} Name can't be empty\n", tok2li(res));
+    return true;
+  }
+  return false;
+}
+
 static bool fetch_token(Parser *p, Token *output) {
   while (skip_empty(p)) 
     ;
@@ -118,15 +182,11 @@ static bool fetch_token(Parser *p, Token *output) {
   if (parser_is(p, '%')) {
     res.type = TokenType_Register;
     parser_next(p);
-    int l = 0;
-    while (isalnum(parser_get(p))) {
-      parser_next(p);
-      l++;
-    }
-    if (l <= 0) {
-      tprintf("ERROR: {} Name can't be empty\n", tok2li(res));
-      return true;
-    }
+    CHECKOUT(fetch_name(p, res));
+  } else if (parser_is(p, '@')) {
+    res.type = TokenType_Label;
+    parser_next(p);
+    CHECKOUT(fetch_name(p, res));
   } else if (parser_is(p, '\n')) {
     res.type = TokenType_Newline;
     parser_next(p);
@@ -143,9 +203,7 @@ static bool fetch_token(Parser *p, Token *output) {
     }
   } else if (isalpha(parser_get(p))) {
     res.type = TokenType_Instr;
-    while (isalnum(parser_get(p))) {
-      parser_next(p);
-    }
+    CHECKOUT(fetch_name(p, res));
   } else if (p->going == false) {
 
   } else {
@@ -302,8 +360,9 @@ again:
       CHECKOUT(parser_put_instr(p, Instr{InstrType_Div}));
 
     } else {
-      tprintf("ERROR: {} Instruction doesn't exist\n", tok2li(name));
-      CHECKOUT(1);
+      uint ip;
+      CHECKOUT(labels_get(&p->labels, name, &ip));
+      CHECKOUT(parser_put_instr(p, Instr{InstrType_Call, ip}));
     }
 
     name = t;
@@ -319,7 +378,10 @@ bool parse_tape(Parser *p) {
   Token t;
   CHECKOUT(fetch_token(p, &t));
   int argc = 0;
-
+  if (t.type == TokenType_Label) {
+    CHECKOUT(labels_put(p, &p->labels, t));
+    return 0;
+  }
   if (t.type == TokenType_Immediate || t.type == TokenType_Register) {
     CHECKOUT(emit_value(p, t));
     CHECKOUT(fetch_token(p, &t));
@@ -337,7 +399,7 @@ bool parser_parse(Program *output, const char *source) {
   current_prog.instrs = current_prog_instrs;
   current_prog.instrs_len = 0;
 
-  Parser p;
+  Parser p = {};
   p.source = source;
   p.going = *source;
   while (p.going) {
