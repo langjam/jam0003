@@ -10,10 +10,14 @@ pub struct ParserBuilder;
 
 impl ParserBuilder {
     #[inline]
-    pub fn build() -> impl Parser<Token, Program, Error = Simple<Token>> {
+    pub fn build() -> (
+        impl Parser<Token, Program, Error = Simple<Token>>,
+        impl Parser<Token, Statement, Error = Simple<Token>>,
+    ) {
         let stream: Recursive<Token, Stream, _> = recursive(|stream| {
             let stream_leaf = Self::ident()
                 .map(|name| Stream::Var(name)) // x
+                .or(just(Token::Null).to(Stream::Const(Value::Null))) // null
                 .or(Self::float().map(|f| Stream::Const(Value::Num(f)))) // n
                 .or(Self::string().map(|s| Stream::Const(Value::Str(s)))) // s
                 .or(just(Token::Lparen)
@@ -75,20 +79,27 @@ impl ParserBuilder {
 
         let consume_stream = stream.clone().map(|s| Statement::Consume(s));
 
-        let statement = let_.or(consume_stream);
+        let statement = let_.or(consume_stream).boxed();
 
         let machine_def = just(Token::Machine)
             .then(Self::ident())
             .then_ignore(just(Token::Lbrace))
-            .then(statement.then_ignore(just(Token::Semicolon)).repeated())
+            .then(
+                statement
+                    .clone()
+                    .then_ignore(just(Token::Semicolon))
+                    .repeated(),
+            )
             .then(stream.clone())
             .then_ignore(just(Token::Rbrace))
             .map(|(((_, name), body), result)| Definition { name, body, result });
 
-        machine_def
+        let program = machine_def
             .repeated()
             .then_ignore(end())
-            .map(|machines| Program { machines })
+            .map(|machines| Program { machines });
+
+        (program, statement)
     }
 
     #[inline]

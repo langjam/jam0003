@@ -12,4 +12,5 @@ tracing = "0.1.35"
 tracing-subscriber = "0.3.15"
 clap = { version = "3.2.14", features = [ "derive" ] }
 rustyline = "10.0.0"
+ansi_term = "0.12.1"
 

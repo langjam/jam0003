@@ -1,6 +1,10 @@
 #![allow(unused)]
+use ansi_term::{Colour, Style};
+use anyhow::{anyhow, bail, Context, Result};
 use chumsky::Parser;
 use clap;
+use eval::Factory;
+use rustyline::{error::ReadlineError, Editor};
 use tracing::{info, level_filters, Level};
 
 mod eval;
@@ -26,65 +30,155 @@ pub type Spanned<T> = (T, Span);
 struct Args {
     #[clap(help = "The source file to execute")]
     source: Option<String>,
-    #[clap(long, help = "Emable tracing")]
+    #[clap(long, help = "Enable tracing")]
     trace: bool,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args: Args = clap::Parser::parse();
 
     if args.trace {
-        tracing_subscriber::fmt::init();
+        tracing_subscriber::fmt().with_max_level(Level::INFO).init();
     }
 
     match args.source {
         None => run_repl(),
-        Some(source) => run(&source),
-    }
-}
-
-fn run_repl() {
-    let mut rl = rustyline::Editor::<()>::new().unwrap();
-    let lexer = LexerBuilder::build();
-    let parser = ParserBuilder::build();
-
-    let mut type_env = GlobalTypeEnv::new();
-    loop {
-        match rl.readline("\x1b[36m*> \x1b[0m") {
-            Err(rustyline::error::ReadlineError::Eof) => break,
-            Err(err) => panic!("ReadlineError: {err}"),
-            Ok(line) => {
-                let tokens = lexer.parse(line).unwrap();
-
-                // TODO: Currently, this parses the entire program.
-                // Ideally, we should parse a single machine definition or a stream expression.
-                match parser.parse(tokens) {
-                    Err(errors) => {
-                        println!(
-                            "\x1b[31mParse Errors:\n{}\x1b[0m",
-                            errors.into_iter().map(|err| { err.to_string() }).collect::<Vec<_>>().join("\n")
-                        )
-                    }
-                    Ok(program) => {
-                        // This should really be a single machine
-                        for machine in &program.machines {
-                            match types::check_machine_def(&mut type_env, machine) {
-                                Err(err) => {
-                                    println!("\x1b[31mType Error: {err}")
-                                }
-                                Ok(_) => ()
-                            }
-                        }
-                    }
-                }
-            }
+        Some(source) => {
+            run(&source);
+            Ok(())
         }
     }
 }
 
+/// REPL mode.
+enum Mode {
+    /// If in this mode, accept statements, so things like:
+    /// - `let x, y = stream -> Machine`
+    /// - `null -> Read -> ToNum -> Sqrt`
+    Statement,
+    /// If in this mode, accept machine-declarations.
+    /// Stores the current line number.
+    Definiton(usize),
+    /// If in this mode, we're stepping through a stream.
+    Streaming(Statement),
+}
+
+fn run_repl() -> Result<()> {
+    let mut rl = Editor::<()>::new().unwrap();
+
+    let lexer = LexerBuilder::build();
+    let (program_parser, statement_parser) = ParserBuilder::build();
+
+    let factory = Factory::new(Program { machines: vec![] });
+
+    let mut mode = Mode::Statement;
+    let mut definition_buf = String::new();
+
+    let prompt = |mode: &mut Mode| match mode {
+        Mode::Statement => Colour::Blue.bold().paint("bam> ").to_string(),
+        Mode::Streaming(_) => Colour::Purple.bold().paint("BAM!> ").to_string(),
+        Mode::Definiton(l) => {
+            *l += 1;
+            Colour::White.bold().paint(format!("{l} | ")).to_string()
+        }
+    };
+
+    rl.load_history(".history");
+    let mut type_env = GlobalTypeEnv::new();
+    loop {
+        let current = rl.readline(&prompt(&mut mode));
+        info!("[REPL] handling line: {:?}", &current);
+        match current {
+            Ok(line) if line.trim().is_empty() => {
+                if let Mode::Streaming(ref mut stream) = mode {
+                    match factory.run_statement(stream) {
+                        Ok(None) => {
+                            // Nothing, just a binding.
+                        }
+                        Ok(Some(value)) => println!("{}", value),
+                        Err(err) => eprintln!("{}", Colour::Red.italic().paint(format!("{err}"))),
+                    };
+                }
+            }
+            Ok(line) if line.starts_with(':') => match line.as_str() {
+                ":d" | ":define" => {
+                    mode = Mode::Definiton(0);
+                }
+                _ => bail!("Unknown command: `{}`", &line[1..]),
+            },
+            Ok(line) if matches!(mode, Mode::Definiton(_)) => {
+                definition_buf.push_str(&line);
+            }
+            Ok(line) if matches!(mode, Mode::Statement) => {
+                rl.add_history_entry(line.as_str());
+
+                let tokens = lexer.parse(line).unwrap();
+                match statement_parser.parse(tokens) {
+                    Err(errors) => bail!(
+                        "{}\n{}",
+                        Colour::Red.bold().paint("Could not parse program:"),
+                        errors
+                            .into_iter()
+                            .map(|err| { err.to_string() })
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    ),
+                    Ok(stream) => mode = Mode::Streaming(stream),
+                }
+            }
+            Err(ReadlineError::Eof) if matches!(mode, Mode::Streaming(_)) => mode = Mode::Statement,
+            Err(ReadlineError::Eof) if matches!(mode, Mode::Definiton(_)) => {
+                let lines = definition_buf.drain(..).collect::<String>();
+                rl.add_history_entry(lines.as_str());
+
+                let tokens = lexer.parse(lines).unwrap();
+                match program_parser.parse(tokens) {
+                    Err(errors) => bail!(
+                        "{}\n{}",
+                        Colour::Red.bold().paint("Could not parse program:"),
+                        errors
+                            .into_iter()
+                            .map(|err| { err.to_string() })
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    ),
+                    Ok(program) => {
+                        // This should really be a single machine
+                        for machine in program.machines {
+                            types::check_machine_def(&mut type_env, &machine).with_context(
+                                || format!("Type error while checking machine definition"),
+                            )?;
+
+                            factory.bind_definition(machine.name.clone(), machine)
+                        }
+                    }
+                }
+                mode = Mode::Statement
+            }
+            Err(ReadlineError::Interrupted) => {
+                // Ctrl+C shouldn't crash the REPL
+            }
+            Err(ReadlineError::Eof) => {
+                println!("{}", Style::new().italic().paint("Exiting ..."));
+                rl.save_history(".history").is_ok();
+                break;
+            }
+            error => {
+                rl.save_history(".history").is_ok();
+                error
+                    .map(|_| ())
+                    .with_context(|| format!("Unexpected error while reading input"))?;
+            }
+        }
+    }
+
+    rl.save_history(".history");
+    Ok(())
+}
+
 fn run(path: &str) {
     let lexer = LexerBuilder::build();
-    let parser = ParserBuilder::build();
+    let parser = ParserBuilder::build().0;
 
     let source = include_str!("../examples/hello.bam").to_owned();
     info!("[SOURCE]: {source}\n");
@@ -145,6 +239,7 @@ mod tests {
         ];
 
         let result = ParserBuilder::build()
+            .0
             .parse(tokens)
             .map_err(|errs| {
                 errs.iter().for_each(|e| eprintln!("Error(parse): {:?}", e));
@@ -192,6 +287,7 @@ mod tests {
         info!("[TOKENS]: {:#?}", &tokens);
 
         let result = ParserBuilder::build()
+            .0
             .parse(tokens)
             .map_err(|errs| {
                 errs.iter().for_each(|e| eprintln!("Error(parse): {:?}", e));

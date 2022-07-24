@@ -1,9 +1,13 @@
-use crate::syntax::{Builtin, Machine, Program, Statement, Stream, Value};
+use crate::{
+    syntax::{Builtin, Machine, Program, Statement, Stream, Value},
+    Definition,
+};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::stdin;
 
 use anyhow::{anyhow, bail, Context, Result};
+use tracing::info;
 
 /// BAM! execution engine.
 pub struct Factory {
@@ -26,9 +30,12 @@ impl Factory {
         }
     }
 
-    // Add a named machine to the factory.
-    pub fn bind_machine(&self, name: String, machine: Machine) {
-        self.machines.borrow_mut().insert(name, machine);
+    // Add a named machine to the factory from a definition.
+    pub fn bind_definition(&self, name: String, machine: Definition) {
+        // TODO: handle Borrow errors.
+        self.machines
+            .borrow_mut()
+            .insert(name, Machine::Defined(machine.body, machine.result));
     }
 
     /// Perform one step of builtin machine evaluation.
@@ -106,9 +113,7 @@ impl Factory {
                 let rhs = rhs.to_bool();
                 Ok(Value::Bool(lhs || rhs))
             }
-            Builtin::Not => {
-                Ok(Value::Bool(!value.to_bool()))
-            }
+            Builtin::Not => Ok(Value::Bool(!value.to_bool())),
             Builtin::Dup2 => Ok(Value::Tuple(vec![value.clone(), value])),
             Builtin::Dup3 => Ok(Value::Tuple(vec![value.clone(), value.clone(), value])),
             Builtin::Print => {
@@ -120,6 +125,30 @@ impl Factory {
                 stdin().read_line(&mut buf);
                 Ok(Value::Str(buf))
             }
+        }
+    }
+
+    /// Run a machine statement, corresponds to one step in the REPL.
+    pub fn run_statement(&self, stmt: &mut Statement) -> Result<Option<Value>> {
+        match stmt {
+            Statement::Let(names, stream) => {
+                if names.len() == 1 {
+                    self.streams
+                        .try_borrow_mut()
+                        .map(|mut ss| ss.insert(names.get(0).unwrap().clone(), stream.clone()))
+                        .with_context(|| format!("Unable to access streams"))?;
+                } else {
+                    for (index, name) in names.iter().enumerate() {
+                        let stream = Stream::Unzip(Box::new(stream.clone()), index);
+                        self.streams
+                            .try_borrow_mut()
+                            .map(|mut ss| ss.insert(name.clone(), stream))
+                            .with_context(|| format!("Unable to access streams"))?;
+                    }
+                }
+                Ok(None)
+            }
+            Statement::Consume(stream) => Ok(Some(self.advance_stream(stream)?)),
         }
     }
 
@@ -135,27 +164,7 @@ impl Factory {
             .insert("input".to_string(), Stream::Const(value));
 
         for mut stmt in body {
-            match stmt {
-                Statement::Let(names, stream) => {
-                    if names.len() == 1 {
-                        self.streams
-                            .try_borrow_mut()
-                            .map(|mut ss| ss.insert(names.get(0).unwrap().clone(), stream.clone()))
-                            .with_context(|| format!("Unable to access streams"))?;
-                    } else {
-                        for (index, name) in names.iter().enumerate() {
-                            let stream = Stream::Unzip(Box::new(stream.clone()), index);
-                            self.streams
-                                .try_borrow_mut()
-                                .map(|mut ss| ss.insert(name.clone(), stream))
-                                .with_context(|| format!("Unable to access streams"))?;
-                        }
-                    }
-                }
-                Statement::Consume(stream) => {
-                    self.advance_stream(stream);
-                }
-            }
+            self.run_statement(stmt);
         }
 
         self.advance_stream(result)
@@ -166,8 +175,14 @@ impl Factory {
         match machine {
             Machine::Var(var) => {
                 let mut machines = self.machines.borrow_mut();
+
+                info!("[EVAL] about to pull machine `{}` from the factory.", var);
+                info!("[EVAL] factory machines: {:#?}", machines);
+
                 self.run_machine(
-                    machines.get_mut(var).expect("Error: undefined stream."),
+                    machines
+                        .get_mut(var)
+                        .ok_or(anyhow!("Undefined fantastic machine: {}", var))?,
                     value,
                 )
             }
@@ -185,9 +200,12 @@ impl Factory {
                     .try_borrow_mut()
                     .with_context(|| format!("Unable to access streams"))?;
 
+                info!("[EVAL] about to pull stream `{}` from the factory.", var);
+                info!("[EVAL] factory streams: {:#?}", streams);
+
                 let stream = streams
                     .get_mut(var)
-                    .ok_or(anyhow!("Undefined stream: {}", var))?;
+                    .ok_or(anyhow!("Undefined fantastic stream: {}", var))?;
 
                 self.advance_stream(stream)
             }
