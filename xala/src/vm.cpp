@@ -124,8 +124,13 @@ int vm_memory_store(VM *vm) {
 
 int vm_run(VM *vm) {
 	uint base = 0;
+	uint it = 0;
 	while (true) {
 		const Instr is = vm->prog.instrs[vm->ip];
+		if (it++ > 10000) {
+			tprintf("VM OVERLOADED {}!\n", vm->ip);
+			return 1;
+		}
 
 		switch (is.type) {
 			case InstrType_Add:
@@ -183,7 +188,9 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Ret: {
-				CHECKOUT(vm->csk.calls_len == 0);
+				if (vm->csk.calls_len == 0) {
+					return 0;
+				}
 			  Call c = vm->csk.calls[--vm->csk.calls_len];
 				vm->ip = c.ret;
 				vm->sk.values_len = c.base;
@@ -207,6 +214,48 @@ int vm_run(VM *vm) {
 				vm_instr_pow(vm);
 				break;
 
+			case InstrType_Ba:
+			  vm->ip = is.argument;
+			  continue;
+				break;
+
+		  case InstrType_Bp:
+		  	if (vm_pop(vm) > 0) {
+				  vm->ip = is.argument;
+		  	} else {
+		  		vm->ip++;
+		  	}
+			  continue;
+				break;
+
+		  case InstrType_Bn:
+		  	if (vm_pop(vm) < 0)
+				  vm->ip = is.argument;
+				else
+					vm->ip++;
+			  continue;
+				break;
+
+			case InstrType_Bz:
+		  	if (vm_pop(vm) == 0)
+				  vm->ip = is.argument;
+				else
+					vm->ip++;
+
+			  continue;
+				break;
+
+			case InstrType_Bnz:
+		  	if (vm_pop(vm) != 0)
+				  vm->ip = is.argument;
+				else
+					vm->ip++;
+
+
+				
+			  continue;
+				break;
+
 			case InstrType_Exit:
 				return 0;
 				break;
@@ -216,26 +265,34 @@ int vm_run(VM *vm) {
 				return 1;
 		}
 		vm->ip += 1;
-		//if (vm->sk.values_len < 3) {
-		//	return 1;
-		//}
+		if (vm->sk.values_len < 3) {
+			tprintf("VM: STACK UNDEFLOW\n");
+			return 1;
+		}
 	}
 
 	return 0;
 }
 
+int parity = 0;
+
 int vm_run_scr(VM *vm, u8 screen[256][256]) {
-	for (int x = 0; x < 256; ++x) {
-		for (int y = 0; y < 256; ++y) {
+	parity += 1;
+	int period = 3;
+	int s = parity%period;
+	int z = parity/period%period;
+	for (int x = z; x < 256; x += period) {
+		for (int y = s; y < 256; y += period) {
+
 			vm->ip = vm->prog.start;
 
 
 			vm->csk.calls_len = 0;
-			vm->sk.values_len = 0;
+			vm->sk.values_len = 3;
 			vm->regs[Reg_X] = x/255.0;
 			vm->regs[Reg_Y] = (255-y)/255.0;
 
-			vm_run(vm);
+			CHECKOUT(vm_run(vm));
 
 			if (vm->regs[Reg_Out] > 1.0) {
 				vm->regs[Reg_Out] = 1.0;
