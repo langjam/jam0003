@@ -1,7 +1,11 @@
-let func = step another(dont, fail) third [more
-  stuff in
-between  ] here okay
-ballots by(constituency) [fptp] {
-  largest-party# = results-by-party [count] highest#
-	constituencies = _
-}
+;;let func = step another(dont, fail) third [more
+;;  stuff in
+;;between  ] here okay
+;;ballots by(constituency) [fptp] {
+;;  largest-party# = results-by-party [count] highest#
+	;;constituencies = _
+;;}
+
+let _ = BUILTIN(identity)
+
+_

@@ -18,6 +18,7 @@ class LetBody:
     return "(" + ", ".join(self.params) + ") => " + " ".join(str(x) for x in self.exprs) + "\n----"
 
 class Term:
+  __match_args__ = ('name', 'params')
   def __init__(self, name, params):
     self.name = name
     self.params = params
