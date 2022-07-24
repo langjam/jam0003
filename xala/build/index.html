@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xala</title>
+  <style>
+    pre, #stdout, textarea {
+      background: #eeeecc;
+      font-family: monospace;
+      border: 1px solid #dcca;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-top: 10px;
+      flex: 1;
+      width: 100%;
+      overflow: auto;
+    }
+    .row {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      padding: 2%;
+      box-sizing: border-box;
+    }
+    .cont {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    body {
+      margin: 0;
+    }
+    canvas {
+      width: 512px;
+      height: 512px;
+      border: 1px solid black;
+      -ms-interpolation-mode: nearest-neighbor;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Chromium + Safari */
+      image-rendering: pixelated;
+    }
+    .runbtn {
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <div class="cont">
+      <textarea id="input">@SQUARED
+  %0 MUL %0 INTO %RET
+  RET
+
+@MAIN
+  %TIME COS ADD %X SUB 0.5 SQUARED INTO %X
+  %TIME SIN ADD %Y SUB 0.5 SQUARED INTO %Y
+  %X ADD %Y INTO %OUT</textarea>
+      <button class="runbtn" onclick="run()">Run</button>
+    </div>
+    <div class="cont">
+      By Skejeton, RealDoigt, Marek Maskarinec (mrms.cz) <a href="https://mrms.cz/xala">Documentation</a>
+      <div>
+        <canvas id="canvas" width="256" height="256"></canvas>
+      </div>
+      <div id="stdout"></div>
+    </div>
+  </div>
+  <script>
+    let stdout = ""
+    let renderData = new Uint8Array(256*256), ctx, instance;
+    let recompile = false;
+    let last;
+    function render(ts) {
+      if (recompile) {
+        instance.exports.wasm_run();
+        recompile = false;
+      }
+      last ??= ts;
+      const dt = ts - last;
+      last = ts;
+      if (instance) {
+        instance.exports.wasm_frame(dt/1000.0);
+      }
+
+      const arr = new Uint8ClampedArray(256*256*4);
+      for (let i = 0; i < 256*256; i += 1) {
+        arr[i*4+0] = renderData[i]+51;
+        arr[i*4+1] = renderData[i]+122;
+        arr[i*4+2] = renderData[i]+166;
+        arr[i*4+3] = 255;
+      }
+      var img = new ImageData(arr, 256);
+
+      ctx.putImageData(img, 0, 0, 0, 0, 512, 512);
+      var element = document.getElementById("stdout");
+      element.scrollTop = element.scrollHeight;
+      window.requestAnimationFrame(render)
+    }
+
+    function run(e) {
+      stdout = "";
+      console.log("run")
+      const input = document.getElementById("input");
+      var enc = new TextEncoder();
+      var buf = enc.encode(input.value);
+      console.log(input.value);
+      for (let v of buf) {
+        instance.exports.wasm_accept(v);
+      }
+      recompile = true;
+    }
+
+
+    window.addEventListener("load", () => {
+      window.requestAnimationFrame(render)
+      var canvas = document.getElementById("canvas");
+
+      canvas.addEventListener("mouseleave", (e) => {
+
+        instance.exports.wasm_setmouse(-1, -1);
+      });
+      canvas.addEventListener("mousemove", (e) => {
+        e.preventDefault()
+
+        const { width, height } = canvas.getBoundingClientRect();
+
+        var x = e.offsetX/width*256
+        var y = e.offsetY/height*256
+
+        instance.exports.wasm_setmouse(x, y);
+      })
+
+
+
+      ctx = canvas.getContext("2d");
+      var stdoutEl = document.getElementById("stdout");
+
+      (async () => {
+        const wasm = await fetch("main.wasm");
+        const buffer = await wasm.arrayBuffer();
+        const result = await WebAssembly.instantiate(buffer, { env: {
+          wasm_render: (buffer) => {
+            renderData = new Uint8Array(instance.exports.memory.buffer, buffer, 256*256);
+          },
+          wasm_getx: (buffer) => {
+
+          },
+          wasm_putchar: (stream, ch) => {
+            if (stdout.length > 10000) {
+              stdout = "";
+              return;
+            }
+            if (ch == 1) {
+              stdoutEl.innerText = "";
+              stdoutEl.innerHTML = stdout;
+              return;
+            }
+
+            if (stream == 0) { // stdout
+              stdout += String.fromCharCode(ch);
+            } else if (stream == 1) { // stderr
+              stdoutEl.innerHTML += "[TODO: STDERR]"
+            } else {
+              console.error("wasm_putchar: Unknown stream")
+            }
+          },
+          sin: Math.sin,
+          cos: Math.cos,
+          pow: Math.pow,
+
+        }});
+        instance = result.instance;
+        instance.exports.wasm_init()
+        window.requestAnimationFrame(render)
+      })()
+    })
+  </script>
+</body>
+</html>
