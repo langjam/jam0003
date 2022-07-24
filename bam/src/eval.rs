@@ -97,7 +97,7 @@ impl Factory {
             Builtin::Dup2 => Value::Tuple(vec![value.clone(), value]),
             Builtin::Dup3 => Value::Tuple(vec![value.clone(), value.clone(), value]),
             Builtin::Print => {
-                println!("{:?}", &value);
+                println!("{}", &value);
                 value
             }
         }
@@ -117,9 +117,15 @@ impl Factory {
         for stmt in body {
             match stmt {
                 Statement::Let(names, stream) => {
-                    for (index, name) in names.iter().enumerate() {
-                        let stream = Stream::Unzip(Box::new(stream.clone()), index);
-                        self.streams.borrow_mut().insert(name.clone(), stream);
+                    if names.len() == 1 {
+                        self.streams
+                            .borrow_mut()
+                            .insert(names.get(0).unwrap().clone(), stream.clone());
+                    } else {
+                        for (index, name) in names.iter().enumerate() {
+                            let stream = Stream::Unzip(Box::new(stream.clone()), index);
+                            self.streams.borrow_mut().insert(name.clone(), stream);
+                        }
                     }
                 }
                 Statement::Consume(stream) => {

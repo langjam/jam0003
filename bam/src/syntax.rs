@@ -1,3 +1,5 @@
+use core::fmt;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     pub machines: Vec<Definition>,
@@ -65,6 +67,27 @@ pub enum Value {
     Str(String),
     Bool(bool),
     Tuple(Vec<Value>),
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Value::*;
+        match self {
+            Null => write!(f, "null"),
+            Num(float) => write!(f, "{}", float),
+            Str(string) => write!(f, "{}", string),
+            Bool(boolean) => write!(f, "{}", boolean),
+            Tuple(values) => write!(
+                f,
+                "({})",
+                values
+                    .iter()
+                    .map(|s| format!("{s}"))
+                    .reduce(|acc, val| acc + val.as_str())
+                    .unwrap_or_else(|| "".to_string())
+            ),
+        }
+    }
 }
 
 impl Value {
