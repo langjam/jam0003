@@ -1,4 +1,4 @@
-# run using `pipenv run python3 . examples\hello.greet`
+# run using `pipenv run python3 . examples\test.tally`
 
 import argparse
 
@@ -14,5 +14,5 @@ print("Unfortunately, I can't. Yet.")
 
 from parser import parse_file
 
-print("\nInstead, I'll do some demo parsing:")
-print(args.file, "->", parse_file(args.file))
+print("\nInstead, I'll at least try and parse it:")
+print(parse_file(args.file))
