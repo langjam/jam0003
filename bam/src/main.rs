@@ -24,19 +24,22 @@ pub type Spanned<T> = (T, Span);
 #[clap(version, about, long_about = None)]
 struct Args {
     #[clap(help = "The source file to execute")]
-    source: Option<String>
+    source: Option<String>,
+    #[clap(long, help = "Emable tracing")]
+    trace: bool,
 }
 
 fn main() {
-    tracing_subscriber::fmt::init();
     let args: Args = clap::Parser::parse();
+
+    if args.trace {
+        tracing_subscriber::fmt::init();
+    }
 
     match args.source {
         None => run_repl(),
-        Some(source) => run(&source)
+        Some(source) => run(&source),
     }
-
-    run("examples/hello.bam")
 }
 
 fn run_repl() {
@@ -65,12 +68,15 @@ fn run(path: &str) {
     }
 
     let factory = eval::Factory::new(program);
-    let result = factory.advance_stream(&mut Stream::Pipe(
-        Stream::Const(Value::Num(42f64)).into(),
-        Machine::Var("AddOne".to_string()).into(),
-    ));
 
-    info!("[RESULT]: {result:#?}");
+    loop {
+        let result = factory.advance_stream(&mut Stream::Pipe(
+            Stream::Const(Value::Num(42f64)).into(),
+            Machine::Var("Main".to_string()).into(),
+        ));
+
+        info!("[STEP]: {result:#?}");
+    }
 }
 
 #[cfg(test)]
