@@ -29,6 +29,9 @@ pub enum Op {
     Jge = 18,
     Rect = 19,
     Line = 20,
+    Elps = 21,
+    Vert = 22,
+    Pgon = 23,
 }
 
 impl TryFrom<u8> for Op {
@@ -58,6 +61,9 @@ impl TryFrom<u8> for Op {
             18 => Jge,
             19 => Rect,
             20 => Line,
+            21 => Elps,
+            22 => Vert,
+            23 => Pgon,
             _ => return Err(format!("Invalid Op: {}", value)),
         };
 
@@ -188,6 +194,19 @@ pub fn compile(ir: Vec<IR>) -> Result<Instructions> {
                 c.emit_op(Op::Line);
                 c.emit_value(w);
                 c.emit_value(h);
+            }
+            Elps(w, h) => {
+                c.emit_op(Op::Elps);
+                c.emit_value(w);
+                c.emit_value(h);
+            }
+            Vert(x, y) => {
+                c.emit_op(Op::Vert);
+                c.emit_value(x);
+                c.emit_value(y);
+            }
+            Pgon => {
+                c.emit_op(Op::Pgon);
             }
         }
     }

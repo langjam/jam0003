@@ -150,10 +150,9 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
                     let w = extract_value(&mut vm, &inst);
                     let h = extract_value(&mut vm, &inst);
 
-                    let rect = TuxShape {
-                        kind: ShapeKind::Rect,
+                    let rect = TuxShape::Rect {
                         color: vm.pen_color,
-                        top_left: vm.pen_position,
+                        origin: vm.pen_position,
                         width: w,
                         height: h,
                     };
@@ -161,18 +160,45 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
                     vm.shapes.push(rect);
                 }
                 Line => {
+                    let dx = extract_value(&mut vm, &inst);
+                    let dy = extract_value(&mut vm, &inst);
+
+                    let line = TuxShape::Line {
+                        color: vm.pen_color,
+                        origin: vm.pen_position,
+                        dx,
+                        dy,
+                    };
+
+                    vm.shapes.push(line);
+                }
+                Elps => {
                     let w = extract_value(&mut vm, &inst);
                     let h = extract_value(&mut vm, &inst);
 
-                    let line = TuxShape {
-                        kind: ShapeKind::Line,
+                    let ellipse = TuxShape::Ellipse {
                         color: vm.pen_color,
-                        top_left: vm.pen_position,
+                        origin: vm.pen_position,
                         width: w,
                         height: h,
                     };
 
-                    vm.shapes.push(line);
+                    vm.shapes.push(ellipse);
+                }
+                Vert => {
+                    let x = extract_value(&mut vm, &inst);
+                    let y = extract_value(&mut vm, &inst);
+
+                    let vert = Position { x, y };
+
+                    vm.vertices.push(vert);
+                }
+                Pgon => {
+                    let pgon = TuxShape::Polygon {
+                        color: vm.pen_color,
+                        vertices: vm.vertices.drain(..).collect(),
+                    };
+                    vm.shapes.push(pgon);
                 }
             }
         }
@@ -191,39 +217,78 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
             );
 
             for shape in shapes {
-                match shape.kind {
-                    ShapeKind::Rect => rectangle_from_to(
+                match shape {
+                    TuxShape::Rect {
+                        color,
+                        origin,
+                        width,
+                        height,
+                    } => rectangle_from_to(
                         [
-                            shape.color[0] as f32 / 255.0,
-                            shape.color[1] as f32 / 255.0,
-                            shape.color[2] as f32 / 255.0,
+                            color[0] as f32 / 255.0,
+                            color[1] as f32 / 255.0,
+                            color[2] as f32 / 255.0,
                             1.0,
                         ],
-                        [shape.top_left.x as f64, shape.top_left.y as f64],
-                        [
-                            (shape.top_left.x + shape.width) as f64,
-                            (shape.top_left.y + shape.height) as f64,
-                        ],
+                        [origin.x as f64, origin.y as f64],
+                        [(origin.x + width) as f64, (origin.y + height) as f64],
                         ctx.transform,
                         g,
                     ),
-                    ShapeKind::Line => line(
+                    TuxShape::Line {
+                        color,
+                        origin,
+                        dx,
+                        dy,
+                    } => line(
                         [
-                            shape.color[0] as f32 / 255.0,
-                            shape.color[1] as f32 / 255.0,
-                            shape.color[2] as f32 / 255.0,
+                            color[0] as f32 / 255.0,
+                            color[1] as f32 / 255.0,
+                            color[2] as f32 / 255.0,
                             1.0,
                         ],
                         vm.pen_radius as f64,
                         [
-                            shape.top_left.x as f64,
-                            shape.top_left.y as f64,
-                            (shape.top_left.x + shape.width) as f64,
-                            (shape.top_left.y + shape.height) as f64,
+                            origin.x as f64,
+                            origin.y as f64,
+                            (origin.x + dx) as f64,
+                            (origin.y + dy) as f64,
                         ],
                         ctx.transform,
                         g,
                     ),
+                    TuxShape::Ellipse {
+                        color,
+                        origin,
+                        width,
+                        height,
+                    } => ellipse_from_to(
+                        [
+                            color[0] as f32 / 255.0,
+                            color[1] as f32 / 255.0,
+                            color[2] as f32 / 255.0,
+                            1.0,
+                        ],
+                        [origin.x as f64, origin.y as f64],
+                        [(origin.x + width) as f64, (origin.y + height) as f64],
+                        ctx.transform,
+                        g,
+                    ),
+                    TuxShape::Polygon { color, vertices } => {
+                        let verts: Vec<_> =
+                            vertices.iter().map(|p| [p.x as f64, p.y as f64]).collect();
+                        polygon(
+                            [
+                                color[0] as f32 / 255.0,
+                                color[1] as f32 / 255.0,
+                                color[2] as f32 / 255.0,
+                                1.0,
+                            ],
+                            verts.as_slice(),
+                            ctx.transform,
+                            g,
+                        );
+                    }
                 };
             }
         });
@@ -266,19 +331,30 @@ struct Position {
     y: i16,
 }
 
-#[derive(Clone, Copy, Debug)]
-struct TuxShape {
-    kind: ShapeKind,
-    color: [i16; 3],
-    top_left: Position,
-    width: i16,
-    height: i16,
-}
-
-#[derive(Clone, Copy, Debug)]
-enum ShapeKind {
-    Rect,
-    Line,
+#[derive(Clone, Debug)]
+enum TuxShape {
+    Rect {
+        color: [i16; 3],
+        origin: Position,
+        width: i16,
+        height: i16,
+    },
+    Line {
+        color: [i16; 3],
+        origin: Position,
+        dx: i16,
+        dy: i16,
+    },
+    Ellipse {
+        color: [i16; 3],
+        origin: Position,
+        width: i16,
+        height: i16,
+    },
+    Polygon {
+        color: [i16; 3],
+        vertices: Vec<Position>,
+    },
 }
 
 struct VM {
@@ -293,6 +369,7 @@ struct VM {
     pen_radius: i16,
     background_color: [i16; 3],
     shapes: Vec<TuxShape>,
+    vertices: Vec<Position>,
 }
 
 impl VM {
@@ -306,6 +383,7 @@ impl VM {
             pen_radius: Default::default(),
             background_color: Default::default(),
             shapes: Default::default(),
+            vertices: Default::default(),
         }
     }
 }

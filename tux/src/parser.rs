@@ -42,6 +42,9 @@ enum TokenData {
     Jge,
     Rect,
     Line,
+    Elps,
+    Vert,
+    Pgon,
 }
 
 struct Tokenizer {
@@ -146,6 +149,12 @@ impl Tokenizer {
         let c0 = self.col;
 
         let mut word = String::new();
+
+        if self.peek_char(0).expect("Expected a character") == '-' {
+            word.push('-');
+            self.advance();
+        }
+
         while self.peek_char(0).filter(char::is_ascii_digit).is_some() && self.has_more() {
             word.push(self.peek_char(0).expect("Expected a digit character."));
             self.advance();
@@ -214,6 +223,9 @@ impl Tokenizer {
                 "jge" => TokenData::Jge,
                 "rect" => TokenData::Rect,
                 "line" => TokenData::Line,
+                "elps" => TokenData::Elps,
+                "vert" => TokenData::Vert,
+                "pgon" => TokenData::Pgon,
                 _ => TokenData::Label(word),
             };
 
@@ -254,6 +266,9 @@ pub enum IR {
     Jge(String),
     Rect(Value, Value),
     Line(Value, Value),
+    Elps(Value, Value),
+    Vert(Value, Value),
+    Pgon,
 }
 
 pub fn parse(source: &'static str) -> Result<Vec<IR>> {
@@ -435,6 +450,25 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
                 let h = parse_value(&mut t)?;
 
                 ir.push(IR::Line(w, h));
+            }
+            Elps => {
+                let w = parse_value(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let h = parse_value(&mut t)?;
+
+                ir.push(IR::Elps(w, h));
+            }
+            Vert => {
+                let x = parse_value(&mut t)?;
+                eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
+
+                let y = parse_value(&mut t)?;
+
+                ir.push(IR::Vert(x, y));
+            }
+            Pgon => {
+                ir.push(IR::Pgon);
             }
         }
     }
