@@ -281,8 +281,6 @@ class Interpreter {
       }
     }
 
-    this.debug();
-
     program: while (true) {
       const next = this.advance();
       if (next === null || next.value === '') {
