@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "commander": "^9.4.0",
+    "ts-node": "^10.9.1"
+  },
+  "name": "beautiful-assembly",
+  "description": "A language for specifying clockwork.",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "test": "deno test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/X-yl/beautiful-assembly.git"
+  },
+  "author": "",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/X-yl/beautiful-assembly/issues"
+  },
+  "homepage": "https://github.com/X-yl/beautiful-assembly#readme",
+  "devDependencies": {
+    "antlr4ts-cli": "^0.5.0-alpha.4"
+  }
+}
