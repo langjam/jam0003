@@ -63,6 +63,38 @@ void vm_instr_mod(VM *vm) {
 	vm_push(vm, fmod(b, a));
 }
 
+static inline
+int vm_check_address(VM *vm, int addr) {
+	if (addr < 0 || addr >= MEMORY_SIZE) {
+		tprintf("SEGFAULT\n");
+		return 1;
+	}
+
+	return 0;
+}
+
+static inline
+int vm_memory_load(VM *vm) {
+	const float base = vm->regs[Reg_Base];
+
+	CHECKOUT(vm_check_address(vm, base));
+
+	vm_push(vm, vm->mem[(int)base]);
+
+	return 0;
+}
+
+static inline
+int vm_memory_store(VM *vm) {
+	const float base = vm->regs[Reg_Base];
+
+	CHECKOUT(vm_check_address(vm, base));
+
+	vm->mem[(int)base] = vm_pop(vm);
+
+	return 0;
+}
+
 int vm_run(VM *vm) {
 	while (true) {
 		const Instr is = vm->prog.instrs[vm->ip];
@@ -93,11 +125,17 @@ int vm_run(VM *vm) {
 				break;
 
 			case InstrType_Load:
-				vm_push(vm, vm->regs[is.argument]);
+				if (is.argument == Reg_Memory)
+					CHECKOUT(vm_memory_load(vm));
+				else
+					vm_push(vm, vm->regs[is.argument]);
 				break;
 
 			case InstrType_Store:
-				vm->regs[is.argument] = vm_pop(vm);
+				if (is.argument == Reg_Memory)
+					CHECKOUT(vm_memory_store(vm));
+				else
+					vm->regs[is.argument] = vm_pop(vm);
 				break;
 
 			case InstrType_Exit:
