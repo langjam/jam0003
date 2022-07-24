@@ -1,0 +1,3 @@
+external machine fib_add: repeat_state add {0} {-1} [0] 1
+external machine fib_print(fib_add): print [0]
+input product machine fib: repeat fib_print [0]
