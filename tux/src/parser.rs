@@ -244,7 +244,19 @@ pub struct Value {
 }
 
 #[derive(Debug)]
-pub enum IR {
+pub struct IR {
+    pub location: CodeLocation,
+    pub data: IRData,
+}
+
+impl IR {
+    fn new(location: CodeLocation, data: IRData) -> Self {
+        Self { location, data }
+    }
+}
+
+#[derive(Debug)]
+pub enum IRData {
     DefineLabel(String),
     Move(Value, Value),
     Store(u8, Value),
@@ -281,7 +293,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
         match token.data {
             Label(label) => {
                 eat(&mut t, TokenData::Colon, "Expected a `:` after label.")?;
-                ir.push(IR::DefineLabel(label));
+                ir.push(IR::new(token.location, IRData::DefineLabel(label)));
             }
             Int(_) => {
                 return Err(Error::new(
@@ -313,13 +325,13 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let dy = parse_value(&mut t)?;
 
-                ir.push(IR::Move(dx, dy));
+                ir.push(IR::new(token.location, IRData::Move(dx, dy)));
             }
             Store => {
                 let reg = parse_register_name(&mut t)?;
                 eat(&mut t, TokenData::Comma, "Expected a `,`.")?;
                 let value = parse_value(&mut t)?;
-                ir.push(IR::Store(reg, value));
+                ir.push(IR::new(token.location, IRData::Store(reg, value)));
             }
             Add => {
                 let reg = parse_register_name(&mut t)?;
@@ -330,7 +342,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Add(reg, a, b));
+                ir.push(IR::new(token.location, IRData::Add(reg, a, b)));
             }
             Subtract => {
                 let reg = parse_register_name(&mut t)?;
@@ -341,7 +353,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Subtract(reg, a, b));
+                ir.push(IR::new(token.location, IRData::Subtract(reg, a, b)));
             }
             Multiply => {
                 let reg = parse_register_name(&mut t)?;
@@ -352,7 +364,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Multiply(reg, a, b));
+                ir.push(IR::new(token.location, IRData::Multiply(reg, a, b)));
             }
             Divide => {
                 let reg = parse_register_name(&mut t)?;
@@ -363,7 +375,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Divide(reg, a, b));
+                ir.push(IR::new(token.location, IRData::Divide(reg, a, b)));
             }
             Stbg => {
                 let r = parse_value(&mut t)?;
@@ -374,7 +386,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Stbg(r, g, b));
+                ir.push(IR::new(token.location, IRData::Stbg(r, g, b)));
             }
             Stps => {
                 let x = parse_value(&mut t)?;
@@ -382,7 +394,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let y = parse_value(&mut t)?;
 
-                ir.push(IR::Stps(x, y));
+                ir.push(IR::new(token.location, IRData::Stps(x, y)));
             }
             Stcl => {
                 let r = parse_value(&mut t)?;
@@ -393,11 +405,11 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Stcl(r, g, b));
+                ir.push(IR::new(token.location, IRData::Stcl(r, g, b)));
             }
             Strd => {
                 let r = parse_value(&mut t)?;
-                ir.push(IR::Strd(r));
+                ir.push(IR::new(token.location, IRData::Strd(r)));
             }
             Cmp => {
                 let a = parse_value(&mut t)?;
@@ -405,35 +417,35 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let b = parse_value(&mut t)?;
 
-                ir.push(IR::Cmp(a, b));
+                ir.push(IR::new(token.location, IRData::Cmp(a, b)));
             }
             Jmp => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jmp(dst));
+                ir.push(IR::new(token.location, IRData::Jmp(dst)));
             }
             Jeq => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jeq(dst));
+                ir.push(IR::new(token.location, IRData::Jeq(dst)));
             }
             Jne => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jne(dst));
+                ir.push(IR::new(token.location, IRData::Jne(dst)));
             }
             Jlt => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jlt(dst));
+                ir.push(IR::new(token.location, IRData::Jlt(dst)));
             }
             Jgt => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jgt(dst));
+                ir.push(IR::new(token.location, IRData::Jgt(dst)));
             }
             Jle => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jle(dst));
+                ir.push(IR::new(token.location, IRData::Jle(dst)));
             }
             Jge => {
                 let dst = parse_label_name(&mut t)?;
-                ir.push(IR::Jge(dst));
+                ir.push(IR::new(token.location, IRData::Jge(dst)));
             }
             Rect => {
                 let w = parse_value(&mut t)?;
@@ -441,7 +453,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let h = parse_value(&mut t)?;
 
-                ir.push(IR::Rect(w, h));
+                ir.push(IR::new(token.location, IRData::Rect(w, h)));
             }
             Line => {
                 let w = parse_value(&mut t)?;
@@ -449,7 +461,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let h = parse_value(&mut t)?;
 
-                ir.push(IR::Line(w, h));
+                ir.push(IR::new(token.location, IRData::Line(w, h)));
             }
             Elps => {
                 let w = parse_value(&mut t)?;
@@ -457,7 +469,7 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let h = parse_value(&mut t)?;
 
-                ir.push(IR::Elps(w, h));
+                ir.push(IR::new(token.location, IRData::Elps(w, h)));
             }
             Vert => {
                 let x = parse_value(&mut t)?;
@@ -465,10 +477,10 @@ pub fn parse(source: &'static str) -> Result<Vec<IR>> {
 
                 let y = parse_value(&mut t)?;
 
-                ir.push(IR::Vert(x, y));
+                ir.push(IR::new(token.location, IRData::Vert(x, y)));
             }
             Pgon => {
-                ir.push(IR::Pgon);
+                ir.push(IR::new(token.location, IRData::Pgon));
             }
         }
     }

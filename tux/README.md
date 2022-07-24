@@ -27,7 +27,7 @@ storing and loading registers.
 | `stcl`   | Set the pen color.
 | `strd`   | Set line radius.
 | `cmp`    | Compare 2 values.
-| `jmp`    | Uncondition jump.
+| `jmp`    | Unconditional jump.
 | `jeq`    | Jump if result of `cmp` is 0.
 | `jne`    | Jump if result of `cmp` isn't 0.
 | `jlt`    | Jump if result of `cmp` is -1.

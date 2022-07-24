@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use crate::parser::{Value, IR};
+use crate::parser::{IRData, Value, IR};
 use crate::utils::*;
 
 pub type Instructions = Vec<u8>;
@@ -75,8 +75,8 @@ pub fn compile(ir: Vec<IR>) -> Result<Instructions> {
     let mut c = Compiler::new();
 
     for i in ir {
-        use IR::*;
-        match i {
+        use IRData::*;
+        match i.data {
             DefineLabel(label) => {
                 let label_dst = c.instructions.len();
 
@@ -99,7 +99,7 @@ pub fn compile(ir: Vec<IR>) -> Result<Instructions> {
 
                 if c.labels.insert(label.clone(), label_dst).is_some() {
                     return Err(Error::new(
-                        CodeLocation::new(0, 0),
+                        i.location,
                         format!("Redeclaration of label `{}`.", label),
                     ));
                 }

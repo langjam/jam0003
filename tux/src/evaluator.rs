@@ -20,15 +20,13 @@ pub fn evaluate(program_name: String, inst: compiler::Instructions) -> Result<()
 
     while let Some(e) = window.next() {
         while vm.ip < inst.len() {
-            let op: compiler::Op = inst[vm.ip]
-                .try_into()
-                .map_err(|err| Error::new(CodeLocation::new(0, 0), err))?;
+            let op: compiler::Op = inst[vm.ip].try_into().expect("Expected valid `Op`.");
 
             vm.ip += 1;
 
             use compiler::Op::*;
             match op {
-                NoOp => return Err(Error::new(CodeLocation::new(0, 0), "NoOp encountered.")),
+                NoOp => panic!("NoOp encountered."),
                 Move => {
                     let x = extract_value(&mut vm, &inst);
                     let y = extract_value(&mut vm, &inst);

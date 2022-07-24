@@ -23,11 +23,15 @@ impl DisplayableError {
 
 impl std::fmt::Display for DisplayableError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}:{}:{}: Error: {}",
-            self.filename, self.err.location.line, self.err.location.col, self.err.message
-        )
+        if self.err.location.line == 0 || self.err.location.col == 0 {
+            write!(f, "{}: Error: {}", self.filename, self.err.message)
+        } else {
+            write!(
+                f,
+                "{}:{}:{}: Error: {}",
+                self.filename, self.err.location.line, self.err.location.col, self.err.message
+            )
+        }
     }
 }
 
