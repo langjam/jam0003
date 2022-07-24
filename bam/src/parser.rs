@@ -160,12 +160,23 @@ impl ParserBuilder {
                 span.start, span.end
             );
 
+            use Builtin::*;
             match tok {
                 Token::Ident(ident) => Ok(match ident.as_str() {
-                    "Add" => Machine::Builtin(Builtin::Add),
-                    "Sqrt" => Machine::Builtin(Builtin::Sqrt),
-                    // TODO: Remaining builtins
-                    "Print" => Machine::Builtin(Builtin::Print),
+                    "Add" => Machine::Builtin(Add),
+                    "Sub" => Machine::Builtin(Sub),
+                    "Mul" => Machine::Builtin(Mul),
+                    "Div" => Machine::Builtin(Div),
+                    "Mod" => Machine::Builtin(Mod),
+                    "Pow" => Machine::Builtin(Pow),
+                    "Sqrt" => Machine::Builtin(Sqrt),
+                    "Gt" => Machine::Builtin(Gt),
+                    "Lt" => Machine::Builtin(Lt),
+                    "Eq" => Machine::Builtin(Eq),
+                    "Dup2" => Machine::Builtin(Dup2),
+                    "Dup3" => Machine::Builtin(Dup3),
+                    "Print" => Machine::Builtin(Print),
+                    "Read" => Machine::Builtin(Read),
                     _ => Machine::Var(ident),
                 }),
                 _ => Err(Simple::custom(span, "Expected a machine")),

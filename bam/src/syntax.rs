@@ -46,16 +46,19 @@ pub enum Machine {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Builtin {
     Add,
+    Sub,
     Mul,
+    Div,
     Mod,
     Pow,
     Sqrt,
-    Gte,
+    Gt,
     Lt,
     Eq,
     Dup2,
     Dup3,
     Print,
+    Read
 }
 
 #[derive(Debug, Clone, PartialEq)]

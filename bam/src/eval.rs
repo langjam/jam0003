@@ -1,6 +1,7 @@
 use crate::syntax::{Builtin, Machine, Program, Statement, Stream, Value};
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io::stdin;
 
 /// BAM! execution engine.
 pub struct Factory {
@@ -41,6 +42,16 @@ impl Factory {
                     .expect("Error: Second stream to Add should contain Num elements");
                 Value::Num(lhs + rhs)
             }
+            Builtin::Sub => {
+                let (lhs, rhs) = value.to_pair().expect("Error: Sub takes two streams.");
+                let lhs = lhs
+                    .to_num()
+                    .expect("Error: First stream to Sub should contain Num elements");
+                let rhs = rhs
+                    .to_num()
+                    .expect("Error: Second stream to Sub should contain Num elements");
+                Value::Num(lhs - rhs)
+            }
             Builtin::Mul => {
                 let (lhs, rhs) = value.to_pair().expect("Error: Mul takes two streams.");
                 let lhs = lhs
@@ -50,6 +61,16 @@ impl Factory {
                     .to_num()
                     .expect("Error: Second stream to Mul should contain Num elements");
                 Value::Num(lhs * rhs)
+            }
+            Builtin::Div => {
+                let (lhs, rhs) = value.to_pair().expect("Error: Div takes two streams.");
+                let lhs = lhs
+                    .to_num()
+                    .expect("Error: First stream to Div should contain Num elements");
+                let rhs = rhs
+                    .to_num()
+                    .expect("Error: Second stream to Div should contain Num elements");
+                Value::Num(lhs / rhs)
             }
             Builtin::Mod => {
                 let (lhs, rhs) = value.to_pair().expect("Error: Mod takes two streams.");
@@ -75,15 +96,15 @@ impl Factory {
                 let num = value.to_num().expect("Error: Sqrt expects one Num stream.");
                 Value::Num(f64::sqrt(num))
             }
-            Builtin::Gte => {
-                let (lhs, rhs) = value.to_pair().expect("Error: Gte takes two streams.");
+            Builtin::Gt => {
+                let (lhs, rhs) = value.to_pair().expect("Error: Gt takes two streams.");
                 let lhs = lhs
                     .to_num()
-                    .expect("Error: First stream to Gte should contain Num elements");
+                    .expect("Error: First stream to Gt should contain Num elements");
                 let rhs = rhs
                     .to_num()
-                    .expect("Error: Second stream to Gte should contain Num elements");
-                Value::Bool(lhs >= rhs)
+                    .expect("Error: Second stream to Gt should contain Num elements");
+                Value::Bool(lhs > rhs)
             }
             Builtin::Lt => {
                 let (lhs, rhs) = value.to_pair().expect("Error: Lt takes two streams.");
@@ -104,6 +125,11 @@ impl Factory {
             Builtin::Print => {
                 println!("{}", &value);
                 value
+            }
+            Builtin::Read => {
+                let mut buf = String::new();
+                stdin().read_line(&mut buf);
+                Value::Str(buf)
             }
         }
     }
@@ -147,12 +173,13 @@ impl Factory {
         match machine {
             Machine::Var(var) => {
                 let mut machines = self.machines.borrow_mut();
-                self.run_machine(machines.get_mut(var).expect("Error: undefined stream."), value)
+                self.run_machine(
+                    machines.get_mut(var).expect("Error: undefined stream."),
+                    value,
+                )
             }
             Machine::Builtin(builtin) => self.run_builtin_machine(builtin, value),
-            Machine::Defined(body, result) => {
-                self.run_defined_machine(body, result, value)
-            }
+            Machine::Defined(body, result) => self.run_defined_machine(body, result, value),
         }
     }
 

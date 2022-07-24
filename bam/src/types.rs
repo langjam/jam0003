@@ -42,7 +42,7 @@ lazy_static! {
                 output: Type::Num
             }
         },
-        Builtin::Gte => {   // (Num, Num) -> Bool
+        Builtin::Gt => {   // (Num, Num) -> Bool
             MachineType {
                 var_count: 0,
                 input: Type::Tuple(vec![Type::Num, Type::Num]),
