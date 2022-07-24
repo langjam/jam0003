@@ -11,6 +11,7 @@ class Program:
       "\n>")
 
 class LetBody:
+  __match_args__ = ('params', 'exprs')
   def __init__(self, params, exprs):
     self.params = params
     self.exprs = exprs
@@ -29,12 +30,14 @@ class Term:
     return "<term " + self.name + more + ">"
 
 class BagVal: #not actually a value, but a function bag->bag
+  __match_args__ = ('exprs')
   def __init__(self, exprs):
     self.exprs = exprs
   def __repr__(self):
     return "<bag " + " ".join(str(x) for x in self.exprs) + ">"
 
 class RecordVal: #as above
+  __match_args__ = ('dicty')
   def __init__(self, dicty):
     self.dicty = dicty
   def __repr__(self):
