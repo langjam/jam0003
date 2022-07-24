@@ -37,13 +37,17 @@ impl World {
 
     fn neighbor_coords(&self, coords: Coords, direction: Direction) -> Coords {
         let (x, y) = coords;
-        let (nx, ny): (usize, usize) = match direction {
-            Direction::North => (x, y - 1),
-            Direction::East => (x + 1, y),
-            Direction::South => (x, y + 1),
-            Direction::West => (x - 1, y),
+        let ix = x as i32;
+        let iy = y as i32;
+        let (nx, ny): (i32, i32) = match direction {
+            Direction::North => (ix, iy - 1),
+            Direction::East => (ix + 1, iy),
+            Direction::South => (ix, iy + 1),
+            Direction::West => (ix - 1, iy),
         };
-        return (nx % self.width, ny % self.height);
+        let rx = nx.rem_euclid(self.width as i32);
+        let ry = ny.rem_euclid(self.height as i32);
+        return (rx as usize, ry as usize);
     }
 
     pub fn set(&mut self, (x, y): Coords, computer: Computer) {
@@ -214,5 +218,24 @@ impl Location {
         if eliminate_computer {
             self.computer = None;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_neighbor_out_of_bounds() {
+        let world = World::new(5, 5, 5);
+        assert_eq!(world.neighbor_coords((2, 2), Direction::North), (2, 1));
+        assert_eq!(world.neighbor_coords((2, 2), Direction::South), (2, 3));
+        assert_eq!(world.neighbor_coords((2, 2), Direction::West), (1, 2));
+        assert_eq!(world.neighbor_coords((2, 2), Direction::East), (3, 2));
+
+        assert_eq!(world.neighbor_coords((1, 0), Direction::North), (1, 4));
+        assert_eq!(world.neighbor_coords((1, 4), Direction::South), (1, 0));
+        assert_eq!(world.neighbor_coords((0, 2), Direction::West), (4, 2));
+        assert_eq!(world.neighbor_coords((4, 2), Direction::East), (0, 2));
     }
 }

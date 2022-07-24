@@ -13,3 +13,4 @@ moveslice = "2.0.1"
 rand = { version = "0.8.5", features = ["small_rng"]}
 strum = "0.24"
 strum_macros = "0.24"
+clap = { version = "3.2.14", features = ["derive"] }
