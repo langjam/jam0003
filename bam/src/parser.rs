@@ -1,5 +1,5 @@
 use crate::{
-    syntax::{Builtin, Machine, Definition, Program, Statement, Stream, Value},
+    syntax::{Builtin, Definition, Machine, Program, Statement, Stream, Value},
     Token,
 };
 use chumsky::{prelude::*, primitive::FilterMap};

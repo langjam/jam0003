@@ -20,7 +20,7 @@ pub type Span = std::ops::Range<usize>;
 pub type Spanned<T> = (T, Span);
 
 fn main() {
-    tracing_subscriber::fmt::init();
+    // tracing_subscriber::fmt::init();
 }
 
 fn run(path: &str) {
@@ -34,7 +34,6 @@ fn run(path: &str) {
     let tokens = lexer.parse(source).unwrap();
     info!("[LEXER] end");
 
-    let tokens: Vec<Token> = tokens.into_iter().map(|(token, _)| token).collect();
     info!("[TOKENS]: {tokens:#?}\n");
 
     let program = parser.parse(tokens).unwrap();
@@ -64,6 +63,7 @@ mod tests {
         //     let hello = "Hello, BAM!";
         //     hello{1} -> Print
         // };
+
         let tokens = vec![
             Token::Machine,
             Token::Ident("Main".to_string()),
@@ -85,7 +85,7 @@ mod tests {
         let result = ParserBuilder::build()
             .parse(tokens)
             .map_err(|errs| {
-                errs.iter().for_each(|e| eprintln!("Error: {:?}", e));
+                errs.iter().for_each(|e| eprintln!("Error(parse): {:?}", e));
                 errs
             })
             .unwrap();
@@ -122,20 +122,17 @@ mod tests {
         let tokens = LexerBuilder::build()
             .parse(source)
             .map_err(|errs| {
-                errs.iter().for_each(|e| eprintln!("Error: {:?}", e));
+                errs.iter().for_each(|e| eprintln!("Error(lex): {:?}", e));
                 errs
             })
-            .unwrap()
-            .into_iter()
-            .map(|(token, _span)| token)
-            .collect::<Vec<_>>();
+            .unwrap();
 
         info!("[TOKENS]: {:#?}", &tokens);
 
         let result = ParserBuilder::build()
             .parse(tokens)
             .map_err(|errs| {
-                errs.iter().for_each(|e| eprintln!("Error: {:?}", e));
+                errs.iter().for_each(|e| eprintln!("Error(parse): {:?}", e));
                 errs
             })
             .unwrap();

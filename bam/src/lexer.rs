@@ -1,21 +1,20 @@
 use crate::{hashmap, Span};
 use chumsky::{
     error::Simple,
-    primitive, recovery, select,
-    text::{self, TextParser},
+    prelude::*,
+    primitive::*,
+    recovery, select,
+    text::{self, ident, int, keyword, TextParser},
     Parser,
 };
 use lazy_static::lazy_static;
 use std::{collections::HashMap, fmt::Display};
-use tracing::info;
 
 lazy_static! {
     pub static ref KEYWORD_MAP: HashMap<String, Token> = hashmap!(<String, Token> [
         "=" => Token::Equals,
         "{" => Token::Lbrace,
         "}" => Token::Rbrace,
-        "[" => Token::Lbracket,
-        "]" => Token::Rbracket,
         "(" => Token::Lparen,
         ")" => Token::Rparen,
         "," => Token::Comma,
@@ -24,9 +23,7 @@ lazy_static! {
         ";" => Token::Semicolon,
         "->" => Token::Pipe,
         "let" =>  Token::Let,
-        "component" =>  Token::Component,
-        "machine" => Token::Machine,
-        "factory" => Token::Factory
+        "machine" => Token::Machine
     ]);
 }
 
@@ -40,18 +37,14 @@ pub enum Token {
     Equals,
     Lbrace,
     Rbrace,
-    Lbracket,
-    Rbracket,
     Lparen,
     Rparen,
     Comma,
     QuestionMark,
     Colon,
     Semicolon,
-    Component,
     Pipe,
     Machine,
-    Factory,
 }
 
 impl Display for Token {
@@ -81,21 +74,24 @@ pub struct LexerBuilder;
 
 impl LexerBuilder {
     #[inline]
-    pub fn build() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>> {
-        let token = Self::number()
-            .or(Self::string())
-            .or(Self::identifier())
-            .recover_with(recovery::skip_then_retry_until([]));
-
-        let comment = primitive::just("//")
-            .then(primitive::take_until(primitive::just('\n')))
-            .padded();
-
-        token
-            .map_with_span(|token, span| (token, span))
-            .padded_by(comment.repeated())
+    pub fn build() -> impl Parser<char, Vec<Token>, Error = Simple<char>> {
+        let comment = just("//")
+            .ignore_then(take_until(just("\n")).ignored())
             .padded()
             .repeated()
+            .ignored();
+
+        choice((
+            Self::operator(),
+            Self::keyword(),
+            Self::number(),
+            Self::string(),
+            Self::identifier(),
+        ))
+        .padded()
+        .padded_by(comment)
+        .repeated()
+        .then_ignore(end())
     }
 
     #[inline]
@@ -103,60 +99,51 @@ impl LexerBuilder {
         let radix = 10;
 
         text::int(radix)
-            .chain::<char, _, _>(
-                primitive::just('.')
-                    .chain(text::digits(radix))
-                    .or_not()
-                    .flatten(),
-            )
+            .chain::<char, _, _>(just('.').chain(text::digits(radix)).or_not().flatten())
             .collect::<String>()
-            .map(|value| {
-                info!("[LEXER] parsing number: {value}");
-
-                match value.contains('.') {
-                    true => Token::FloatLit(value),
-                    false => Token::IntLit(value),
-                }
+            .map(|value| match value.contains('.') {
+                true => Token::FloatLit(value),
+                false => Token::IntLit(value),
             })
     }
 
     #[inline]
     fn string() -> impl Parser<char, Token, Error = Simple<char>> {
-        primitive::just('"')
-            .ignore_then(primitive::filter(|c: &char| *c != '"').repeated())
-            .then_ignore(primitive::just('"'))
+        just('"')
+            .ignore_then(filter(|c: &char| *c != '"').repeated())
+            .then_ignore(just('"'))
             .collect::<String>()
             .map(|value| {
-                info!("[LEXER] parsing string: {value}");
-
                 Token::StringLit(value)
             })
     }
 
     #[inline]
-    fn identifier() -> impl Parser<char, Token, Error = Simple<char>> {
-        text::ident().map(|ident: String| {
-            info!("[LEXER] parsing identifier: {ident}");
+    fn operator() -> impl Parser<char, Token, Error = Simple<char>> {
+        choice((
+            just("=").to(Token::Equals),
+            just("{").to(Token::Lbrace),
+            just("}").to(Token::Rbrace),
+            just("(").to(Token::Lparen),
+            just(")").to(Token::Rparen),
+            just(",").to(Token::Comma),
+            just("?").to(Token::QuestionMark),
+            just(":").to(Token::Colon),
+            just(";").to(Token::Semicolon),
+            just("->").to(Token::Pipe),
+        ))
+    }
 
-            match ident.as_str() {
-                "=" => Token::Equals,
-                "{" => Token::Lbrace,
-                "}" => Token::Rbrace,
-                "[" => Token::Lbracket,
-                "]" => Token::Rbracket,
-                "(" => Token::Lparen,
-                ")" => Token::Rparen,
-                "," => Token::Comma,
-                "?" => Token::QuestionMark,
-                ":" => Token::Colon,
-                ";" => Token::Semicolon,
-                "->" => Token::Pipe,
-                "let" => Token::Let,
-                "component" => Token::Component,
-                "machine" => Token::Machine,
-                "factory" => Token::Factory,
-                _ => Token::Ident(ident),
-            }
-        })
+    #[inline]
+    fn keyword() -> impl Parser<char, Token, Error = Simple<char>> {
+        choice((
+            keyword("machine").to(Token::Machine),
+            keyword("let").to(Token::Let),
+        ))
+    }
+
+    #[inline]
+    fn identifier() -> impl Parser<char, Token, Error = Simple<char>> {
+        ident().map(Token::Ident)
     }
 }
