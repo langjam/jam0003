@@ -1,0 +1,13 @@
+"welcome to the taf repl!" #print!
+"(run #?! for help)" #print!
+@dup 1 #dupn! ~
+@?
+    "tafᵒᵏrᴱᴾᴸ usage:" #print!
+    "   :d          dumps the stacks"                   #print!
+    "   :p <code>   parses and dumps tokens in CODE"    #print!
+    "   :c          clears screen and data stack"       #print!
+    "   " #print!
+    "have fun!"
+    0
+    1 #.! #print!
+    ~
