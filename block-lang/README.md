@@ -1,6 +1,8 @@
 # Block Lang
 *Functional Blocks*
 
+See the website: https://zyansheep.github.io/tmp-lang/
+
 ## General idea
 
 Lambda calculus, but a visual drag-n-drop application, a bit like MIT Scratch
