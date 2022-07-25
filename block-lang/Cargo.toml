@@ -1,8 +1,8 @@
 [package]
-name = "tmp-lang"
+name = "block-lang"
 version = "0.1.0"
 edition = "2021"
-default-run = "tmp-lang"
+default-run = "block-lang"
 
 [[bin]]
 name = "cli"
@@ -29,15 +29,11 @@ anyhow = "1.0.58"
 bytecheck = "0.6.8"
 rkyv = { version = "0.7.39", features = ["validation"] }
 thiserror = "1.0.31"
-bevy_pancam = { version = "*" }
-bevy_mouse_tracking_plugin = { version = "*" }
+bevy_pancam = { git = "https://github.com/zyansheep/bevy_pancam" }
+bevy_mouse_tracking_plugin = { git = "https://github.com/zyansheep/bevy-mouse-tracking" }
 iyes_loopless = "0.6.1"
 rustyline = "10.0.0"
 bevy_prototype_lyon = "0.5.0"
-
-[patch.crates-io]
-bevy_mouse_tracking_plugin = { path = "vendor/bevy-mouse-tracking" }
-bevy_pancam = { path = "vendor/bevy_pancam" }
 
 # Stuff for Zyansheep, I use NixOS btw :)
 [package.metadata.nix]
@@ -51,6 +47,7 @@ nativeBuildInputs = [
 	"pkgconfig",
 	"cmake",
 	"mold",
+	"rust-analyzer",
 ]
 buildInputs = [
 	# Window and Input

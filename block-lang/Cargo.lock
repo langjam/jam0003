@@ -534,6 +534,7 @@ dependencies = [
 [[package]]
 name = "bevy_mouse_tracking_plugin"
 version = "0.2.1"
+source = "git+https://github.com/zyansheep/bevy-mouse-tracking#7b358c66feffc38b44d0d1b2d479057914888b04"
 dependencies = [
  "bevy",
 ]
@@ -541,6 +542,7 @@ dependencies = [
 [[package]]
 name = "bevy_pancam"
 version = "0.3.0"
+source = "git+https://github.com/zyansheep/bevy_pancam#e3e3f3e0824f21a6a38c6f59df74c635fcab3867"
 dependencies = [
  "bevy",
 ]
@@ -913,6 +915,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bf7fe51849ea569fd452f37822f606a5cabb684dc918707a0193fd4664ff324"
 dependencies = [
  "generic-array",
+]
+
+[[package]]
+name = "block-lang"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "ariadne",
+ "bevy",
+ "bevy_mouse_tracking_plugin",
+ "bevy_pancam",
+ "bevy_prototype_lyon",
+ "bytecheck",
+ "chumsky",
+ "hashdb",
+ "iyes_loopless",
+ "rkyv",
+ "rustyline",
+ "thiserror",
 ]
 
 [[package]]
@@ -3572,25 +3593,6 @@ name = "tinyvec_macros"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
-
-[[package]]
-name = "tmp-lang"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "ariadne",
- "bevy",
- "bevy_mouse_tracking_plugin",
- "bevy_pancam",
- "bevy_prototype_lyon",
- "bytecheck",
- "chumsky",
- "hashdb",
- "iyes_loopless",
- "rkyv",
- "rustyline",
- "thiserror",
-]
 
 [[package]]
 name = "toml"

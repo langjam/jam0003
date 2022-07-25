@@ -20,7 +20,7 @@ fn cli_editor() {
 	use parse::Command;
 	use rustyline::Editor;
 
-	println!("tmp-lang cli editor!");
+	println!("block-lang cli editor!");
 	let mut editor = Editor::<()>::new().unwrap();
 	if editor.load_history(".editor_history").is_err() {}
 
