@@ -1,0 +1,4 @@
+$length is 10
+$direction is > + ^
+$line is $direction * $length
+Generate $line
