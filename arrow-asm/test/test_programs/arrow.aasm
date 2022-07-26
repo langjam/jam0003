@@ -1,0 +1,4 @@
+fn main {
+  l1 <- l0
+  l0.sometype:a <- l2
+}

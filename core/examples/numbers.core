@@ -1,0 +1,60 @@
+// for i in range(1,11):
+//   print(i)
+
+// store number 0 to memory 0
+op 0
+d0 0
+d1 0
+call
+
+// store number 1 to memory 1, this will be our step
+op 0
+d0 1
+d1 1
+call
+
+// store number 10 to memory 2, this will be our target number
+op 0
+d0 2
+d1 10
+call
+
+// store newline on memory 3, this will help to print number on its own line
+op 0
+d0 3
+d1 "\n"
+call
+
+// increase number by step and store it to memory 0 back
+op 3
+d0 0
+d1 1
+d2 0
+call
+
+// print current number on memory 0
+op 1
+d0 0
+call
+
+// print newline from memory 3
+op 1
+d0 3
+call
+
+// if number equal to 10, jump to exit
+op 7
+d0 0
+d1 2
+d2 58
+call
+
+// jump back to top incase of false, will be skipped if true
+op 8
+d0 29
+call
+
+// exit with 0 code
+op 9
+d0 0
+call

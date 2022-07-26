@@ -1,0 +1,164 @@
+{
+  "type": "program",
+  "program": [
+    {
+      "type": "assignment",
+      "operator": "=",
+      "left": { "type": "identifier", "value": "double" },
+      "right": {
+        "type": "func",
+        "args": [{ "type": "identifier", "value": "x" }],
+        "body": {
+          "type": "binary_operation",
+          "operator": "*",
+          "left": { "type": "identifier", "value": "x" },
+          "right": {
+            "type": "literal",
+            "value": { "type": "int", "value": "2" }
+          }
+        }
+      }
+    },
+    {
+      "type": "call",
+      "func": { "type": "identifier", "value": "p" },
+      "args": [
+        {
+          "type": "call",
+          "func": { "type": "identifier", "value": "double" },
+          "args": [
+            { "type": "literal", "value": { "type": "int", "value": "10" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "assignment",
+      "operator": "=",
+      "left": { "type": "identifier", "value": "triple" },
+      "right": {
+        "type": "func",
+        "args": [{ "type": "identifier", "value": "a" }],
+        "body": {
+          "type": "binary_operation",
+          "operator": "*",
+          "left": { "type": "identifier", "value": "a" },
+          "right": {
+            "type": "literal",
+            "value": { "type": "int", "value": "3" }
+          }
+        }
+      }
+    },
+    {
+      "type": "call",
+      "func": { "type": "identifier", "value": "puts" },
+      "args": [
+        {
+          "type": "call",
+          "func": { "type": "identifier", "value": "triple" },
+          "args": [
+            { "type": "literal", "value": { "type": "int", "value": "123" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "assignment",
+      "operator": "=",
+      "left": { "type": "identifier", "value": "add" },
+      "right": {
+        "type": "func",
+        "args": [
+          { "type": "identifier", "value": "x" },
+          { "type": "identifier", "value": "y" }
+        ],
+        "body": {
+          "type": "binary_operation",
+          "operator": "+",
+          "left": { "type": "identifier", "value": "x" },
+          "right": { "type": "identifier", "value": "y" }
+        }
+      }
+    },
+    {
+      "type": "call",
+      "func": { "type": "identifier", "value": "p" },
+      "args": [
+        {
+          "type": "call",
+          "func": { "type": "identifier", "value": "add" },
+          "args": [
+            { "type": "literal", "value": { "type": "int", "value": "1" } },
+            { "type": "literal", "value": { "type": "int", "value": "2" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "assignment",
+      "operator": "=",
+      "left": { "type": "identifier", "value": "dosomething" },
+      "right": {
+        "type": "func",
+        "args": [],
+        "body": {
+          "type": "call",
+          "func": { "type": "identifier", "value": "puts" },
+          "args": [
+            {
+              "type": "call",
+              "func": { "type": "identifier", "value": "rand" },
+              "args": [
+                { "type": "literal", "value": { "type": "int", "value": "10" } }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "call",
+      "func": { "type": "identifier", "value": "dosomething" },
+      "args": []
+    },
+    {
+      "type": "call",
+      "func": { "type": "identifier", "value": "p" },
+      "args": [
+        {
+          "type": "amp_method",
+          "self": {
+            "type": "method",
+            "self": {
+              "type": "array",
+              "value": [
+                { "type": "literal", "value": { "type": "int", "value": "1" } },
+                { "type": "literal", "value": { "type": "int", "value": "2" } },
+                { "type": "literal", "value": { "type": "int", "value": "3" } }
+              ]
+            },
+            "name": "map",
+            "args": []
+          },
+          "name": "with_index",
+          "args": [
+            {
+              "type": "func",
+              "args": [
+                { "type": "identifier", "value": "x" },
+                { "type": "identifier", "value": "i" }
+              ],
+              "body": {
+                "type": "call",
+                "func": { "type": "identifier", "value": "puts" },
+                "args": [{ "type": "identifier", "value": "x" }]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { "type": "nil" }
+  ]
+}

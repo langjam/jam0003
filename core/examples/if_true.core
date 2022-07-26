@@ -1,0 +1,52 @@
+// if 42 == 42:
+//   print("true")
+// else:
+//   print("false")
+
+
+// store 42 on memory 0
+op 0
+d0 0
+d1 42
+call
+
+// store another 42 on memory 1
+op 0
+d0 1
+d1 42
+call
+
+// compare memory 0 and 1, if true jump to line 44, else continue
+op 7
+d0 0
+d1 1
+d2 44
+call
+
+// store "false" on memory 2
+op 0
+d0 2
+d1 "false\n"
+call
+
+// print "false" from memory 2
+op 1
+d0 2
+call
+
+// exit with 0 code, prevent the program from entering the false block
+op 9
+d0 0
+call
+
+// incase of true, line 19 - 35 will be skipped (jumped)
+// store "true" on memory 2
+op 0
+d0 2
+d1 "true\n"
+call
+
+// print "true" from memory 2
+op 1
+d0 2
+call

@@ -1,0 +1,1 @@
+$><<"abc sd k kjlh kjlashdfkajs jkhfk   12 n jk".split.map(.reverse) # wow, our syntax is lit!

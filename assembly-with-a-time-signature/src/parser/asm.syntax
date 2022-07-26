@@ -1,0 +1,131 @@
+
+int = [0-9]+; {no-layout, single-string}
+note = "#" [a-g]; {no-layout}
+identifier = [A-Za-z_][A-Za-z0-9-_]*; {single-string, no-layout}
+
+label:
+    global = identifier ":";
+    local = "." int ":";
+
+section = "." identifier; {no-layout}
+
+register-name:
+    br = "br";
+    bt = "bt";
+    pc = "pc";
+    sp = "sp";
+    ir = "ir";
+    oc = "oc";
+    accidental = "a" note; {no-layout}
+    num = "r" [0-7]; {no-layout}
+    note = "n" [0-7]; {no-layout}
+
+register = "%" register-name; {no-layout}
+
+operand:
+    label-ref = identifier;
+    int;
+    note;
+    register;
+
+instrument:
+    custom = int;
+    piano = "piano";
+    celesta = "celesta";
+    glockenspiel = "glockenspiel";
+    musicbox = "musicbox";
+    marimba = "marimba";
+    dulcimer = "dulcimer";
+    organ = "organ";
+    accordion = "accordion";
+    harmonica = "harmonica";
+    nylonguitar = "nylonguitar";
+    steelguitar = "steelguitar";
+    distortionguitar = "distortionguitar";
+    acousticbass = "acousticbass";
+    slapbass = "slapbass";
+    violin = "violin";
+    harp = "harp";
+    timpani = "timpani";
+    strings = "strings";
+    synthstrings = "synthstrings";
+    voiceoohs = "voiceoohs";
+    synthvox = "synthvox";
+    brass = "brass";
+    altosax = "altosax";
+    tenorsax = "tenorsax";
+    oboe = "oboe";
+    enghorn = "enghorn";
+    flute = "flute";
+    panflute = "panflute";
+    whistle = "whistle";
+    ocarina = "ocarina";
+    heavysquarewave = "heavysquarewave";
+    fantasia = "fantasia";
+    warmpad = "warmpad";
+    echodrops = "echodrops";
+    startheme = "startheme";
+    sitar = "sitar";
+    banjo = "banjo";
+    kalimba = "kalimba";
+    bagpipe = "bagpipe";
+    fiddle = "fiddle";
+    steeldrum = "steeldrum";
+    bird = "birb";
+    telephone = "telephone";
+    applause = "applause";
+    gunshot = "gunshot";
+
+
+instruction:
+    call = "call" operand;
+    call_async = "go" operand;
+    ret = "ret";
+    ret_async = "exit";
+    jmp = "jmp" operand;
+    bpm = "bpm" operand;
+    time = "time" operand operand;
+    beat = "beat";
+    wait = "wait" operand;
+    play_one = "play" operand;
+    play = "play-for" operand operand;
+    flat = "flat" note;
+    sharp = "sharp" note;
+    push = "push" operand;
+    pop = "pop" register;
+    add = "add" register operand operand;
+    sub = "sub" register operand operand;
+    inc = "inc" register;
+    dec = "dec" register;
+    jg = "jg" operand operand operand;
+    jl = "jl" operand operand operand;
+    jge = "jge" operand operand operand;
+    jle = "jle" operand operand operand;
+    jeq = "jeq" operand operand operand;
+    je = "je" operand operand operand;
+    jne = "jne" operand operand operand;
+    mov = "mov" register operand;
+    st = "st" operand operand;
+    ld = "ld" register operand;
+    define = "define" instrument;
+    lir = "lir" operand;
+    stop = "stop";
+
+label-or-instr:
+    instruction = instruction newline;
+    label = label newline;
+    combined = label instruction newline;
+    section = section newline;
+    newline;
+
+newline: {hidden}
+    unix = "\n";
+    windows = "\r\n";
+
+program = label-or-instr *;
+
+
+start at program;
+layout:
+    simple = [\t ];
+    comment = ";" [^\n]*;

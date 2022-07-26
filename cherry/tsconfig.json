@@ -1,0 +1,12 @@
+{
+	"extends": "@mckayla/tsconfig",
+	"compilerOptions": {
+		"noEmit": true,
+		"baseUrl": ".",
+		"jsx": "react",
+		"paths": {
+			"^/*": ["./src/*"]
+		}
+	},
+	"include": ["./src/**/*"]
+}

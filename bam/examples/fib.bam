@@ -1,0 +1,10 @@
+
+machine Fib {
+    let input_check, input_rec1, input_rec2 = input -> Dup3;
+
+    (input_check, 2 -> Lt)
+        ? 1
+        : ((input_rec1, 1 -> Sub -> Fib), (input_rec2, 2 -> Sub -> Fib)) -> Add
+}
+
+

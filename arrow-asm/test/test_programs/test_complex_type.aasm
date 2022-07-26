@@ -1,0 +1,40 @@
+type mytype {
+  ctor {
+    store p1, p0.sometype:x
+    store p2, p0.sometype:y
+    p0.sometype:z <- p3
+  }
+  dtor {
+    l0 <- p0
+  }
+  x: long
+  y: long
+  w: double
+  z: ptr<int>
+}
+
+fn test {
+  ; Set up parameters
+  add op0, 0, 3
+  add op1, 0, 5
+  op2 <- make long
+  store op2, 15
+  l0 <- make mytype
+  ; Now we have an instance of mytype in l0
+  load l1, l0.mytype:x
+  ; l1 is 3
+  load l1, l0.mytype:y
+  ; l1 is 5
+  l1 <- l0.mytype:z
+  ; l1 is pointer to 15, l0.z holds nothing
+  ; Illegal to load l1, l1
+  load l2, l1
+  ; l2 now holds 15
+  add l2, l2, 5
+  ; l2 now holds 20
+  store l2, l1
+  ; put 20 into that pointer that used to hold 15
+  l0.mytype:z <- l1
+  ; move that pointer back into the instance
+}
+; When this function exits, the l0 instance gets destroyed (the dtor gets called) and everything gets cleaned up-- no dangling pointers

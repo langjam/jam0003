@@ -1,0 +1,53 @@
+;; This tux file draws a simple sky image with a tree ;;
+
+; Blue sky
+    stbg    0, 200, 255
+
+; Sun
+    stcl    255, 255, 0
+    stps    100, 50
+    elps    150, 150
+
+; Cloud
+    stcl    255, 255, 255
+    stps    400, 50
+    elps    150, 50
+
+    move    5, -10
+    elps    50, 50
+
+    move    30, -10
+    elps    50, 50
+
+    move    30, 5
+    elps    50, 50
+
+    move    30, 5
+    elps    50, 50
+
+    move    0, 20
+    elps    50, 50
+
+    move    -30, 10
+    elps    50, 50
+
+    move    -30, -5
+    elps    50, 50
+
+    move    -30, -10
+    elps    50, 50
+
+; Grass
+    stcl    0, 255, 100
+    stps    0, 380
+    rect    640, 100
+
+; Tree Trunk
+    stcl    160, 82, 45
+    stps    500, 230
+    rect    50, 200
+
+; Tree Leaves
+    stcl    0, 255, 50
+    stps    450, 150
+    elps    150, 150

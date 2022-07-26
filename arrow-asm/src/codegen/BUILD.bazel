@@ -1,0 +1,22 @@
+# cc_library(
+#     name = "codegen",
+#     hdrs = ["codegen.hh"],
+#     srcs = ["codegen.cc"],
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         "//src/bytecode:bytecode",
+#         "//foreign:llvm",
+#         "@com_github_gabime_spdlog//:spdlog",
+#     ],
+# )
+
+# cc_binary(
+#     name = "codegen_test",
+#     srcs = [
+#         "codegen_test.cc",
+#     ],
+#     deps = [
+#         ":codegen",
+#         "@com_github_gabime_spdlog//:spdlog",
+#     ],
+# )

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+textarea {
+}
+</style>
+</head>
+<body>
+
+<h1>FMT Shorthand Expander</h1>
+
+<button onclick="generate ()">Generate JavaScript from FMT specification</button>
+<br>
+<button onclick="usesmalltest ()">Use small test.</button>
+<button onclick="usesmalltest2 ()">Use small test 2.</button>
+<button onclick="usesmalltest3 ()">Use small test 3.</button>
+<button onclick="usebigtest ()">Use big test.</button>
+<br>
+
+<p>source:</p>
+<textarea id="src" rows="17" cols="90" placeholder="src" style="background-color:oldlace;">
+</textarea>
+
+
+<p>equivalent JavaScript code:</p>
+<textarea id="output" rows="17" cols="90" placeholder="transpiled"  readonly style="background-color:whitesmoke;">
+</textarea>
+<br>
+<br>
+<p id="status" > READY </p>
+<br>
+<br>
+<br>
+
+<!-- Ohm-JS -->
+<script src="https://unpkg.com/ohm-js@16/dist/ohm.min.js"></script>
+
+
+<!-- Macro preprocessor -->
+<script src="fmt-js.js"></script>
+
+
+<script>
+
+const smallsrc = String.raw`
+Test {
+//
+Rule1 [x] = ‛«x»’
+//
+}
+`;
+
+  const smallsrc2 = String.raw`
+Test {
+//
+Rule1 [x] = ‛«x»’
+Rule2 [x+] = ‛«x»’
+//
+}
+`;
+  const smallsrc3 = String.raw`
+Test {
+//
+Rule1 [x] = ‛«x»’
+Rule2 [x+] = ‛«x»’
+Rule3 [a+ b* c?] = ‛«a»«b»«c»’
+//
+}
+`;
+
+
+  const bigsrc = String.raw`
+Test {
+TopLevel [x+] = ‛«x»’
+ConstDeclaration [kconst ident kto expression] = ‛\nconst «ident» = «expression»;’
+FunctionDeclaration [kfn ident Formals Block] = ‛\nfunction «ident» («Formals») {«Block»\n’
+
+Formals [ident*] = ‛«ident»’
+
+Primary_number [digit+] = ‛«digits»’
+Primary_arrayliteral [karr Expressions kend] = ‛\[«Expressions»\] ’
+
+Expression_fieldaccess [e1 op e2] = ‛«e1».«e2»’
+Expression_operation [e1 op e2] = ‛«e1» «op» «e2»’
+Expression_functioncall [e1 kcall Actuals* kend] = ‛«e1» («Actuals»)’
+Expression_primary [Primary] = ‛«Primary»’
+
+Operator_subtract [k] = ‛-’
+Operator_add [k] = ‛+’
+Operator_gt [k] = ‛ > ’
+
+Phrase [x] = ‛«x»’
+
+IfPhrase [kif Expression Block elsifphrase? elsephrase?] = ‛\nif («Expression») {«Block»\n«elsifphrase»«elsephrase»’
+ElsifPhrase [kelse kif Expression Block] = ‛\nelse if («Expression») {«Block»\n’
+ElsePhrase [kelse Block] = ‛\nelse {«Block»\n’
+ReturnPhrase [kreturn Expression] = ‛\nreturn «Expression»;’
+
+Block [kdo Phrase+ kend] = ‛«Phrase»’
+
+FieldName [ident] = ‛«ident»’
+
+ident [identFirst identRest*] = ‛«identFirst»«identRest»’
+identFirst [c] = ‛«c»’
+identRest [c] = ‛«c»’
+
+NonemptyListOf [x xs+ cs+] = ‛«x»«xs»«cs»’
+}
+`;
+
+
+  function usesmalltest () {
+      document.getElementById('src').innerHTML = smallsrc;
+  }
+  function usesmalltest2 () {
+      document.getElementById('src').innerHTML = smallsrc2;
+  }
+  function usesmalltest3 () {
+      document.getElementById('src').innerHTML = smallsrc3;
+  }
+  function usebigtest () {
+      document.getElementById('src').innerHTML = bigsrc;
+  }
+  
+  function generate () {
+      var src = document.getElementById('src').innerHTML;
+      try {
+          let [success, transpiled] = fmtjs (src);
+          document.getElementById('output').value = transpiled;
+          if (success) {
+              document.getElementById('status').innerHTML = "OK";
+          } else {
+              document.getElementById('status').innerHTML = "FAILED";
+          }
+      } catch (err) {
+          document.getElementById('status').innerHTML = "parse FAILED: " + err.message;
+      }
+  }
+
+  // helper functions
+  var ruleName = "???";
+  function setRuleName (s) { ruleName = s; return "";}
+  function getRuleName () { return ruleName; }
+
+
+  </script>
+</body>
+</html>
+
+

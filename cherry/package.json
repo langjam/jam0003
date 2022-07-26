@@ -1,0 +1,38 @@
+{
+	"name": "cherry",
+	"version": "0.0.0",
+	"author": "McKayla Washburn <mckayla@hey.com>",
+	"description": "A simple environment to learn about Assembly",
+	"keywords": [],
+	"license": "MIT",
+	"homepage": "https://github.com/aslilac/cherry",
+	"repository": "https://github.com/aslilac/cherry",
+	"bugs": "https://github.com/aslilac/cherry/issues",
+	"dependencies": {
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"succulent": "^0.18.0"
+	},
+	"devDependencies": {
+		"@mckayla/prettier": "^1.0.2",
+		"@mckayla/tsconfig": "^1.0.2",
+		"@types/jest": "^28.1.6",
+		"@types/react": "^18.0.15",
+		"@types/react-dom": "^18.0.6",
+		"eslint": "^8.20.0",
+		"eslint-config-mckayla": "^1.0.4",
+		"jest": "^28.1.3",
+		"prettier": "^2.7.1",
+		"ts-jest": "^28.0.7",
+		"typescript": "^4.7.4",
+		"vite": "^3.0.2"
+	},
+	"scripts": {
+		"build": "tsc -b .",
+		"dev": "vite",
+		"fmt": "prettier --write .",
+		"lint": "eslint .",
+		"prepack": "npm run build -s",
+		"test": "jest"
+	}
+}

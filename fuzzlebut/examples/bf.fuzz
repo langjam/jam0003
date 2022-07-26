@@ -1,0 +1,48 @@
+v   A brainf interpreter written in Fūzzlebūt
+|
+>U.r%Vs--------------------------------------v  Skip the user input
+|   Replace the `>` with a `v` in the line    above to prompt the user for the brainf program.
+|
+>"Please input the brainF program: "!%U.r%Vs-v  Ask the user to input the data.
+v---------<----------------------------------<
+>psRsAsl0Eb    Reverse the input program
+          >%V30000v create 30,000 cells
+v-----------------<
+>R0sAr1v
+BE0dSs-<
+%   Define some convienence functions
+|   so I don't have to put everything
+|   in the match block
+>1"inc"P-------------|
+       |p1A256sDs%sA~| Wrapping 8bit increment
+       |--------------v
+v---------------------<
+>1"dec"P------------------|
+       |p1sS256A256sDs%sA~|    Wrapping 8bit decrement and account for negative numbers
+       |-------------------v
+v--------------------------<
+>1"print"P---------|
+         |pd$!%s-A~|
+         |----------v
+v---------------s0s0<
+|
+|  Dec   Inc   Print NextCell PrevCell LoopStart LoopEnd                      Default
+>rpdc-Ev>dc+Ev>dc.Ev>dc>Ev>---dc<Ev>---dc[Ev>----dc]Ev>-----------------------v
+|     vb^   vb^   vb^   vb^      vb^      vb^       vb^                       |
+|     s     s     s     s        s        s         s            vA1<         s
+|     A     A     A     A        A        A         A            r  R         A
+|     R     R     R     R        R        R         R >Rdrv-----<<  bE]crAs<  R
+|     "     "     "     [        ]        R         p |   |   >r^<--<      R  |
+|     d     i     p     |        |        1         d |   |   |            d  |
+|     e     n     r     |        |        A         R s   |   s            p  |
+|     c     c     i     |        |        r         s R   |   S    >%s-----+v |
+|     "     "     n     |        |        |         A s   |   s    |       || |
+|     *     *     t     |        |        |         r r   |   ^1s-b^       || |
+|     |     |     "     |        |        |         0 r   |       ^ErdsRdRB^| |
+|     |     |     *     |        |        |         E r   >r1sSR[pdRsArc[E^ | |
+|     |     |     |     |        |        |         >-b                     | |
+|     |     |     |     |        |        |       vs1R<                     | |
+|     |     |     |     |        |        |       >sSrv                     | |
+|   v-<-----<-----<-----<--------<--------<-----------<---------------------<-<
+|   >-rsRRsdrl1sSsREv
+^-----------Rsr]rsA1B"Program finished"#~
