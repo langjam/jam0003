@@ -1,0 +1,3 @@
+$length is 5
+$square is ^ * $length + > * $length + , * $length + < * $length
+generate $square
