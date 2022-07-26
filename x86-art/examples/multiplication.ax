@@ -1,16 +1,16 @@
  > ***
 -->*2*
  > ***
-; ^ LOAD 2, adds 2 onto the stack
+; ^ LOAD 2, adds 2 onto the queue
  > ***
 -->*2*
  > ***
-; ^ LOAD 2, adds another 2 onto the stack
+; ^ LOAD 2, adds another 2 onto the queue
 * *
  * 
 * *
-; ^ MUL, multiplies both values in the stack, clears it, and puts the result on the stack
+; ^ MUL, multiplies both values in the queue, clears it, and puts the result on the queue
 *->
 *->
 *->
-; ^ PUT, prints the last value on the stack to stdout
+; ^ PUT, prints the last value on the queue to stdout
