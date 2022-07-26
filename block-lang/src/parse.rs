@@ -80,7 +80,7 @@ fn parser<'e: 'b, 'b, B: TypeStore<'b>, E: TypeStore<'e>>(namespace: &'b Namespa
 				});
 				0..symbols.len()
 			}).then(expr.clone()).foldr(|_, (lam_expr, mut bind_tree)| {
-				let binding = bind_tree.pop_binding(binds, bind_map.pop_bind(), exprs).expect("failed to pop lambda");
+				let binding = bind_tree.pop_binding(binds, &bind_map.pop_bind(), exprs).expect("failed to pop lambda");
 				(Expr::lambda(binding, lam_expr, exprs), bind_tree)
 			}).labelled("lambda");
 		

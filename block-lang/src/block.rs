@@ -4,40 +4,44 @@ use std::f32::consts::{FRAC_1_SQRT_2, FRAC_PI_2, PI};
 
 use bevy::prelude::*;
 
-use crate::{expr::{Binding, Expr}, mouseover::{HoverState, TopHover}, placing::Placing};
+use crate::{expr::{BindTree, Expr}, mouseover::{HoverState, TopHover}, placing::Placing};
 
-/* pub enum Binding {
-	None,
-	End,
-	Branch(Box<Binding>, Box<Binding>)
+/// Associated `Entity` with a variable
+pub type BindEntityTree = BindTree<'static, Entity>;
+
+#[derive(Clone, Copy, Debug)]
+pub enum PartialForm {
+	Func, Args
 }
-
-#[derive(Component, Default)]
-pub enum Expr {
-	Function { bind: Binding, expr: Option<Entity> },
-	Application { func: Option<Entity>, args: Option<Entity> },
-	#[default]
-	Variable,
-} */
 
 #[derive(Component, Clone, Debug)]
 pub enum WrappedExpr {
-	Variable { bound: Option<Entity> },
+	Variable { formed: (&'static Expr<'static>, &'static BindEntityTree) },
 	Lambda {
-		bind_entity: Option<Entity>,
 		expr_entity: Option<Entity>,
-		formed: Option<Expr<'static>>,
+		is_bound: bool,
+		formed: Option<(&'static Expr<'static>, &'static BindEntityTree)>,
 	},
 	Application {
 		func_entity: Option<Entity>,
 		args_entity: Option<Entity>,
-		formed: Option<Expr<'static>>,
+		partial_formed: Option<(&'static Expr<'static>, &'static BindEntityTree, PartialForm)>,
+		formed: Option<(&'static Expr<'static>, &'static BindEntityTree)>,
 	}
 }
 impl WrappedExpr {
-	pub const APPLICATION: WrappedExpr = WrappedExpr::Application { func_entity: None, args_entity: None, formed: None };
-	pub const LAMBDA: WrappedExpr = WrappedExpr::Lambda { bind_entity: None, expr_entity: None, formed: None };
-	pub const VARIABLE: WrappedExpr = WrappedExpr::Variable { bound: None };
+	pub const APPLICATION: WrappedExpr = WrappedExpr::Application { func_entity: None, args_entity: None, partial_formed: None, formed: None };
+	pub const LAMBDA: WrappedExpr = WrappedExpr::Lambda { is_bound: false, expr_entity: None, formed: None };
+	pub const VARIABLE: WrappedExpr = WrappedExpr::Variable { formed: (Expr::VAR, BindTree::NONE) };
+	pub fn unform(&mut self) {
+		match self {
+			Self::Application { formed, partial_formed, .. } => {
+				*formed = None; *partial_formed = None;
+			}
+			Self::Lambda { formed, .. } => *formed = None,
+			_ => {},
+		}
+	}
 }
 impl Default for WrappedExpr { fn default() -> Self { Self::VARIABLE } }
 
@@ -80,12 +84,16 @@ impl ObjectData {
 	}
 	pub fn gen_texture(expr: &WrappedExpr, asset_server: &AssetServer) -> Handle<Image> {
 		match expr {
-			WrappedExpr::Variable { .. } => asset_server.load("VariableDot.png"),
-			WrappedExpr::Variable { bound: Some(_) } => asset_server.load("VariableBound.png"),
-			WrappedExpr::Lambda { expr_entity: None, formed: None, .. } => asset_server.load("Lambda.png"),
-			WrappedExpr::Lambda { expr_entity: Some(_), formed: None, .. } => asset_server.load("LambdaEmpty.png"),
-			WrappedExpr::Lambda { formed: Some(_), .. } => asset_server.load("LambdaDot.png"),
-			WrappedExpr::Application { .. } => asset_server.load("Application.png"),
+			WrappedExpr::Variable { formed: (_, BindEntityTree::End(_)) } => 				asset_server.load("VarState=Connected.png"),
+			WrappedExpr::Variable { .. } => 												asset_server.load("VarState=Placed.png"),
+			WrappedExpr::Lambda { formed: Some(_), is_bound: true, .. } => 			asset_server.load("LamState=FormedConnected.png"),
+			WrappedExpr::Lambda { formed: Some(_), .. } => 									asset_server.load("LamState=Formed.png"),
+			WrappedExpr::Lambda { expr_entity: Some(_), is_bound: true, .. } => 		asset_server.load("LamState=Connected.png"),
+			WrappedExpr::Lambda { expr_entity: Some(_), .. } => 							asset_server.load("LamState=Placed.png"),
+			WrappedExpr::Lambda { expr_entity: None, .. } => 								asset_server.load("LamState=None.png"),
+			WrappedExpr::Application { formed: Some(_), .. } => 							asset_server.load("AppState=Formed.png"),
+			WrappedExpr::Application { func_entity: Some(_), args_entity: Some(_), .. } => 	asset_server.load("AppState=Slotted.png"),
+			WrappedExpr::Application { .. } => 												asset_server.load("AppState=Placed.png"),
 		}
 	}
 	pub fn gen_transform(&self, z_loc: f32) -> Transform {

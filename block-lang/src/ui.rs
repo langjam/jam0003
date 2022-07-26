@@ -64,7 +64,7 @@ pub fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 					build_button(
 						parent,
-						asset_server.load("VariableDot.png"),
+						asset_server.load("VarState=None.png"),
 						|commands, app_state, state| {
 							place_expr(commands, app_state, state, WrappedExpr::VARIABLE);
 							info!("Added variable");
@@ -72,7 +72,7 @@ pub fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 					);
 					build_button(
 						parent,
-						asset_server.load("Lambda.png"),
+						asset_server.load("LamState=None.png"),
 						|commands, app_state, state| {
 							place_expr(
 								commands,
@@ -85,7 +85,7 @@ pub fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 					);
 					build_button(
 						parent,
-						asset_server.load("Application.png"),
+						asset_server.load("AppState=None.png"),
 						|commands, app_state, state| {
 							place_expr(
 								commands,

@@ -5,7 +5,7 @@ use std::f32::consts::FRAC_1_SQRT_2;
 use bevy::prelude::*;
 use bevy_mouse_tracking_plugin::{MainCamera, MousePosWorld};
 
-use crate::{AppState, GameState, block::{WrappedExpr, Object, ObjectData, Orientation}, mouseover::{HoverState, Side, TopHover}};
+use crate::{AppState, Formed, GameState, block::{WrappedExpr, Object, ObjectData, Orientation}, mouseover::{HoverState, Side, TopHover}};
 
 #[derive(Component, Default, Clone)]
 pub struct Placing;
@@ -16,7 +16,7 @@ pub fn place_expr(
 	state: &mut GameState,
 	expr: WrappedExpr,
 ) {
-	info!("Placing: {:?}", expr);
+	debug!("Placing: {:?}", expr);
 	match app_state.current() {
 		AppState::Default => {
 			state.just_pressed = true; // Prevent a single mouse click
@@ -59,6 +59,7 @@ pub fn placing_system(
 		*expr = new_expr;
 	}
 	
+	let mut follow_mouse = true;
 	if let Ok((h_entity, mut h_data, mut h_expr, HoverState::Yes { side, .. })) = top_hover.get_single_mut() {
 		// Make sure we can place block
 		if let Some((side, expr_slot)) = match (&mut *h_expr, side) {
@@ -75,6 +76,7 @@ pub fn placing_system(
 			}
 			(_, _) => None,
 		} {
+			follow_mouse = false;
 			let size = (h_data.size * FRAC_1_SQRT_2) * 0.90;
 			data.orientation = h_data.orientation.swap();
 			data.size = size;
@@ -91,7 +93,10 @@ pub fn placing_system(
 
 			// Place block inside another block
 			if mouse.clear_just_pressed(MouseButton::Left) {
-				state.just_pressed = true;
+				// Variables are formed expressions
+				if let WrappedExpr::Variable { .. } = *expr { commands.entity(entity).insert(Formed); }
+				debug!("Placed inside {:?} on {:?} side: {:?}, {:?}", h_entity, side, entity, expr);
+
 				*expr_slot = Some(entity);
 				data.parent = Some(h_entity);
 				// commands.entity(h_entity).add_child(entity); // DONT DO THIS, YOUR LIFE WILL BE PAINNNN
@@ -100,13 +105,18 @@ pub fn placing_system(
 				return;
 			}
 		}
-	} else {
+	}
+	if follow_mouse {
 		data.size = camera_proj.iter().next().unwrap().scale * 300.0; // Scale block-to-place with size
 		data.location = Vec2::new(mouse_pos.x, mouse_pos.y); // Move block-to-place to mouse cursor
 		data.orientation = state.placing_orientation; // Set orientation based on game state
 
 		// Place block on blank canvas (if there are no objects in scene)
 		if mouse.clear_just_pressed(MouseButton::Left) && top_hover.is_empty() {
+			// Variables are formed expressions
+			if let WrappedExpr::Variable { .. } = *expr { commands.entity(entity).insert(Formed); }
+			debug!("Placed on canvas {:?}, {:?}", entity, expr);
+
 			state.just_pressed = true;
 			commands.entity(entity).remove::<Placing>().insert(HoverState::No);
 			app_state.pop().unwrap();
