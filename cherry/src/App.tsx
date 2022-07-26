@@ -61,7 +61,7 @@ const init: AppState = {
 		{ instruction: { type: "putc_i", i: 110 }, editing: false },
 		{ instruction: { type: "putc_i", i: 100 }, editing: false },
 		{ instruction: { type: "putc_i", i: 33 }, editing: false },
-		{ instruction: {}, editing: true },
+		// { instruction: {}, editing: true },
 	],
 	endInstruction: 12,
 	vm: vmInit,
