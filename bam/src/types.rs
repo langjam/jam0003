@@ -173,7 +173,7 @@ pub enum TypeError {
     #[error("Unbound variable '{0}'")]
     UnboundVariable(String),
 
-    #[error("cannot machine '{0}'")]
+    #[error("Unbound machine '{0}'")]
     UnboundMachine(String),
 }
 
@@ -315,7 +315,7 @@ fn infer_stream(
     match stream {
         Stream::Var(name) => match local_env.var_types.get(name) {
             Some(ty) => Ok(ty.clone()),
-            None => Err(TypeError::UnboundVariable(name.clone()))
+            None => Err(TypeError::UnboundVariable(name.clone())),
         },
         Stream::Const(Value::Null) => {
             // 'null' can have any type, so we treat it like 'forall a. a'
@@ -354,7 +354,7 @@ fn infer_stream(
             let stream_tys = streams
                 .iter()
                 .map(|stream| infer_stream(global_env, local_env, stream))
-                .collect::<Result<Vec<_>,_>>()?;
+                .collect::<Result<Vec<_>, _>>()?;
             Ok(Type::Tuple(stream_tys))
         }
 
@@ -375,10 +375,12 @@ fn infer_stream(
             // equivalent, it doesn't matter which one we return here. We arbitrarily pick the 'then' branch.
             Ok(then_ty)
         }
-        Stream::Limit(stream, _) => infer_stream(global_env, local_env, stream),
+        Stream::Take(stream, _) | Stream::Peek(stream) | Stream::Hold(stream, _) => {
+            infer_stream(global_env, local_env, stream)
+        }
 
-        Stream::Unzip(_, _) => {
-            panic!("infer_stream: Stream::Unzip should not be able to appear in source files")
+        Stream::Proj(_, _) | Stream::Local(_, _) | Stream::Share(_) => {
+            panic!("infer_stream: should not be able to appear in source files")
         }
     }
 }
@@ -451,12 +453,10 @@ fn replace_unif_var(ty: Type, var: usize, to_replace: &Type) -> Type {
 fn apply_substitution(subst: &HashMap<usize, Type>, ty: Type) -> Type {
     match ty {
         Type::Num | Type::Bool | Type::String | Type::TyVar(_) => ty,
-        Type::UnifVar(var) => {
-            match subst.get(&var) {
-                None => Type::UnifVar(var),
-                Some(ty) => apply_substitution(subst, ty.clone())
-            }
-        }
+        Type::UnifVar(var) => match subst.get(&var) {
+            None => Type::UnifVar(var),
+            Some(ty) => apply_substitution(subst, ty.clone()),
+        },
         Type::Tuple(tys) => Type::Tuple(
             tys.into_iter()
                 .map(|ty| apply_substitution(subst, ty))
@@ -535,21 +535,15 @@ fn generalize(subst: &HashMap<usize, Type>, machine_ty: MachineType) -> MachineT
 
     let input = apply_substitution(subst, machine_ty.input);
 
-    let input = free_vars
-        .iter()
-        .enumerate()
-        .rfold(input, |ty, (i, var)| {
-            replace_unif_var(ty, *var, &Type::TyVar(i))
-        });
+    let input = free_vars.iter().enumerate().rfold(input, |ty, (i, var)| {
+        replace_unif_var(ty, *var, &Type::TyVar(i))
+    });
 
     let output = apply_substitution(subst, machine_ty.output);
 
-    let output = free_vars
-        .iter()
-        .enumerate()
-        .rfold(output, |ty, (i, var)| {
-            replace_unif_var(ty, *var, &Type::TyVar(i))
-        });
+    let output = free_vars.iter().enumerate().rfold(output, |ty, (i, var)| {
+        replace_unif_var(ty, *var, &Type::TyVar(i))
+    });
 
     MachineType {
         var_count: free_vars.len(),

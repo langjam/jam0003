@@ -1,4 +1,10 @@
 use core::fmt;
+use std::{
+    cell::{Cell, RefCell},
+    collections::VecDeque,
+    ptr::NonNull,
+    rc::Rc,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
@@ -20,19 +26,64 @@ pub enum Statement {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stream {
-    // NOTE: just parse this as Var("input")
-    // Input,                        // input
     Var(String),                                 // x
     Const(Value),                                // v
     Pipe(Box<Stream>, Box<Machine>),             // s -> m
     Zip(Vec<Stream>),                            // s₁ , .. , sₙ
     Cond(Box<Stream>, Box<Stream>, Box<Stream>), // s₁ ? s₂ : s₃
-    Limit(Box<Stream>, usize),                   // s{n}
+    Take(Box<Stream>, usize),                    // s{n}
+    /// Read a value from the underlying stream
+    /// without consuming it.
+    Peek(Box<Stream>), // !s
 
-    /// Only generated during evaluation.
+    /* Only generated during evaluation. */
     /// Contains the original stream to unzip,
     /// and the index with which to project.
-    Unzip(Box<Stream>, usize), // let x, y = s
+    Proj(Box<Stream>, usize), // let x, y = s
+
+    /// A stream that caches returned values.
+    Hold(Box<Stream>, VecDeque<Value>),
+
+    /// A stream that can be sneakily mutated.
+    Share(Rc<RefCell<Stream>>),
+
+    /// A Stream plus an index to the task it was created in.
+    Local(Box<Stream>, usize),
+}
+
+impl Default for Stream {
+    fn default() -> Self {
+        Stream::Const(Value::Null)
+    }
+}
+
+impl Stream {
+    /// Is this the input stream?
+    pub fn is_input(&self) -> bool {
+        match self {
+            Stream::Var(var) if var.eq("input") => true,
+            _ => false,
+        }
+    }
+
+    /// Transforms a stream in place to be `Share`.
+    pub fn share(&mut self) {
+        if let Self::Share(_) = self {
+            return;
+        }
+        let old_stream = std::mem::take(self);
+        /* Nothing should/would access the stream here, it's Null */
+        let new_stream = Self::Share(Rc::new(RefCell::new(old_stream)));
+        std::mem::replace(self, new_stream);
+    }
+
+    /// Transforms a stream in place to be `Local`.
+    pub fn local(&mut self, index: usize) {
+        let old_stream = std::mem::take(self);
+        /* Nothing should/would access the stream here, it's Null */
+        let new_stream = Self::Local(Box::new(old_stream), index);
+        std::mem::replace(self, new_stream);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -61,7 +112,7 @@ pub enum Builtin {
     Dup2,
     Dup3,
     Print,
-    Read
+    Read,
 }
 
 #[derive(Debug, Clone, PartialEq)]

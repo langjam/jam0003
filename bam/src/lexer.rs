@@ -21,6 +21,7 @@ lazy_static! {
         "?" => Token::QuestionMark,
         ":" => Token::Colon,
         ";" => Token::Semicolon,
+        "!" => Token::Bang,
         "->" => Token::Pipe,
         "let" => Token::Let,
         "machine" => Token::Machine,
@@ -46,7 +47,8 @@ pub enum Token {
     Semicolon,
     Pipe,
     Machine,
-    Null
+    Null,
+    Bang
 }
 
 impl Display for Token {
@@ -131,6 +133,7 @@ impl LexerBuilder {
             just(":").to(Token::Colon),
             just(";").to(Token::Semicolon),
             just("->").to(Token::Pipe),
+            just("!").to(Token::Bang),
         ))
     }
 

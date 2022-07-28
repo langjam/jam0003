@@ -7,12 +7,14 @@ use eval::Factory;
 use rustyline::{error::ReadlineError, Editor};
 use tracing::{info, level_filters, Level};
 
-mod eval;
+mod util;
 mod lexer;
 mod parser;
 mod syntax;
 mod types;
-mod util;
+mod compiler;
+// mod eval;
+mod vm;
 
 pub use lexer::{LexerBuilder, Token, KEYWORD_MAP};
 use types::GlobalTypeEnv;
@@ -53,6 +55,8 @@ struct Args {
     source: Option<String>,
     #[clap(long, help = "Enable tracing")]
     trace: bool,
+    #[clap(long, help = "Don't run the REPL")]
+    no_repl: bool,
 }
 
 fn main() -> Result<()> {
@@ -89,9 +93,9 @@ fn run_repl(filename: Option<String>) -> Result<()> {
     let lexer = LexerBuilder::build();
     let (program_parser, statement_parser) = ParserBuilder::build();
 
-    let factory = Factory::new(Program { machines: vec![] });
+    let mut factory = Factory::new(Program { machines: vec![] });
 
-    let mut load = |source: String| {
+    let mut load = |factory: &mut Factory, source: String| {
         let tokens = lexer.parse(source).unwrap();
         match program_parser.parse(tokens) {
             Err(errors) => {
@@ -123,7 +127,7 @@ fn run_repl(filename: Option<String>) -> Result<()> {
     if let Some(filename) = filename {
         let source = std::fs::read_to_string(&filename)
             .with_context(|| format!("Could not load file `{}`", filename))?;
-        load(source);
+        load(&mut factory, source);
     }
 
     let mut mode = Mode::Statement;
@@ -145,13 +149,21 @@ fn run_repl(filename: Option<String>) -> Result<()> {
         match current {
             Ok(line) if line.trim().is_empty() => {
                 if let Mode::Streaming(ref mut stream) = mode {
-                    match factory.run_statement(stream) {
-                        Ok(None) => {
-                            // Nothing, just a binding.
-                        }
-                        Ok(Some(value)) => println!("{}", value),
-                        Err(err) => eprintln!("{}", Colour::Red.italic().paint(format!("{err}"))),
-                    };
+                    if let Statement::Consume(s) = stream {
+                        match factory.advance_stream(s) {
+                            Ok(value) => println!("{}", value),
+                            Err(err) => {
+                                eprintln!("{}", Colour::Red.italic().paint(format!("{err}")))
+                            }
+                        };
+                    } else {
+                        eprintln!(
+                            "{}",
+                            Colour::Red
+                                .italic()
+                                .paint("Cannot run let-statements, for now ...")
+                        )
+                    }
                 }
             }
             Ok(line) if line.starts_with(':') => match line.as_str() {
@@ -189,7 +201,7 @@ fn run_repl(filename: Option<String>) -> Result<()> {
             Err(ReadlineError::Eof) if matches!(mode, Mode::Definiton(_)) => {
                 let lines = definition_buf.drain(..).collect::<String>();
                 rl.add_history_entry(lines.as_str());
-                load(lines);
+                load(&mut factory, lines);
                 mode = Mode::Statement
             }
             Err(ReadlineError::Interrupted) => {
@@ -234,7 +246,7 @@ fn run(path: &str) {
         Err(err) => println!("Type Error: {err:#?}"),
     }
 
-    let factory = eval::Factory::new(program);
+    let mut factory = eval::Factory::new(program);
 
     loop {
         let result = factory.advance_stream(&mut Stream::Pipe(
@@ -298,7 +310,7 @@ mod tests {
                         Const(Str("Hello, BAM!".to_string()))
                     )],
                     result: Pipe(
-                        Box::new(Limit(Box::new(Stream::Var("hello".to_string())), 1)),
+                        Box::new(Take(Box::new(Stream::Var("hello".to_string())), 1)),
                         Box::new(Machine::Builtin(Print))
                     )
                 }]
@@ -346,7 +358,7 @@ mod tests {
                         Const(Str("Hello, BAM!".to_string()))
                     )],
                     result: Pipe(
-                        Box::new(Limit(Box::new(Stream::Var("hello".to_string())), 1)),
+                        Box::new(Take(Box::new(Stream::Var("hello".to_string())), 1)),
                         Box::new(Machine::Builtin(Print))
                     )
                 }]

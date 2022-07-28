@@ -31,9 +31,13 @@ impl ParserBuilder {
                 .then_ignore(just(Token::Lbrace))
                 .then(Self::int())
                 .then_ignore(just(Token::Rbrace))
-                .map(|(stream, count)| Stream::Limit(Box::new(stream), count));
+                .map(|(stream, count)| Stream::Take(Box::new(stream), count));
 
-            let stream_limit = limit.or(stream_leaf.clone()).boxed();
+            let peek = just(Token::Bang)
+                .ignore_then(stream_leaf.clone())
+                .map(|stream| Stream::Peek(Box::new(stream)));
+
+            let stream_limit = peek.or(limit.or(stream_leaf.clone())).boxed();
 
             let stream_zip = stream_limit
                 .clone()
