@@ -1,0 +1,5 @@
+machine Factorial {
+    ((!input, 1) -> Lt)
+        ? 1
+        : (((!input, 1) -> Sub -> Factorial), input) -> Mul
+}
