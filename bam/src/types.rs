@@ -338,9 +338,6 @@ fn infer_stream(
                 },
                 Machine::Builtin(builtin) => Ok(get_builtin_ty(builtin)
                     .unwrap_or_else(|| panic!("{builtin:#?} not found in BUILTIN_MAP"))),
-                Machine::Defined(_, _) => panic!(
-                    "infer_stream: Machine::Defined should not be able to appear in source files"
-                ),
             }?;
             let machine_ty = instantiate(local_env, machine_ty);
 
@@ -375,12 +372,8 @@ fn infer_stream(
             // equivalent, it doesn't matter which one we return here. We arbitrarily pick the 'then' branch.
             Ok(then_ty)
         }
-        Stream::Take(stream, _) | Stream::Peek(stream) | Stream::Hold(stream, _) => {
+        Stream::Take(stream, _) | Stream::Peek(stream) => {
             infer_stream(global_env, local_env, stream)
-        }
-
-        Stream::Proj(_, _) | Stream::Local(_, _) | Stream::Share(_) => {
-            panic!("infer_stream: should not be able to appear in source files")
         }
     }
 }

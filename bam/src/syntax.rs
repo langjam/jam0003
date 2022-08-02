@@ -35,20 +35,6 @@ pub enum Stream {
     /// Read a value from the underlying stream
     /// without consuming it.
     Peek(Box<Stream>), // !s
-
-    /* Only generated during evaluation. */
-    /// Contains the original stream to unzip,
-    /// and the index with which to project.
-    Proj(Box<Stream>, usize), // let x, y = s
-
-    /// A stream that caches returned values.
-    Hold(Box<Stream>, VecDeque<Value>),
-
-    /// A stream that can be sneakily mutated.
-    Share(Rc<RefCell<Stream>>),
-
-    /// A Stream plus an index to the task it was created in.
-    Local(Box<Stream>, usize),
 }
 
 impl Default for Stream {
@@ -65,33 +51,12 @@ impl Stream {
             _ => false,
         }
     }
-
-    /// Transforms a stream in place to be `Share`.
-    pub fn share(&mut self) {
-        if let Self::Share(_) = self {
-            return;
-        }
-        let old_stream = std::mem::take(self);
-        /* Nothing should/would access the stream here, it's Null */
-        let new_stream = Self::Share(Rc::new(RefCell::new(old_stream)));
-        std::mem::replace(self, new_stream);
-    }
-
-    /// Transforms a stream in place to be `Local`.
-    pub fn local(&mut self, index: usize) {
-        let old_stream = std::mem::take(self);
-        /* Nothing should/would access the stream here, it's Null */
-        let new_stream = Self::Local(Box::new(old_stream), index);
-        std::mem::replace(self, new_stream);
-    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Machine {
     Var(String),
     Builtin(Builtin),
-    /// Only generated during evaluation.
-    Defined(Vec<Statement>, Stream),
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
